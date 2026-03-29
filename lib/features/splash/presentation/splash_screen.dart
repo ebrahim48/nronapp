@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/custom_widgets/custom_text.dart';
+import '../../../core/config/app-routes/app_routes.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../global/custom_assets/assets.gen.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) context.go(AppRoutes.onboardingScreen);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,20 +41,20 @@ class SplashScreen extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                CustomText(text:
-                  'Work Smarter, Not Harder',
+                CustomText(
+                  text: 'Work Smarter, Not Harder',
                   textAlign: TextAlign.center,
-                    color: AppColors.primaryTextColor,
-                    fontsize: 16.sp,
-                    fontWeight: FontWeight.bold,
+                  color: AppColors.primaryTextColor,
+                  fontsize: 16.sp,
+                  fontWeight: FontWeight.bold,
                 ),
                 SizedBox(height: 9.h),
-                CustomText(text:
-                  "Let's be effective on how we Create Lean Informed Organizations.",
+                CustomText(
+                  text:
+                      "Let's be effective on how we Create Lean Informed Organizations.",
                   textAlign: TextAlign.center,
-                    color: AppColors.secondaryTextColor,
-                    fontsize: 12.sp,
-
+                  color: AppColors.secondaryTextColor,
+                  fontsize: 12.sp,
                 ),
               ],
             ),
