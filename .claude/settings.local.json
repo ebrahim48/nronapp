@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze:*)",
+      "Bash(export PATH=\"$PATH:/c/flutter/bin:/c/Users/ebu/flutter/bin:/c/src/flutter/bin\")"
+    ]
+  }
+}

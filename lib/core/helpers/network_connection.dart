@@ -111,8 +111,8 @@ class NetworkConnectivityController extends GetxController {
 
   Future<void> _initializeConnectivity() async {
     // Check the initial connectivity status
-    final status = await _connectivity.checkConnectivity();
-    isConnected.value = status != ConnectivityResult.none;
+    final results = await _connectivity.checkConnectivity();
+    isConnected.value = results.any((r) => r != ConnectivityResult.none);
   }
 
   void _updateConnectionStatus(ConnectivityResult result) {

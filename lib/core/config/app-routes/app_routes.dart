@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/splash/presentation/splash_screen.dart';
+
 
 class AppRoutes {
   static const String splashScreen = "/splashScreen";
@@ -8,17 +10,17 @@ class AppRoutes {
 
 
   static final GoRouter goRouter = GoRouter(
-
+    initialLocation: splashScreen,
     redirect: (context, state) async {
-
+      return null;
     },
     routes: [
 
-      // GoRoute(
-      //   path: splashScreen,
-      //   name: splashScreen,
-      //   builder: (context, state) => SplashScreen(),
-      // )
+      GoRoute(
+        path: splashScreen,
+        name: splashScreen,
+        builder: (context, state) => SplashScreen(),
+      )
 
 
 

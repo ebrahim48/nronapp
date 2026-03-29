@@ -1,10 +1,11 @@
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:toastification/toastification.dart';
 
+import 'core/config/app-routes/app_routes.dart';
 import 'core/config/app_themes/app_themes.dart';
+import 'core/helpers/network_connection.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,16 +25,15 @@ class MyApp extends StatelessWidget {
               title: "Nron App",
               theme: Themes().lightTheme,
               darkTheme: Themes().lightTheme,
-              useInheritedMediaQuery: true,
               locale: DevicePreview.locale(context),
               // themeMode: Get.find<ThemeController>().themeMode.value,
-              // routeInformationParser: AppRoutes.goRouter.routeInformationParser,
-              // routeInformationProvider:
-              // AppRoutes.goRouter.routeInformationProvider,
-              // routerDelegate: AppRoutes.goRouter.routerDelegate,
-              // builder: (context, child) {
-              //   return Scaffold(body: NoInterNetScreen(child: child!));
-              // },
+              routeInformationParser: AppRoutes.goRouter.routeInformationParser,
+              routeInformationProvider:
+              AppRoutes.goRouter.routeInformationProvider,
+              routerDelegate: AppRoutes.goRouter.routerDelegate,
+              builder: (context, child) {
+                return Scaffold(body: NoInterNetScreen(child: child!));
+              },
             );
           }),
     );
