@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/auth/forget/forget_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
+import '../../../features/auth/reset/reset_password_screen.dart';
+import '../../../features/auth/verify/verify_screen.dart';
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
@@ -13,6 +16,9 @@ class AppRoutes {
   static const String roleSelection = "/roleSelection";
   static const String representativeHome = "/representativeHome";
   static const String signUpScreen = "/signUpScreen";
+  static const String forgetPasswordScreen = "/forgetPasswordScreen";
+  static const String verifyScreen = "/verifyScreen";
+  static const String resetPasswordScreen = "/resetPasswordScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -39,6 +45,21 @@ class AppRoutes {
         path: signUpScreen,
         name: signUpScreen,
         builder: (context, state) =>  SignUpScreen(),
+      ),
+      GoRoute(
+        path: forgetPasswordScreen,
+        name: forgetPasswordScreen,
+        builder: (context, state) =>  ForgetPasswordScreen(),
+      ),
+      GoRoute(
+        path: verifyScreen,
+        name: verifyScreen,
+        builder: (context, state) =>  VerifyScreen(),
+      ),
+      GoRoute(
+        path: resetPasswordScreen,
+        name: resetPasswordScreen,
+        builder: (context, state) =>  ResetPasswordScreen(),
       ),
       // GoRoute(
       //   path: representativeHome,
