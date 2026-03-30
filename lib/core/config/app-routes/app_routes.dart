@@ -61,11 +61,11 @@ class AppRoutes {
         name: resetPasswordScreen,
         builder: (context, state) =>  ResetPasswordScreen(),
       ),
-      // GoRoute(
-      //   path: representativeHome,
-      //   name: representativeHome,
-      //   builder: (context, state) => const RepresentativeHomeScreen(),
-      // ),
+      GoRoute(
+        path: representativeHome,
+        name: representativeHome,
+        builder: (context, state) => const RepresentativeHomeScreen(),
+      ),
     ],
   );
 

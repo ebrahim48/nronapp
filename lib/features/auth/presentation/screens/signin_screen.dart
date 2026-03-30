@@ -134,7 +134,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
                         CustomButton(
                           title: 'Log In',
-                          onpress: () => _controller.validateLogin(),
+                          onpress: (){
+                            context.pushNamed(AppRoutes.representativeHome);
+                          },
                         ),
 
                         SizedBox(height: 20.h),
