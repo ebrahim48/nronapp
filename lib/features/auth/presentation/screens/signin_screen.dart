@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nron_app/core/config/app-routes/app_routes.dart';
 import 'package:nron_app/core/constants/app_colors.dart';
 
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -115,7 +117,9 @@ class _SignInScreenState extends State<SignInScreen> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              context.pushNamed(AppRoutes.forgetPasswordScreen);
+                            },
                             child: CustomText(
                               text: 'Forget password',
                               fontsize: 12.sp,
