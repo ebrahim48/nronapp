@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 
 class AppColors {
-  // ── New App Colors ──────────────────────────────────────────────────────────
   static const Color backgroundColor = Color(0xff1B1B1B);
   static const Color primaryColor = Color(0xff00D5ED);
   static const Color primaryTextColor = Color(0xffFFFFFF);
@@ -11,10 +10,9 @@ class AppColors {
   static const Color dotButtonActiveColor = Color(0xff00C5DA);
   static const Color dotButtonInactiveColor = Color(0xffD4D4D4);
   static const Color blackColor = Color(0xff000000);
-  static const Color successColor = Color(0x9900D500); // 60% opacity
+  static const Color successColor = Color(0x9900D500);
   static const Color warningColor = Color(0xffFFB516);
 
-  // ── Role Card Colors ────────────────────────────────────────────────────────
   static const Color roleCardBorderColor = Color(0xFF3A3A3A);
   static const Color roleCardBaseDark = Color(0x4D1E293B);
   static const Color roleCardGlowStart = Color(0x4D3A3A3A);

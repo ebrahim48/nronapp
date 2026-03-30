@@ -94,13 +94,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             width: 345.w,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(widget.borderRadio?.r ?? 8.r),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x3DE4E5E7),
-                  blurRadius: 2,
-                  offset: Offset(0, 1),
-                ),
-              ],
             ),
             child: Theme(
               data: Theme.of(context).copyWith(
