@@ -35,8 +35,6 @@ class RoleCard extends StatelessWidget {
   }
 }
 
-// ── Manager Card ─────────────────────────────────────────────────────────────
-// Dark card (#1E293B) with subtle left cyan glow, teal icon box, arrow right
 class _ManagerCard extends StatelessWidget {
   final String iconPath;
   final String label;
@@ -55,12 +53,11 @@ class _ManagerCard extends StatelessWidget {
       height: 130.h,
       child: Stack(
         children: [
-          // Base dark layer
           Container(
             decoration: BoxDecoration(
-              color: const Color(0x4D1E293B),
+              color: AppColors.roleCardBaseDark,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: const Color(0xFF3A3A3A)),
+              border: Border.all(color: AppColors.roleCardBorderColor),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x1A000000),
@@ -70,8 +67,6 @@ class _ManagerCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Left-side cyan gradient glow only
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.r),
@@ -79,37 +74,40 @@ class _ManagerCard extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [
-                  Color(0x4D1AC8DB), // ~30% opacity cyan on left
-                  Color(0x001AC8DB), // fully transparent on right
+                  AppColors.roleCardGlowStart,
+                  AppColors.roleCardGlowEnd,
                 ],
                 stops: [0.0, 0.5],
               ),
             ),
           ),
 
-          // Content row
-          Padding(
+          Center(
+            child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Teal rounded icon box
+
                 Container(
-                  width: 52.r,
-                  height: 52.r,
+                  width: 64.r,
+                  height: 64.r,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0D3D3D),
-                    borderRadius: BorderRadius.circular(14.r),
+                    borderRadius: BorderRadius.circular(24.r),
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        AppColors.cyanColorLight,
+                        AppColors.cyanColorTransparent,
+                      ],
+                    ),
                   ),
                   child: Center(
                     child: SvgPicture.asset(
                       iconPath,
                       width: 30.r,
                       height: 30.r,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF00C5DA),
-                        BlendMode.srcIn,
-                      ),
                     ),
                   ),
                 ),
@@ -158,13 +156,13 @@ class _ManagerCard extends StatelessWidget {
               ],
             ),
           ),
+          ),
         ],
       ),
     );
   }
 }
 
-// ── Representative Card ───────────────────────────────────────────────────────
 class _RepresentativeCard extends StatelessWidget {
   final String iconPath;
   final String label;
@@ -183,57 +181,56 @@ class _RepresentativeCard extends StatelessWidget {
       height: 130.h,
       child: Stack(
         children: [
-          // Base — teal gradient background (180deg, #00C5DA → #006974)
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.roleCardBaseDark,
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: AppColors.roleCardBorderColor),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1A000000),
+                  blurRadius: 3,
+                  offset: Offset(1, 2),
+                ),
+              ],
+            ),
+          ),
+
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16.r),
               gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF00C5DA), Color(0xFF006974)],
-              ),
-              border: Border.all(color: const Color(0x0DFFFFFF)),
-            ),
-          ),
-
-          // White saturation overlay — #FFFFFF4D
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.r),
-              color: const Color(0x4DFFFFFF),
-            ),
-          ),
-
-          // Dark bottom gradient — readability
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.r),
-              gradient: const LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
                 colors: [
-                  Color(0xFF080C11),
-                  Color(0x00080C11),
-                  Color(0x00080C11),
+                  AppColors.roleCardGlowStart,
+                  AppColors.roleCardGlowEnd,
                 ],
-                stops: [0.0, 0.5, 1.0],
+                stops: [0.0, 0.5],
               ),
             ),
           ),
 
           // Content row
-          Padding(
+          Center(
+            child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // White circle icon box
                 Container(
-                  width: 52.r,
-                  height: 52.r,
+                  width: 64.r,
+                  height: 64.r,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(14.r),
+                    borderRadius: BorderRadius.circular(24.r),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.dotButtonActiveColor,
+                        AppColors.tealDarkColor,
+                      ],
+                    ),
                   ),
                   child: Center(
                     child: SvgPicture.asset(
@@ -279,18 +276,18 @@ class _RepresentativeCard extends StatelessWidget {
 
                 SizedBox(width: 8.w),
 
-                // Arrow icon
                 SvgPicture.asset(
                   'assets/icons/arrows.svg',
                   width: 16.r,
                   height: 16.r,
                   colorFilter: const ColorFilter.mode(
-                    Colors.white,
+                    AppColors.primaryTextColor,
                     BlendMode.srcIn,
                   ),
                 ),
               ],
             ),
+          ),
           ),
         ],
       ),
