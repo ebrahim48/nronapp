@@ -8,7 +8,7 @@ class Themes {
   final lightTheme = ThemeData.light().copyWith(
     // Set colorScheme to eliminate default Material purple
     colorScheme: ColorScheme.light(
-      primary: AppColors.primaryColor9F7F5F,
+      primary: AppColors.primaryColor,
       onPrimary: Colors.white,
       secondary: AppColors.textColor997C67,
       onSecondary: Colors.white,
@@ -17,11 +17,11 @@ class Themes {
       error: AppColors.redColorFF1D1D,
       onError: Colors.white,
     ),
-    primaryColor: AppColors.primaryColor9F7F5F,
+    primaryColor: AppColors.primaryColor,
 
     // Progress indicators, sliders, switches etc.
     progressIndicatorTheme: ProgressIndicatorThemeData(
-      color: AppColors.primaryColor9F7F5F,
+      color: AppColors.primaryColor,
       linearTrackColor: AppColors.textColorF3EFEC,
     ),
 
@@ -29,7 +29,7 @@ class Themes {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
-        backgroundColor: AppColors.primaryColor9F7F5F,
+        backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
         minimumSize: Size(double.maxFinite, 56.h),
         shape: RoundedRectangleBorder(
@@ -57,32 +57,32 @@ class Themes {
 
     // Text selection (cursor, handles, highlight)
     textSelectionTheme: TextSelectionThemeData(
-      cursorColor: AppColors.primaryColor9F7F5F,
-      selectionColor: AppColors.primaryColor9F7F5F.withValues(alpha: 0.3),
-      selectionHandleColor: AppColors.primaryColor9F7F5F,
+      cursorColor: AppColors.primaryColor,
+      selectionColor: AppColors.primaryColor.withValues(alpha: 0.3),
+      selectionHandleColor: AppColors.primaryColor,
     ),
 
     // Checkbox, Radio, Switch
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return AppColors.primaryColor9F7F5F;
+        if (states.contains(WidgetState.selected)) return AppColors.primaryColor;
         return Colors.transparent;
       }),
       checkColor: WidgetStatePropertyAll(Colors.white),
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return AppColors.primaryColor9F7F5F;
+        if (states.contains(WidgetState.selected)) return AppColors.primaryColor;
         return Colors.grey;
       }),
       trackColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return AppColors.primaryColor9F7F5F.withValues(alpha: 0.5);
+        if (states.contains(WidgetState.selected)) return AppColors.primaryColor.withValues(alpha: 0.5);
         return Colors.grey.withValues(alpha: 0.3);
       }),
     ),
     radioTheme: RadioThemeData(
       fillColor: WidgetStateProperty.resolveWith((states) {
-        if (states.contains(WidgetState.selected)) return AppColors.primaryColor9F7F5F;
+        if (states.contains(WidgetState.selected)) return AppColors.primaryColor;
         return Colors.grey;
       }),
     ),
@@ -91,7 +91,7 @@ class Themes {
   ///----------------------------dart theme------------------------------->
   final darkTheme = ThemeData.dark().copyWith(
     ///------------------------- button theme------------------------->
-    primaryColor: AppColors.primaryColor9F7F5F,
+    primaryColor: AppColors.primaryColor,
     scaffoldBackgroundColor: AppColors.backgroundColor,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(

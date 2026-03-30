@@ -95,7 +95,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 subtitle:
                 'Optimize field operations, procurement workflows, and commission tracking.',
                 style: RoleCardStyle.representative,
-                onTap: () => context.go(AppRoutes.representativeHome),
+                onTap: () => context.go(AppRoutes.signUpScreen),
               ),
 
               SizedBox(height: 16.h),

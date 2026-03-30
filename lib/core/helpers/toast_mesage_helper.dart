@@ -50,7 +50,7 @@ class ToastMessageHelper {
       },
       icon: icon,
       showIcon: true,
-      primaryColor: AppColors.primaryColor9F7F5F,
+      primaryColor: AppColors.primaryColor,
       backgroundColor: Colors.white,
       foregroundColor: Colors.black,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),

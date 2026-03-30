@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
@@ -11,6 +12,7 @@ class AppRoutes {
   static const String onboardingScreen = "/onboardingScreen";
   static const String roleSelection = "/roleSelection";
   static const String representativeHome = "/representativeHome";
+  static const String signUpScreen = "/signUpScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -32,6 +34,11 @@ class AppRoutes {
         path: roleSelection,
         name: roleSelection,
         builder: (context, state) => const RoleSelectionScreen(),
+      ),
+      GoRoute(
+        path: signUpScreen,
+        name: signUpScreen,
+        builder: (context, state) =>  SignUpScreen(),
       ),
       // GoRoute(
       //   path: representativeHome,
