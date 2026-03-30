@@ -23,14 +23,11 @@ class RoleSelectionScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: 48.h),
-
-              // ── Header section — width 322, height 230, gap 16 ────────────
               SizedBox(
                 width: 322.w,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Logo — 150x150
                     Assets.images.splashicon.image(
                       width: 150.w,
                       height: 150.h,
@@ -38,8 +35,6 @@ class RoleSelectionScreen extends StatelessWidget {
                     ),
 
                     SizedBox(height: 16.h),
-
-                    // Title — "H.O.L.E" in #00C5DA
                     Text.rich(
                       TextSpan(
                         style: TextStyle(
@@ -54,7 +49,10 @@ class RoleSelectionScreen extends StatelessWidget {
                             text: 'H.O.L.E',
                             style: TextStyle(color: Color(0xFF00C5DA)),
                           ),
-                          TextSpan(text: ' APP'),
+                          TextSpan(
+                            text: ' APP',
+                            style: TextStyle(color: Color(0xFF00C5DA)),
+                          ),
                         ],
                       ),
                       textAlign: TextAlign.center,

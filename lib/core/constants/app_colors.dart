@@ -14,6 +14,16 @@ class AppColors {
   static const Color successColor = Color(0x9900D500); // 60% opacity
   static const Color warningColor = Color(0xffFFB516);
 
+  // ── Role Card Colors ────────────────────────────────────────────────────────
+  static const Color roleCardBorderColor = Color(0xFF3A3A3A);
+  static const Color roleCardBaseDark = Color(0x4D1E293B);
+  static const Color roleCardGlowStart = Color(0x4D3A3A3A);
+  static const Color roleCardGlowEnd = Color(0x003A3A3A);
+  static const Color cyanColor = Color(0xFF1AC8DB);
+  static const Color cyanColorLight = Color(0x331AC8DB);
+  static const Color cyanColorTransparent = Color(0x001AC8DB);
+  static const Color tealDarkColor = Color(0xFF006974);
+
   // ── Legacy Colors ────────────────────────────────────────────────────────────
   static const Color primaryColor9F7F5F = Color(0xff9F7F5F);
   static const Color textColorAD9D8D = Color(0xffAD9D8D);
