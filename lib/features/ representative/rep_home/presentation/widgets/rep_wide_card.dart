@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 import '../../../../../core/constants/app_colors.dart';
@@ -87,12 +88,16 @@ class _ActivityItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Center(
-              child: Icon(
+              child: SvgPicture.asset(
                 item['iconType'] == 'check'
-                    ? Icons.check_rounded
-                    : Icons.chat_bubble_outline_rounded,
-                color: AppColors.primaryColor,
-                size: 20.r,
+                    ? 'assets/icons/click.svg'
+                    : 'assets/icons/dots.svg',
+                width: 20.r,
+                height: 20.r,
+                colorFilter: ColorFilter.mode(
+                  AppColors.primaryColor,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),

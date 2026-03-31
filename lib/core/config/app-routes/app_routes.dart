@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/ representative/rep_bottomnavbar/rep_bottomNavbar_screen.dart';
+import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
+import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
@@ -19,6 +22,9 @@ class AppRoutes {
   static const String forgetPasswordScreen = "/forgetPasswordScreen";
   static const String verifyScreen = "/verifyScreen";
   static const String resetPasswordScreen = "/resetPasswordScreen";
+  static const String repBottomNavBar = "/repBottomNavBar";
+  static const String qrScanScreen = "/qrScanScreen";
+  static const String newPoScreen = "/newPoScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -65,6 +71,21 @@ class AppRoutes {
         path: representativeHome,
         name: representativeHome,
         builder: (context, state) => const RepresentativeHomeScreen(),
+      ),
+      GoRoute(
+        path: repBottomNavBar,
+        name: repBottomNavBar,
+        builder: (context, state) => const RepBottomNavBar(),
+      ),
+      GoRoute(
+        path: qrScanScreen,
+        name: qrScanScreen,
+        builder: (context, state) => const QrScanScreen(),
+      ),
+      GoRoute(
+        path: newPoScreen,
+        name: newPoScreen,
+        builder: (context, state) => const NewPoScreen(),
       ),
     ],
   );
