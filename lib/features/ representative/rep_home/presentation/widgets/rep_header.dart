@@ -68,7 +68,6 @@ class RepHeader extends StatelessWidget {
             ],
           ),
 
-          // ── Right icons ─────────────────────────────────────────────
           Row(
             children: [
               // Notification icon with red dot badge
@@ -84,10 +83,6 @@ class RepHeader extends StatelessWidget {
                         'assets/icons/notification.svg',
                         width: 26.r,
                         height: 26.r,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.primaryColor, // #00C5DA
-                          BlendMode.srcIn,
-                        ),
                       ),
                     ),
                     // Red dot badge — top right of icon
@@ -119,31 +114,14 @@ class RepHeader extends StatelessWidget {
               ),
 
               SizedBox(width: 8.w),
-
-              // Drawer icon — circle bg
-              Container(
-                width: 42.r,
-                height: 42.r,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2A2A2A),
-                  shape: BoxShape.circle,
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x1A000000),
-                      blurRadius: 3,
-                      offset: Offset(1, 2),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/icons/drawer.svg',
-                    width: 20.r,
-                    height: 20.r,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.primaryTextColor,
-                      BlendMode.srcIn,
-                    ),
+              Center(
+                child: SvgPicture.asset(
+                  'assets/icons/drawer.svg',
+                  width: 42.r,
+                  height: 42.r,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primaryTextColor,
+                    BlendMode.srcIn,
                   ),
                 ),
               ),

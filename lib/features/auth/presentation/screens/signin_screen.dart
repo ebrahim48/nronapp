@@ -135,7 +135,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         CustomButton(
                           title: 'Log In',
                           onpress: (){
-                            context.pushNamed(AppRoutes.representativeHome);
+                            context.pushNamed(AppRoutes.repBottomNavBar);
                           },
                         ),
 

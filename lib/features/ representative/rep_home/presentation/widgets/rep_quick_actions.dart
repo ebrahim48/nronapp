@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nron_app/core/config/app-routes/app_routes.dart';
 
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
@@ -27,15 +29,19 @@ class RepQuickActions extends StatelessWidget {
             _ActionCard(
               iconPath: 'assets/icons/scanitem.svg',
               label: 'Scan Item',
-              onTap: () {},
+              onTap: () {
+                context.pushNamed(AppRoutes.qrScanScreen);
+              },
             ),
             _ActionCard(
-              iconPath: 'assets/icons/activepos.svg',
+              iconPath: 'assets/icons/createpo.svg',
               label: 'Create PO',
-              onTap: () {},
+              onTap: () {
+                context.pushNamed(AppRoutes.newPoScreen);
+              },
             ),
             _ActionCard(
-              iconPath: 'assets/icons/expenses.svg',
+              iconPath: 'assets/icons/expense.svg',
               label: 'Expenses',
               onTap: () {},
             ),
