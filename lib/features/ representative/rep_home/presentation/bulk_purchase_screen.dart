@@ -197,7 +197,7 @@ class BulkPurchaseScreen extends StatelessWidget {
 
                     SizedBox(height: 16.h),
 
-                    BulkBioOrderCard(onAddProducts: c.addProduct),
+                    BulkBioOrderCard(onAddProducts: () => c.addProduct(context)),
 
                     SizedBox(height: 10.h),
 

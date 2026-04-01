@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../features/ representative/rep_bottomnavbar/rep_bottomNavbar_screen.dart';
 import '../../../features/ representative/rep_home/create_purchase_order_screen.dart';
+import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
 import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
@@ -29,6 +30,7 @@ class AppRoutes {
   static const String newPoScreen = "/newPoScreen";
   static const String createPurchaseScreen = "/createPurchaseScreen";
   static const String bulkPurchaseScreen = "/bulkPurchaseScreen";
+  static const String addProductScreen = "/addProductScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -100,6 +102,11 @@ class AppRoutes {
         path: bulkPurchaseScreen,
         name: bulkPurchaseScreen,
         builder: (context, state) => const BulkPurchaseScreen(),
+      ),
+      GoRoute(
+        path: addProductScreen,
+        name: addProductScreen,
+        builder: (context, state) => const AddProductScreen(),
       ),
     ],
   );

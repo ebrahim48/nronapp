@@ -1,8 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:nron_app/core/config/app-routes/app_routes.dart';
 
 class BulkProductItem {
   final String iconPath;
@@ -65,8 +67,8 @@ class BulkPurchaseController extends GetxController {
 
   void removeProduct(int index) => bulkProducts.removeAt(index);
 
-  void addProduct() {
-    // Navigate to product search / add product flow
+  void addProduct(BuildContext context) {
+   context.pushNamed(AppRoutes.addProductScreen);
   }
 
   void deleteDoc(int index) => attachedDocs.removeAt(index);
