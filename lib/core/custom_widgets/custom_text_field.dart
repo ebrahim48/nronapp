@@ -108,7 +108,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 onTap: widget.onTap,
                 readOnly: widget.readOnly!,
                 controller: widget.controller,
-                keyboardType: widget.keyboardType,
+                keyboardType: widget.keyboardType == TextInputType.text && (widget.maxLine ?? 1) > 1
+                    ? TextInputType.multiline
+                    : widget.keyboardType,
                 obscuringCharacter: widget.obscure!,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 maxLines: widget.maxLine ?? 1,
