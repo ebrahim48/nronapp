@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(flutter analyze:*)",
-      "Bash(export PATH=\"$PATH:/c/flutter/bin:/c/Users/ebu/flutter/bin:/c/src/flutter/bin\")"
+      "Bash(export PATH=\"$PATH:/c/flutter/bin:/c/Users/ebu/flutter/bin:/c/src/flutter/bin\")",
+      "Bash(wc -l /c/Users/ebu/Desktop/office_work/nron-app/lib/core/custom_widgets/*.dart)"
     ]
   }
 }

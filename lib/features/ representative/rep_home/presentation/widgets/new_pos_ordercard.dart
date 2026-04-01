@@ -15,6 +15,7 @@ class NewPoOrderCard extends StatelessWidget {
   final String description;
   final bool isSelected;
   final VoidCallback onTap;
+  final VoidCallback? onButtonTap;
 
   const NewPoOrderCard({
     super.key,
@@ -26,6 +27,7 @@ class NewPoOrderCard extends StatelessWidget {
     required this.description,
     required this.isSelected,
     required this.onTap,
+    this.onButtonTap,
   });
 
   @override
@@ -146,29 +148,32 @@ class NewPoOrderCard extends StatelessWidget {
                           maxline: 2,
                         ),
 
-                        Container(
-                          width: 309.w,
-                          height: 40.h,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0x1A00D5ED)
-                                : const Color(0x1A00C5DA),
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(
+                        GestureDetector(
+                          onTap: onButtonTap,
+                          child: Container(
+                            width: 309.w,
+                            height: 40.h,
+                            decoration: BoxDecoration(
                               color: isSelected
-                                  ? AppColors.primaryColor
-                                  : AppColors.primaryTextColor,
-                              width: isSelected ? 1 : 0.5,
+                                  ? const Color(0x1A00D5ED)
+                                  : const Color(0x1A00C5DA),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primaryColor
+                                    : AppColors.primaryTextColor,
+                                width: isSelected ? 1 : 0.5,
+                              ),
                             ),
-                          ),
-                          child: Center(
-                            child: CustomText(
-                              text: 'Selected Choice',
-                              fontsize: 13.sp,
-                              fontWeight: FontWeight.w500,
-                              color: isSelected
-                                  ? AppColors.primaryColor
-                                  : AppColors.primaryTextColor,
+                            child: Center(
+                              child: CustomText(
+                                text: 'Selected Choice',
+                                fontsize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: isSelected
+                                    ? AppColors.primaryColor
+                                    : AppColors.primaryTextColor,
+                              ),
                             ),
                           ),
                         ),

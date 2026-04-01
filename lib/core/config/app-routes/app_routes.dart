@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../features/ representative/rep_bottomnavbar/rep_bottomNavbar_screen.dart';
+import '../../../features/ representative/rep_home/create_purchase_order_screen.dart';
+import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
 import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
@@ -25,6 +27,8 @@ class AppRoutes {
   static const String repBottomNavBar = "/repBottomNavBar";
   static const String qrScanScreen = "/qrScanScreen";
   static const String newPoScreen = "/newPoScreen";
+  static const String createPurchaseScreen = "/createPurchaseScreen";
+  static const String bulkPurchaseScreen = "/bulkPurchaseScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -86,6 +90,16 @@ class AppRoutes {
         path: newPoScreen,
         name: newPoScreen,
         builder: (context, state) => const NewPoScreen(),
+      ),
+      GoRoute(
+        path: createPurchaseScreen,
+        name: createPurchaseScreen,
+        builder: (context, state) => const CreatePurchaseScreen(),
+      ),
+      GoRoute(
+        path: bulkPurchaseScreen,
+        name: bulkPurchaseScreen,
+        builder: (context, state) => const BulkPurchaseScreen(),
       ),
     ],
   );

@@ -18,6 +18,7 @@ class CustomButton extends StatelessWidget {
   final bool loading;
   final bool loaderIgnore;
   final Widget? prefixIcon;
+  final Widget? suffixIcon;
 
   const CustomButton({
     super.key,
@@ -30,6 +31,7 @@ class CustomButton extends StatelessWidget {
     this.fontSize,
     this.titlecolor,
     this.prefixIcon,
+    this.suffixIcon,
     this.loading = false,
     this.loaderIgnore = false,
     this.fontWeight,
@@ -71,6 +73,10 @@ class CustomButton extends StatelessWidget {
                     fontWeight: fontWeight ?? FontWeight.w400,
                     textAlign: TextAlign.center,
                   ),
+                  if (suffixIcon != null) ...[
+                    SizedBox(width: 10.w),
+                    suffixIcon!,
+                  ],
                 ],
               ),
       ),
