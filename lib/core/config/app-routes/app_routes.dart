@@ -6,6 +6,7 @@ import '../../../features/ representative/rep_home/create_purchase_order_screen.
 import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/rep_inventory_screen.dart';
 import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
@@ -31,6 +32,7 @@ class AppRoutes {
   static const String createPurchaseScreen = "/createPurchaseScreen";
   static const String bulkPurchaseScreen = "/bulkPurchaseScreen";
   static const String addProductScreen = "/addProductScreen";
+  static const String inventoryScreen = "/inventoryScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -107,6 +109,11 @@ class AppRoutes {
         path: addProductScreen,
         name: addProductScreen,
         builder: (context, state) => const AddProductScreen(),
+      ),
+      GoRoute(
+        path: inventoryScreen,
+        name: inventoryScreen,
+        builder: (context, state) => const InventoryScreen(),
       ),
     ],
   );
