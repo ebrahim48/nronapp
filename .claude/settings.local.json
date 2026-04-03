@@ -3,7 +3,8 @@
     "allow": [
       "Bash(flutter analyze:*)",
       "Bash(export PATH=\"$PATH:/c/flutter/bin:/c/Users/ebu/flutter/bin:/c/src/flutter/bin\")",
-      "Bash(wc -l /c/Users/ebu/Desktop/office_work/nron-app/lib/core/custom_widgets/*.dart)"
+      "Bash(wc -l /c/Users/ebu/Desktop/office_work/nron-app/lib/core/custom_widgets/*.dart)",
+      "Bash(\"/c/Users/ebu/fvm/versions/3.32.5/bin/flutter.bat\" analyze:*)"
     ]
   }
 }

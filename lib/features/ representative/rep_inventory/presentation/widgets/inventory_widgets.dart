@@ -119,6 +119,7 @@ class InventorySearchBar extends StatelessWidget {
               ),
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SvgPicture.asset(
                     'assets/icons/search.svg',
@@ -147,6 +148,7 @@ class InventorySearchBar extends StatelessWidget {
                         ),
                         border: InputBorder.none,
                         isDense: true,
+                        contentPadding: EdgeInsets.zero,
                       ),
                     ),
                   ),
@@ -208,32 +210,40 @@ class InventoryTabRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(24.r),
         border: Border.all(color: const Color(0xFF3A3A3A)),
       ),
-      padding: EdgeInsets.all(4.r),
+      padding: EdgeInsets.symmetric(vertical: 5.5.h, horizontal: 4.r),
       child: Row(
         children: tabs.asMap().entries.map((e) {
           final isActive = e.key == activeIndex;
+          final isLast = e.key == tabs.length - 1;
           return Expanded(
-            child: GestureDetector(
-              onTap: () => onSelect(e.key),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                height: double.infinity,
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? AppColors.primaryColor
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Center(
-                  child: CustomText(
-                    text: e.value,
-                    fontsize: 13.sp,
-                    fontWeight:
-                    isActive ? FontWeight.w600 : FontWeight.w400,
+            child: Padding(
+              padding: EdgeInsets.only(right: isLast ? 0 : 6.w),
+              child: GestureDetector(
+                onTap: () => onSelect(e.key),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: double.infinity,
+                  decoration: BoxDecoration(
                     color: isActive
-                        ? Colors.black
-                        : AppColors.primaryTextColor,
-                    textAlign: TextAlign.center,
+                        ? const Color(0xFF1E2121)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(30.r),
+                    border: Border.all(
+                      color: const Color(0xFFD4D4D4),
+                      width: 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: CustomText(
+                      text: e.value,
+                      fontsize: 13.sp,
+                      fontWeight:
+                      isActive ? FontWeight.w600 : FontWeight.w400,
+                      color: isActive
+                          ? const Color(0xFFD4D4D4)
+                          : AppColors.primaryTextColor,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ),
@@ -252,68 +262,34 @@ class InventoryEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
+        SizedBox(
           width: 199.w,
           height: 190.h,
-          decoration: BoxDecoration(
-            color: const Color(0x4D1E293B),
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: AppColors.primaryColor,
-              width: 1.5,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 95.h,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: AppColors.primaryColor,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
+          child: CustomPaint(
+            painter: _IllustrationPainter(),
+            child: Center(
+              child: Container(
+                width: 80.r,
+                height: 80.r,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF1A2E2E),
                 ),
-              ),
-
-              Center(
-                child: Container(
-                  width: 80.r,
-                  height: 80.r,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primaryColor,
-                    border: Border.all(
-                      color: AppColors.backgroundColor,
-                      width: 3,
-                    ),
-                  ),
+                child: Center(
                   child: Center(
                     child: SvgPicture.asset(
                       'assets/icons/check1.svg',
-                      width: 32.r,
-                      height: 32.r,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
 
         SizedBox(height: 32.h),
 
-        // Text
+        // Title
         CustomText(
           text: 'No Inventory Assigned',
           fontsize: 20.sp,
@@ -324,6 +300,7 @@ class InventoryEmptyState extends StatelessWidget {
 
         SizedBox(height: 12.h),
 
+        // Subtitle
         SizedBox(
           width: 320.w,
           child: CustomText(
@@ -339,6 +316,40 @@ class InventoryEmptyState extends StatelessWidget {
       ],
     );
   }
+}
+
+class _IllustrationPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final borderPaint = Paint()
+      ..color = const Color(0xFF00C5DA)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    final bgPaint = Paint()
+      ..color = const Color(0x4D1E293B)
+      ..style = PaintingStyle.fill;
+
+    final radius = Radius.circular(12);
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final rrect = RRect.fromRectAndRadius(rect, radius);
+
+    canvas.drawRRect(rrect, bgPaint);
+
+    canvas.drawRRect(rrect, borderPaint);
+
+    final y1 = size.height / 3;
+    canvas.drawLine(Offset(0, y1), Offset(size.width, y1), borderPaint);
+
+    final y2 = size.height * 2 / 3;
+    canvas.drawLine(Offset(0, y2), Offset(size.width, y2), borderPaint);
+
+    final cx = size.width / 2;
+    canvas.drawLine(Offset(cx, 0), Offset(cx, size.height), borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(_IllustrationPainter old) => false;
 }
 
 class ViewFullListButton extends StatelessWidget {

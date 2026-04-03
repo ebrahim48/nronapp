@@ -6,7 +6,9 @@ import '../../../features/ representative/rep_home/create_purchase_order_screen.
 import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/new_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/rep_inventory_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/tray_details_screen.dart';
 import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
@@ -33,6 +35,8 @@ class AppRoutes {
   static const String bulkPurchaseScreen = "/bulkPurchaseScreen";
   static const String addProductScreen = "/addProductScreen";
   static const String inventoryScreen = "/inventoryScreen";
+  static const String newTrayScreen = "/newTrayScreen";
+  static const String trayDetailsScreen = "/trayDetailsScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -114,6 +118,16 @@ class AppRoutes {
         path: inventoryScreen,
         name: inventoryScreen,
         builder: (context, state) => const InventoryScreen(),
+      ),
+      GoRoute(
+        path: newTrayScreen,
+        name: newTrayScreen,
+        builder: (context, state) => const NewTrayScreen(),
+      ),
+      GoRoute(
+        path: trayDetailsScreen,
+        name: trayDetailsScreen,
+        builder: (context, state) => const TrayDetailsScreen(),
       ),
     ],
   );
