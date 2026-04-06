@@ -17,8 +17,9 @@ class InventoryController extends GetxController {
     {'name': 'Hip Prosthesis', 'serial': '#HIP123', 'material': 'Ceramic', 'status': 'Shipped', 'location': 'Joint Rehabilitation Center', 'type': 'Implants'},
     {'name': 'Surgical Unit A', 'serial': 'TRAY-102', 'status': 'Available', 'location': 'Central General Hospital', 'type': 'Trays'},
     {'name': 'Surgical Unit B', 'serial': 'TRAY-205', 'status': 'In Stock', 'location': 'Ortho Health Center', 'type': 'Trays'},
-    {'name': 'Bone Graft', 'serial': '#BIO001', 'material': 'Allograft', 'status': 'Available', 'location': 'Bio Storage', 'type': 'Bio'},
-    {'name': 'Tissue Matrix', 'serial': '#BIO002', 'material': 'Dermal', 'status': 'In Stock', 'location': 'Bio Storage', 'type': 'Bio'},
+    {'name': 'Reagent A', 'serial': '1234', 'expiry': '12/12/2026', 'status': 'Available', 'location': 'Joint Rehabilitation Center', 'type': 'Bio'},
+    {'name': 'Reagent B', 'serial': '5678', 'expiry': '06/08/2026', 'status': 'In Stock', 'location': 'Bio Storage Lab', 'type': 'Bio'},
+    {'name': 'Tissue Matrix', 'serial': '9012', 'expiry': '03/15/2027', 'status': 'Available', 'location': 'Advanced Care Clinic', 'type': 'Bio'},
   ].obs;
 
   List<Map<String, dynamic>> get inventoryItems {

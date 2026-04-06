@@ -6,9 +6,10 @@ import '../../../features/ representative/rep_home/create_purchase_order_screen.
 import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/add_bio_inventory_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/details_bio_inventory_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/missing_instrument_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/receive_tray_screen.dart';
-import '../../../features/ representative/rep_inventory/presentation/report_success_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/report_success_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/send_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/new_tray_screen.dart';
@@ -46,6 +47,8 @@ class AppRoutes {
   static const String receiveTrayScreen = "/receiveTrayScreen";
   static const String missingInstrumentScreen = "/missingInstrumentScreen";
   static const String reportSuccessScreen = "/reportSuccessScreen";
+  static const String addBioInventoryScreen = "/addBioInventoryScreen";
+  static const String detailsBioInventoryScreen = "/detailsBioInventoryScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -152,6 +155,16 @@ class AppRoutes {
         path: missingInstrumentScreen,
         name: missingInstrumentScreen,
         builder: (context, state) => const MissingInstrumentScreen(),
+      ),
+      GoRoute(
+        path: addBioInventoryScreen,
+        name: addBioInventoryScreen,
+        builder: (context, state) => const AddBioInventoryScreen(),
+      ),
+      GoRoute(
+        path: detailsBioInventoryScreen,
+        name: detailsBioInventoryScreen,
+        builder: (context, state) => const DetailsBioInventoryScreen(),
       ),
       GoRoute(
         path: reportSuccessScreen,

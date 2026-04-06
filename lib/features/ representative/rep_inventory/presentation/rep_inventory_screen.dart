@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import '../../appdrawer/app_drawer.dart';
 import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/inventory_widgets.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -19,6 +20,7 @@ class InventoryScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      drawer: const AppDrawer(),
 
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E2427),
@@ -58,6 +60,8 @@ class InventoryScreen extends StatelessWidget {
         onTap: () {
           if (c.tabs[activeTabIndex] == 'Trays') {
             context.pushNamed(AppRoutes.newTrayScreen);
+          } else if (c.tabs[activeTabIndex] == 'Bio') {
+            context.pushNamed(AppRoutes.addBioInventoryScreen);
           }
         },
         child: Container(
@@ -151,8 +155,12 @@ class InventoryScreen extends StatelessWidget {
             )
                 : Column(
               children: c.inventoryItems.map((item) {
-                if (c.tabs[c.activeTab.value] == 'Trays') {
+                final tabName = c.tabs[c.activeTab.value];
+                if (tabName == 'Trays') {
                   return _TrayListItem(item: item);
+                }
+                if (tabName == 'Bio') {
+                  return _BioListItem(item: item);
                 }
                 return _InventoryListItem(item: item);
               }).toList(),
@@ -534,6 +542,123 @@ class _InventoryListItemState extends State<_InventoryListItem> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BioListItem extends StatelessWidget {
+  final Map<String, dynamic> item;
+
+  const _BioListItem({required this.item});
+
+  Color _statusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'available':
+        return const Color(0xFF4CAF50);
+      case 'in stock':
+        return AppColors.primaryColor;
+      case 'shipped':
+        return const Color(0xFFFF9800);
+      default:
+        return AppColors.secondaryTextColor;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.pushNamed(AppRoutes.detailsBioInventoryScreen),
+      child: Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(12.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E2121),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFFD4D4D4), width: 0.5),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0D000000),
+            offset: Offset(0, 1),
+            blurRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CustomText(
+                  text: item['name'] ?? '',
+                  fontsize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTextColor,
+                  textAlign: TextAlign.start,
+                ),
+              ),
+              CustomText(
+                text: item['expiry'] ?? '',
+                fontsize: 11.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.secondaryTextColor,
+                textAlign: TextAlign.start,
+              ),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          CustomText(
+            text: 'Lot-${item['serial'] ?? ''}',
+            fontsize: 12.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColors.secondaryTextColor,
+            textAlign: TextAlign.start,
+          ),
+          SizedBox(height: 10.h),
+          Divider(color: const Color(0xFF3A3A3A), height: 1, thickness: 0.5),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Icon(
+                Icons.location_on_outlined,
+                size: 14.r,
+                color: AppColors.secondaryTextColor,
+              ),
+              SizedBox(width: 4.w),
+              Expanded(
+                child: CustomText(
+                  text: item['location'] ?? '',
+                  fontsize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.secondaryTextColor,
+                  textAlign: TextAlign.start,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {},
+                child: Row(
+                  children: [
+                    CustomText(
+                      text: 'Details',
+                      fontsize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryColor,
+                      textAlign: TextAlign.start,
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 16.r,
+                      color: AppColors.primaryColor,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
     );
   }
 }
