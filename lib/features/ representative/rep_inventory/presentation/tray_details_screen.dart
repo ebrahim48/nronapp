@@ -74,7 +74,7 @@ class TrayDetailsScreen extends StatelessWidget {
                     items: c.movementHistory,
                   ),
 
-                  SizedBox(height: 80.h),
+                  SizedBox(height: 16.h),
                 ],
               ),
             ),
@@ -82,7 +82,7 @@ class TrayDetailsScreen extends StatelessWidget {
 
           Container(
             color: AppColors.backgroundColor,
-            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 50.h),
             child: TrayActionButtons(
               onSendTray: c.sendTray,
               onReceiveTray: c.receiveTray,

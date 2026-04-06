@@ -1,4 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nron_app/core/config/app-routes/app_routes.dart';
 
 class MovementHistoryItem {
   final String title;
@@ -42,7 +45,13 @@ class TrayDetailsController extends GetxController {
     ),
   ].obs;
 
-  void sendTray() {}
-  void receiveTray() {}
-  void reportMissingInstrument() {}
+  void sendTray(BuildContext context) {
+    context.pushNamed(AppRoutes.sendTrayScreen);
+  }
+  void receiveTray(BuildContext context) {
+    context.pushNamed(AppRoutes.receiveTrayScreen);
+  }
+  void reportMissingInstrument(BuildContext context) {
+    context.pushNamed(AppRoutes.missingInstrumentScreen);
+  }
 }

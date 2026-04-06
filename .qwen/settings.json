@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(fvm *)"
+      "Bash(fvm *)",
+      "Bash(git commit *)"
     ]
-  }
+  },
+  "$version": 3
 }
