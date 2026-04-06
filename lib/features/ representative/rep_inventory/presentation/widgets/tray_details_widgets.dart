@@ -135,7 +135,7 @@ class TrayTagRow extends StatelessWidget {
     return Row(
       children: [
         _TrayTag(
-          iconPath: 'assets/icons/expense.svg',
+          iconPath: 'assets/icons/loaner.svg',
           label: inventoryModel,
           bgColor: const Color(0x1AEC5B13),
           borderColor: const Color(0x4DEC5B13),
@@ -143,7 +143,7 @@ class TrayTagRow extends StatelessWidget {
         ),
         SizedBox(width: 10.w),
         _TrayTag(
-          iconPath: 'assets/icons/drawer1.svg',
+          iconPath: 'assets/icons/downrack.svg',
           label: status,
           bgColor: const Color(0x1A3A3A3A),
           borderColor: const Color(0xFF3A3A3A),
@@ -182,7 +182,7 @@ class _TrayTag extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon box — orange bg 10% for loaner
+
           Container(
             width: 20.r,
             height: 20.r,
@@ -230,7 +230,7 @@ class TrayLocationCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Orange location icon box
+
           Container(
             width: 32.r,
             height: 36.r,
@@ -317,22 +317,22 @@ class _HistoryItem extends StatelessWidget {
         children: [
           // Timeline dot + line
           SizedBox(
-            width: 24.w,
+            width: 24.r,
             child: Column(
               children: [
                 Container(
-                  width: 14.r,
-                  height: 14.r,
+                  width: 24.r,
+                  height: 24.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: item.isActive
-                        ? const Color(0xFFEC5B13)
-                        : const Color(0xFF555555),
+                        ? const Color(0xFF221610)
+                        : const Color(0xFF94A3B8),
                     border: Border.all(
                       color: item.isActive
-                          ? const Color(0xFF221610) // dark ring
-                          : const Color(0xFF3A3A3A),
-                      width: 3,
+                          ? const Color(0xFFEC5B13)
+                          : const Color(0xFF221610),
+                      width: 2,
                     ),
                   ),
                 ),
@@ -385,9 +385,9 @@ class _HistoryItem extends StatelessWidget {
 }
 
 class TrayActionButtons extends StatelessWidget {
-  final VoidCallback onSendTray;
-  final VoidCallback onReceiveTray;
-  final VoidCallback onReportMissing;
+  final void Function(BuildContext context) onSendTray;
+  final void Function(BuildContext context) onReceiveTray;
+  final void Function(BuildContext context) onReportMissing;
 
   const TrayActionButtons({
     super.key,
@@ -400,13 +400,13 @@ class TrayActionButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Send Tray + Receive Tray
+
         Row(
           children: [
-            // Send Tray — teal filled
+
             Expanded(
               child: GestureDetector(
-                onTap: onSendTray,
+                onTap: () => onSendTray(context),
                 child: Container(
                   height: 48.h,
                   decoration: BoxDecoration(
@@ -436,7 +436,7 @@ class TrayActionButtons extends StatelessWidget {
 
             Expanded(
               child: GestureDetector(
-                onTap: onReceiveTray,
+                onTap: () => onReceiveTray(context),
                 child: Container(
                   height: 48.h,
                   decoration: BoxDecoration(
@@ -468,7 +468,7 @@ class TrayActionButtons extends StatelessWidget {
         SizedBox(height: 12.h),
 
         GestureDetector(
-          onTap: onReportMissing,
+          onTap: () => onReportMissing(context),
           child: Container(
             width: double.infinity,
             height: 48.h,

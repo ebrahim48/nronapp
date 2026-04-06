@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/send_tray_widgets.dart';
+import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/send_tray_widgets.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -19,38 +19,46 @@ class SendTrayScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            // AppBar
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: SizedBox(
+                  height: 52.h,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Padding(
+                          padding: EdgeInsets.all(8.r),
+                          child: Icon(
+                            Icons.arrow_back_ios,
+                            color: AppColors.primaryTextColor,
+                            size: 18.r,
+                          ),
+                        ),
+                      ),
+                      CustomText(
+                        text: 'Send Tray',
+                        fontsize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryTextColor,
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundColor,
-        elevation: 0,
-        toolbarHeight: 52.h,
-        leading: GestureDetector(
-          onTap: () => Get.back(),
-          child: Icon(
-            Icons.arrow_back_ios,
-            color: AppColors.primaryTextColor,
-            size: 18.r,
-          ),
-        ),
-        title: CustomText(
-          text: 'Send Tray',
-          fontsize: 16.sp,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primaryTextColor,
-          textAlign: TextAlign.start,
-        ),
-        centerTitle: false,
-        titleSpacing: 0,
-      ),
-
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 24.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            // Body content
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
                   CustomText(
                     text: 'Tray Details',
                     fontsize: 20.sp,
@@ -61,7 +69,7 @@ class SendTrayScreen extends StatelessWidget {
                   SizedBox(height: 4.h),
                   CustomText(
                     text:
-                    'Please fill in the information below to initiate the tray transfer.',
+                        'Please fill in the information below to initiate the tray transfer.',
                     fontsize: 13.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.secondaryTextColor,
@@ -81,9 +89,9 @@ class SendTrayScreen extends StatelessWidget {
 
                   const SendTrayLabel(text: 'System Type'),
                   Obx(() => SendTraySystemType(
-                    activeIndex: c.systemTypeIndex.value,
-                    onSelect: c.selectSystemType,
-                  )),
+                        activeIndex: c.systemTypeIndex.value,
+                        onSelect: c.selectSystemType,
+                      )),
 
                   SizedBox(height: 16.h),
 
@@ -108,9 +116,9 @@ class SendTrayScreen extends StatelessWidget {
 
                   const SendTrayLabel(text: 'Initial Tray Photo'),
                   Obx(() => SendTrayPhotoSection(
-                    selectedPhoto: c.selectedPhoto.value,
-                    onAddPhoto: c.pickPhoto,
-                  )),
+                        selectedPhoto: c.selectedPhoto.value,
+                        onAddPhoto: () {},
+                      )),
 
                   SizedBox(height: 16.h),
 
@@ -118,12 +126,11 @@ class SendTrayScreen extends StatelessWidget {
                   SendTrayIconField(
                     controller: c.additionalNotesController,
                     hintText:
-                    'Add any specific case details or instructions...',
-                    iconPath: 'assets/icons/document.svg',
+                        'Add any specific case details or instructions...',
+                    iconPath: '',
                     maxLines: 5,
                   ),
 
-                  // Min chars hint
                   Align(
                     alignment: Alignment.centerRight,
                     child: CustomText(
@@ -135,30 +142,30 @@ class SendTrayScreen extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: 100.h),
-                ],
-              ),
-            ),
-          ),
+                  SizedBox(height: 24.h),
 
-          Container(
-            color: AppColors.backgroundColor,
-            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
-            child: CustomButton(
-              title: 'Send Tray',
-              onpress: c.sendTray,
-              prefixIcon: SvgPicture.asset(
-                'assets/icons/next.svg',
-                width: 18.r,
-                height: 18.r,
-                colorFilter: const ColorFilter.mode(
-                  Colors.black,
-                  BlendMode.srcIn,
-                ),
+                  // Button scrolls with content
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 50.h),
+                    child: CustomButton(
+                      title: 'Send Tray',
+                      onpress: c.sendTray,
+                      prefixIcon: SvgPicture.asset(
+                        'assets/icons/next.svg',
+                        width: 18.r,
+                        height: 18.r,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.black,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

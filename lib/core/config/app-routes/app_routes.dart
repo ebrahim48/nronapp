@@ -6,6 +6,11 @@ import '../../../features/ representative/rep_home/create_purchase_order_screen.
 import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/missing_instrument_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/receive_tray_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/report_success_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/report_success_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/send_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/new_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/rep_inventory_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/tray_details_screen.dart';
@@ -37,6 +42,10 @@ class AppRoutes {
   static const String inventoryScreen = "/inventoryScreen";
   static const String newTrayScreen = "/newTrayScreen";
   static const String trayDetailsScreen = "/trayDetailsScreen";
+  static const String sendTrayScreen = "/sendTrayScreen";
+  static const String receiveTrayScreen = "/receiveTrayScreen";
+  static const String missingInstrumentScreen = "/missingInstrumentScreen";
+  static const String reportSuccessScreen = "/reportSuccessScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -128,6 +137,26 @@ class AppRoutes {
         path: trayDetailsScreen,
         name: trayDetailsScreen,
         builder: (context, state) => const TrayDetailsScreen(),
+      ),
+      GoRoute(
+        path: sendTrayScreen,
+        name: sendTrayScreen,
+        builder: (context, state) => const SendTrayScreen(),
+      ),
+      GoRoute(
+        path: receiveTrayScreen,
+        name: receiveTrayScreen,
+        builder: (context, state) => const ReceiveTrayScreen(),
+      ),
+      GoRoute(
+        path: missingInstrumentScreen,
+        name: missingInstrumentScreen,
+        builder: (context, state) => const MissingInstrumentScreen(),
+      ),
+      GoRoute(
+        path: reportSuccessScreen,
+        name: reportSuccessScreen,
+        builder: (context, state) => const ReportSuccessScreen(),
       ),
     ],
   );
