@@ -114,14 +114,21 @@ class RepHeader extends StatelessWidget {
               ),
 
               SizedBox(width: 8.w),
-              Center(
-                child: SvgPicture.asset(
-                  'assets/icons/drawer.svg',
-                  width: 42.r,
-                  height: 42.r,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.primaryTextColor,
-                    BlendMode.srcIn,
+              Builder(
+                builder: (ctx) => GestureDetector(
+                  onTap: () => Scaffold.of(ctx).openDrawer(),
+                  child: SizedBox(
+                    width: 42.r,
+                    height: 42.r,
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/icons/drawer.svg',
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.primaryTextColor,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../appdrawer/app_drawer.dart';
 import '../controller/rep_home_controller.dart';
 import 'widgets/rep_chart_section.dart';
 import 'widgets/rep_header.dart';
@@ -29,6 +30,7 @@ class _RepresentativeHomeScreenState extends State<RepresentativeHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      drawer: const AppDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

@@ -19,7 +19,7 @@ class AppDrawerController extends GetxController {
 
   void selectItem(int index) {
     selectedIndex.value = index;
-    Get.back();
+    // Removed Get.back() to avoid contextless navigation error
   }
 
   void signOut() {

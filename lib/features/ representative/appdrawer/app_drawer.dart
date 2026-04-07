@@ -2,13 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import 'app_drwaer_controller.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
+
+  void _handleNavigation(BuildContext context, int index) {
+    switch (index) {
+      case 0: // Scan Implant
+        context.pushNamed(AppRoutes.qrScanScreen);
+        break;
+      case 1: // Purchase Order
+        context.pushNamed(AppRoutes.purchaseOrderScreen);
+        break;
+      case 2: // Expenses
+        context.pushNamed(AppRoutes.expensesScreen);
+        break;
+      case 3: // Sales
+        // context.pushNamed(AppRoutes.salesScreen);
+        break;
+      case 4: // Commission
+        // context.pushNamed(AppRoutes.commissionScreen);
+        break;
+      case 5: // Physicians
+        // context.pushNamed(AppRoutes.physiciansScreen);
+        break;
+      case 6: // All Surgeries
+        // context.pushNamed(AppRoutes.allSurgeriesScreen);
+        break;
+      case 7: // Setting & Profile
+        // context.pushNamed(AppRoutes.settingsScreen);
+        break;
+      case 8: // Contact Support
+        // context.pushNamed(AppRoutes.contactSupportScreen);
+        break;
+      case 9: // About App
+        // context.pushNamed(AppRoutes.aboutAppScreen);
+        break;
+      case 10: // Terms & Conditions
+        // context.pushNamed(AppRoutes.termsScreen);
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +70,11 @@ class AppDrawer extends StatelessWidget {
                     iconPath: e.value['icon']!,
                     label: e.value['label']!,
                     isActive: isActive,
-                    onTap: () => c.selectItem(e.key),
+                    onTap: () {
+                      Navigator.pop(context); // Close drawer using context
+                      c.selectItem(e.key);
+                      _handleNavigation(context, e.key);
+                    },
                   );
                 }).toList(),
               )),
@@ -69,7 +113,7 @@ class _DrawerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 98.h,
+      height: 120.h,
       color: const Color(0xFF1E2427),
       padding: EdgeInsets.only(
         left: 16.w,
