@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/custom_widgets/custom_text.dart';
+import '../purchaseorder/presentation/purchase_order_screen.dart';
 import '../rep_home/presentation/representative_home_screen.dart';
 import '../rep_inventory/presentation/rep_inventory_screen.dart';
 import '../rep_qrscan/rep_qr_scan_screen.dart';
@@ -21,7 +22,7 @@ class RepBottomNavBar extends StatelessWidget {
       const RepresentativeHomeScreen(),
       const InventoryScreen(),
       const QrScanScreen(),
-      // const PurchaseOrderScreen(),
+      const PurchaseOrderScreen(),
       // const AnalyticsScreen(),
     ];
 

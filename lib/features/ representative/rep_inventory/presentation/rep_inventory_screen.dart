@@ -36,16 +36,18 @@ class InventoryScreen extends StatelessWidget {
           textAlign: TextAlign.start,
         ),
         actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 16.w),
-            child: GestureDetector(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: SizedBox(
-                width: 42.r,
-                height: 42.r,
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/icons/drawer.svg',
+          Builder(
+            builder: (ctx) => Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: GestureDetector(
+                onTap: () => Scaffold.of(ctx).openDrawer(),
+                child: SizedBox(
+                  width: 42.r,
+                  height: 42.r,
+                  child: Center(
+                    child: SvgPicture.asset(
+                      'assets/icons/drawer.svg',
+                    ),
                   ),
                 ),
               ),

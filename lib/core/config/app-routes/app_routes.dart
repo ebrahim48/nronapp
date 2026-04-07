@@ -1,6 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/ representative/expenses/presentation/create_expense_screen.dart';
+import '../../../features/ representative/expenses/presentation/expense_details_screen.dart';
+import '../../../features/ representative/expenses/presentation/expense_success_screen.dart';
+import '../../../features/ representative/expenses/presentation/expenses_screen.dart';
+import '../../../features/ representative/purchaseorder/presentation/purchase_order_screen.dart';
 import '../../../features/ representative/rep_bottomnavbar/rep_bottomNavbar_screen.dart';
 import '../../../features/ representative/rep_home/create_purchase_order_screen.dart';
 import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
@@ -40,6 +45,7 @@ class AppRoutes {
   static const String createPurchaseScreen = "/createPurchaseScreen";
   static const String bulkPurchaseScreen = "/bulkPurchaseScreen";
   static const String addProductScreen = "/addProductScreen";
+  static const String purchaseOrderScreen = "/purchaseOrderScreen";
   static const String inventoryScreen = "/inventoryScreen";
   static const String newTrayScreen = "/newTrayScreen";
   static const String trayDetailsScreen = "/trayDetailsScreen";
@@ -49,6 +55,10 @@ class AppRoutes {
   static const String reportSuccessScreen = "/reportSuccessScreen";
   static const String addBioInventoryScreen = "/addBioInventoryScreen";
   static const String detailsBioInventoryScreen = "/detailsBioInventoryScreen";
+  static const String createExpenseScreen = "/createExpenseScreen";
+  static const String expenseSuccessScreen = "/expenseSuccessScreen";
+  static const String expensesScreen = "/expensesScreen";
+  static const String expenseDetailScreen = "/expenseDetailScreen";
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -127,6 +137,11 @@ class AppRoutes {
         builder: (context, state) => const AddProductScreen(),
       ),
       GoRoute(
+        path: purchaseOrderScreen,
+        name: purchaseOrderScreen,
+        builder: (context, state) => const PurchaseOrderScreen(),
+      ),
+      GoRoute(
         path: inventoryScreen,
         name: inventoryScreen,
         builder: (context, state) => const InventoryScreen(),
@@ -171,6 +186,26 @@ class AppRoutes {
         name: reportSuccessScreen,
         builder: (context, state) => const ReportSuccessScreen(),
       ),
+      GoRoute(
+        path: createExpenseScreen,
+        name: createExpenseScreen,
+        builder: (context, state) => const CreateExpenseScreen(),
+      ),
+      GoRoute(
+        path: expenseSuccessScreen,
+        name: expenseSuccessScreen,
+        builder: (context, state) => const ExpenseSuccessScreen(),
+      ),
+      GoRoute(
+        path: expensesScreen,
+        name: expensesScreen,
+        builder: (context, state) => const ExpensesScreen(),
+      ),
+      // GoRoute(
+      //   path: expenseDetailScreen,
+      //   name: expenseDetailScreen,
+      //   builder: (context, state) => const ExpenseDetailScreen(),
+      // ),
     ],
   );
 
