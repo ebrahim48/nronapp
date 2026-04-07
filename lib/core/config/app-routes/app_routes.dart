@@ -21,6 +21,12 @@ import '../../../features/ representative/rep_inventory/presentation/new_tray_sc
 import '../../../features/ representative/rep_inventory/presentation/rep_inventory_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/tray_details_screen.dart';
 import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
+import '../../../features/ representative/sales/add_representative_screen.dart';
+import '../../../features/ representative/sales/create_sales_screen.dart';
+import '../../../features/ representative/sales/packing_slip_screen.dart';
+import '../../../features/ representative/sales/sales_details_screen.dart';
+import '../../../features/ representative/sales/sales_screen.dart';
+import '../../../features/ representative/sales/select_implants_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
@@ -59,6 +65,13 @@ class AppRoutes {
   static const String expenseSuccessScreen = "/expenseSuccessScreen";
   static const String expensesScreen = "/expensesScreen";
   static const String expenseDetailScreen = "/expenseDetailScreen";
+
+  static const salesScreen = '/sales';
+  static const createSaleScreen = '/create-sale';
+  static const selectImplantsScreen = '/select-implants';
+  static const saleDetailScreen = '/sale-detail';
+  static const addRepresentativeScreen = '/add-representative';
+  static const packingSlipScreen = '/packing-slip';
 
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
@@ -201,11 +214,36 @@ class AppRoutes {
         name: expensesScreen,
         builder: (context, state) => const ExpensesScreen(),
       ),
-      // GoRoute(
-      //   path: expenseDetailScreen,
-      //   name: expenseDetailScreen,
-      //   builder: (context, state) => const ExpenseDetailScreen(),
-      // ),
+      GoRoute(
+        path: salesScreen,
+        name: salesScreen,
+        builder: (context, state) => const SalesScreen(),
+      ),
+      GoRoute(
+        path: createSaleScreen,
+        name: createSaleScreen,
+        builder: (context, state) => const CreateSaleScreen(),
+      ),
+      GoRoute(
+        path: selectImplantsScreen,
+        name: selectImplantsScreen,
+        builder: (context, state) => const SelectImplantsScreen(),
+      ),
+      GoRoute(
+        path: saleDetailScreen,
+        name: saleDetailScreen,
+        builder: (context, state) => const SaleDetailScreen(),
+      ),
+      GoRoute(
+        path: addRepresentativeScreen,
+        name: addRepresentativeScreen,
+        builder: (context, state) => const AddRepresentativeScreen(),
+      ),
+      GoRoute(
+        path: packingSlipScreen,
+        name: packingSlipScreen,
+        builder: (context, state) => const PackingSlipScreen(),
+      ),
     ],
   );
 
