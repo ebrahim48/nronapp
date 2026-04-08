@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
-import '../../../../core/custom_widgets/custom_button.dart';
+import '../../../core/custom_widgets/custom_button.dart';
 import 'controller/sales_controller.dart';
 import 'model/sales_model.dart';
 
@@ -65,7 +65,6 @@ class SelectImplantsScreen extends StatelessWidget {
             EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             child: Row(
               children: [
-                // Search bar
                 Expanded(
                   child: Container(
                     height: 46.h,
@@ -100,7 +99,6 @@ class SelectImplantsScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 10.w),
-                // Filter button
                 Container(
                   width: 46.r,
                   height: 46.r,
@@ -115,8 +113,6 @@ class SelectImplantsScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          // List
           Expanded(
             child: Obx(() => ListView.separated(
               padding: EdgeInsets.symmetric(
@@ -128,7 +124,7 @@ class SelectImplantsScreen extends StatelessWidget {
                 final realIndex = c.allImplants.indexOf(item);
                 return GestureDetector(
                   onTap: () => c.toggleImplant(realIndex),
-                  child: Obx(() => Container(
+                  child: Container(
                     padding: EdgeInsets.all(14.r),
                     decoration: BoxDecoration(
                       color: const Color(0xFF242424),
@@ -233,18 +229,18 @@ class SelectImplantsScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
+
+
                             ],
                           ),
                         ),
                       ],
                     ),
-                  )),
+                  ),
                 );
               },
             )),
           ),
-
-          // Bottom button
           Padding(
             padding:
             EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -259,6 +255,9 @@ class SelectImplantsScreen extends StatelessWidget {
               fontWeight: FontWeight.w600,
             )),
           ),
+          SizedBox(height: 100.h)
+
+
         ],
       ),
     );

@@ -70,7 +70,6 @@ class SaleDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Shipment Information ───────────────────────────────
             _DetailSectionHeader(
               iconPath: 'assets/icons/shipmentinformation.svg',
               title: 'Shipment Information',
@@ -90,7 +89,6 @@ class SaleDetailScreen extends StatelessWidget {
 
             SizedBox(height: 20.h),
 
-            // ── Billing ────────────────────────────────────────────
             _DetailSectionHeader(
               iconPath: 'assets/icons/billing.svg',
               title: 'Billing',
@@ -107,7 +105,6 @@ class SaleDetailScreen extends StatelessWidget {
 
             SizedBox(height: 20.h),
 
-            // ── Inventory Item List ────────────────────────────────
             _DetailSectionHeader(
                 iconPath: 'assets/icons/implantsales.svg',
                 title: 'Inventory Item List'),
@@ -183,14 +180,25 @@ class SaleDetailScreen extends StatelessWidget {
                       height: 1,
                       color: const Color(0xFF3A3A3A),
                       thickness: 0.5),
-                  // View All
+
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
-                    child: CustomText(
-                      text: 'View All 12 Items',
-                      fontsize: 13.sp,
-                      color: AppColors.primaryColor,
-                      fontWeight: FontWeight.w500,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 12.w, vertical: 8.h),
+                    child: CustomPaint(
+                      painter: _DashedBorderPainter(
+                        color: const Color(0x66137FEC),
+                        borderRadius: 8.r,
+                      ),
+                      child: Container(
+                        height: 38.h,
+                        alignment: Alignment.center,
+                        child: CustomText(
+                          text: 'View All 12 Items',
+                          fontsize: 13.sp,
+                          color: AppColors.primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -199,7 +207,6 @@ class SaleDetailScreen extends StatelessWidget {
 
             SizedBox(height: 20.h),
 
-            // ── Sale Classification ────────────────────────────────
             CustomText(
               text: 'Sale Classification',
               fontsize: 15.sp,
@@ -211,22 +218,30 @@ class SaleDetailScreen extends StatelessWidget {
             SizedBox(height: 10.h),
 
             Container(
-              padding: EdgeInsets.all(14.r),
+              padding: EdgeInsets.all(12.r),
               decoration: BoxDecoration(
                 color: const Color(0xFF242424),
-                borderRadius: BorderRadius.circular(10.r),
+                borderRadius: BorderRadius.circular(8.r),
                 border: Border.all(color: const Color(0xFF3A3A3A)),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.swap_horiz_outlined,
-                      color: AppColors.secondaryTextColor, size: 18.r),
-                  SizedBox(width: 8.w),
                   CustomText(
                     text: d.classification,
-                    fontsize: 13.sp,
+                    fontsize: 14.sp,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.primaryTextColor,
                     textAlign: TextAlign.start,
+                  ),
+                  SvgPicture.asset(
+                    'assets/icons/saleclassifiaction.svg',
+                    width: 18.r,
+                    height: 18.r,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.secondaryTextColor,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ],
               ),
@@ -239,13 +254,14 @@ class SaleDetailScreen extends StatelessWidget {
               onpress: () {},
               color: Colors.transparent,
               borderColor: AppColors.warningColor,
+              borderWidth: 2,
               titlecolor: AppColors.warningColor,
               fontWeight: FontWeight.w600,
+              borderRadius: 8.r,
             ),
 
             SizedBox(height: 20.h),
 
-            // ── Representative Split ───────────────────────────────
             CustomText(
               text: 'Representative Split',
               fontsize: 15.sp,
@@ -257,11 +273,11 @@ class SaleDetailScreen extends StatelessWidget {
             SizedBox(height: 10.h),
 
             Container(
-              padding: EdgeInsets.all(14.r),
+              padding: EdgeInsets.symmetric(vertical: 10.h),
               decoration: BoxDecoration(
                 color: const Color(0xFF242424),
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(color: const Color(0xFF3A3A3A)),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: const Color(0xFFB516), width: 2),
               ),
               child: Column(
                 children: [
@@ -329,20 +345,21 @@ class SaleDetailScreen extends StatelessWidget {
 
             SizedBox(height: 16.h),
 
-            // Preview Packing Slip button
+
             CustomButton(
               title: 'Preview Packing Slip',
               onpress: () => Navigator.pushNamed(
                   context, AppRoutes.packingSlipScreen),
               color: Colors.transparent,
               borderColor: AppColors.warningColor,
+              borderWidth: 2,
               titlecolor: AppColors.warningColor,
               fontWeight: FontWeight.w600,
+              borderRadius: 8.r,
             ),
 
             SizedBox(height: 20.h),
 
-            // ── Attachments ────────────────────────────────────────
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -431,7 +448,6 @@ class SaleDetailScreen extends StatelessWidget {
 
             SizedBox(height: 20.h),
 
-            // ── Note ──────────────────────────────────────────────
             CustomText(
               text: 'Note',
               fontsize: 15.sp,
@@ -461,7 +477,6 @@ class SaleDetailScreen extends StatelessWidget {
 
             SizedBox(height: 20.h),
 
-            // ── Audit Trail ────────────────────────────────────────
             CustomText(
               text: 'Audit Trail',
               fontsize: 15.sp,
@@ -485,7 +500,6 @@ class SaleDetailScreen extends StatelessWidget {
   }
 }
 
-// ── Reusable detail widgets ───────────────────────────────────────────────────
 
 class _DetailRow {
   final String label;
@@ -591,6 +605,52 @@ class _DetailSectionHeader extends StatelessWidget {
       ],
     );
   }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double borderRadius;
+  final double dashLength;
+  final double dashGap;
+
+  const _DashedBorderPainter({
+    required this.color,
+    required this.borderRadius,
+    this.dashLength = 3,
+    this.dashGap = 2,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Radius.circular(borderRadius),
+    );
+
+    final path = Path()..addRRect(rrect);
+    final metricsIter = path.computeMetrics().iterator;
+
+    while (metricsIter.moveNext()) {
+      final metric = metricsIter.current;
+      double distance = 0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(distance, distance + dashLength),
+          paint,
+        );
+        distance += dashLength + dashGap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorderPainter old) =>
+      old.color != color || old.borderRadius != borderRadius;
 }
 
 class _AuditItem extends StatelessWidget {
