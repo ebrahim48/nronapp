@@ -8,6 +8,7 @@ import '../../../features/ representative/expenses/presentation/create_expense_s
 import '../../../features/ representative/expenses/presentation/expense_details_screen.dart';
 import '../../../features/ representative/expenses/presentation/expense_success_screen.dart';
 import '../../../features/ representative/expenses/presentation/expenses_screen.dart';
+import '../../../features/ representative/physicions/presentation/physicions_screen.dart';
 import '../../../features/ representative/purchaseorder/presentation/purchase_order_screen.dart';
 import '../../../features/ representative/rep_bottomnavbar/rep_bottomNavbar_screen.dart';
 import '../../../features/ representative/rep_home/create_purchase_order_screen.dart';
@@ -80,6 +81,7 @@ static const commissionScreen = '/commission';
 static const commissionHistoryScreen = '/commission-history';
 static const commissionDetailScreen = '/commission-detail';
 static const shipmentsScreen = '/shipmentsScreen';
+static const physiciansScreen = '/physiciansScreen';
 
 
 
@@ -274,6 +276,11 @@ static const shipmentsScreen = '/shipmentsScreen';
         path: shipmentsScreen,
         name: shipmentsScreen,
         builder: (context, state) => const ShipmentsScreen(),
+      ),
+      GoRoute(
+        path: physiciansScreen,
+        name: physiciansScreen,
+        builder: (context, state) => const PhysiciansScreen(),
       ),
     ],
   );
