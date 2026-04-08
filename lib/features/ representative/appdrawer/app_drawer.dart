@@ -29,22 +29,25 @@ class AppDrawer extends StatelessWidget {
       case 4: // Commission
         context.pushNamed(AppRoutes.commissionScreen);
         break;
-      case 5: // Physicians
+      case 5: // Shipments
+        context.pushNamed(AppRoutes.shipmentsScreen);
+        break;
+      case 6: // Physicians
         // context.pushNamed(AppRoutes.physiciansScreen);
         break;
-      case 6: // All Surgeries
+      case 7: // All Surgeries
         // context.pushNamed(AppRoutes.allSurgeriesScreen);
         break;
-      case 7: // Setting & Profile
+      case 8: // Setting & Profile
         // context.pushNamed(AppRoutes.settingsScreen);
         break;
-      case 8: // Contact Support
+      case 9: // Contact Support
         // context.pushNamed(AppRoutes.contactSupportScreen);
         break;
-      case 9: // About App
+      case 10: // About App
         // context.pushNamed(AppRoutes.aboutAppScreen);
         break;
-      case 10: // Terms & Conditions
+      case 11: // Terms & Conditions
         // context.pushNamed(AppRoutes.termsScreen);
         break;
     }

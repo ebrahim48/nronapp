@@ -30,6 +30,7 @@ import '../../../features/ representative/sales/packing_slip_screen.dart';
 import '../../../features/ representative/sales/sales_details_screen.dart';
 import '../../../features/ representative/sales/sales_screen.dart';
 import '../../../features/ representative/sales/select_implants_screen.dart';
+import '../../../features/ representative/shipment/presentation/shipment_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
@@ -78,6 +79,11 @@ class AppRoutes {
 static const commissionScreen = '/commission';
 static const commissionHistoryScreen = '/commission-history';
 static const commissionDetailScreen = '/commission-detail';
+static const shipmentsScreen = '/shipmentsScreen';
+
+
+
+
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
     redirect: (context, state) async {
@@ -263,6 +269,11 @@ static const commissionDetailScreen = '/commission-detail';
         path: commissionDetailScreen,
         name: commissionDetailScreen,
         builder: (context, state) => const CommissionDetailScreen(),
+      ),
+      GoRoute(
+        path: shipmentsScreen,
+        name: shipmentsScreen,
+        builder: (context, state) => const ShipmentsScreen(),
       ),
     ],
   );

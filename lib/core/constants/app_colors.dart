@@ -12,6 +12,7 @@ class AppColors {
   static const Color blackColor = Color(0xff000000);
   static const Color successColor = Color(0x9900D500);
   static const Color warningColor = Color(0xffFFB516);
+  static const Color textColor = Color(0xff1E2121);
 
   static const Color roleCardBorderColor = Color(0xFF3A3A3A);
   static const Color roleCardBaseDark = Color(0x4D1E293B);
