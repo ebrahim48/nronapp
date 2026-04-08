@@ -42,7 +42,6 @@ class AddRepresentativeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Representative Name
             CustomTextField(
               controller: repC.nameController,
               labelText: 'Representative Name',
@@ -54,7 +53,6 @@ class AddRepresentativeScreen extends StatelessWidget {
               ),
             ),
 
-            // Rep Role dropdown
             Obx(() => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -105,8 +103,6 @@ class AddRepresentativeScreen extends StatelessWidget {
                 SizedBox(height: 14.h),
               ],
             )),
-
-            // Commission %
             CustomTextField(
               controller: repC.commissionController,
               labelText: 'Commission %',
@@ -114,9 +110,8 @@ class AddRepresentativeScreen extends StatelessWidget {
               keyboardType: TextInputType.number,
             ),
 
-            const Spacer(),
+            SizedBox(height: 50.h),
 
-            // Add Representative button
             CustomButton(
               title: 'Add Representative',
               onpress: () {
@@ -129,7 +124,6 @@ class AddRepresentativeScreen extends StatelessWidget {
 
             SizedBox(height: 14.h),
 
-            // Info text
             Text(
               'A team is needed when multiple representatives are involved in different parts of the same sales process.',
               textAlign: TextAlign.center,
@@ -140,7 +134,7 @@ class AddRepresentativeScreen extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: 24.h),
+            SizedBox(height: 50.h),
           ],
         ),
       ),

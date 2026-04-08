@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -122,8 +123,7 @@ class CreateSaleScreen extends StatelessWidget {
 
             // Add Products from Inventory button
             GestureDetector(
-              onTap: () => Navigator.pushNamed(
-                  context, AppRoutes.selectImplantsScreen),
+              onTap: () => context.pushNamed(AppRoutes.selectImplantsScreen),
               child: Container(
                 width: double.infinity,
                 height: 50.h,
@@ -171,8 +171,8 @@ class CreateSaleScreen extends StatelessWidget {
                   textAlign: TextAlign.start,
                 ),
                 GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                      context, AppRoutes.addRepresentativeScreen),
+                  onTap: () => context.pushNamed(
+                      AppRoutes.addRepresentativeScreen),
                   child: Row(
                     children: [
                       Icon(Icons.add_circle_outline,
@@ -358,8 +358,7 @@ class CreateSaleScreen extends StatelessWidget {
             SizedBox(height: 10.h),
 
             GestureDetector(
-              onTap: () => Navigator.pushNamed(
-                  context, AppRoutes.packingSlipScreen),
+              onTap: () => context.pushNamed(AppRoutes.packingSlipScreen),
               child: Container(
                 padding: EdgeInsets.all(14.r),
                 decoration: BoxDecoration(
@@ -425,8 +424,7 @@ class CreateSaleScreen extends StatelessWidget {
             // ── Create Sale Record ─────────────────────────────────
             CustomButton(
               title: 'Create Sale Record',
-              onpress: () => Navigator.pushNamed(
-                  context, AppRoutes.saleDetailScreen),
+              onpress: () => context.pushNamed(AppRoutes.saleDetailScreen),
               titlecolor: AppColors.blackColor,
               fontWeight: FontWeight.w700,
             ),

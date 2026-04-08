@@ -19,6 +19,7 @@ class CustomButton extends StatelessWidget {
   final bool loaderIgnore;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final double? borderWidth;
 
   const CustomButton({
     super.key,
@@ -36,6 +37,7 @@ class CustomButton extends StatelessWidget {
     this.loaderIgnore = false,
     this.fontWeight,
     this.borderRadius,
+    this.borderWidth,
   });
 
   @override
@@ -54,6 +56,9 @@ class CustomButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(borderRadius ?? 10.r),
           color: color ?? AppColors.primaryColor,
+          border: borderColor != null
+              ? Border.all(color: borderColor!, width: borderWidth ?? 1.5)
+              : null,
         ),
         child: loading
             ? const Center(child: CustomLoader())

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nron_app/features/%20representative/sales/presentation/widgets/sales_list_card.dart';
 import 'package:nron_app/features/%20representative/sales/presentation/widgets/sales_state_card.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -100,8 +101,7 @@ class SalesScreen extends StatelessWidget {
             // ── Create Sales button ───────────────────────────────
             CustomButton(
               title: 'Create Sales',
-              onpress: () =>
-                  Navigator.pushNamed(context, AppRoutes.createSaleScreen),
+              onpress: () => context.pushNamed(AppRoutes.createSaleScreen),
               prefixIcon: SvgPicture.asset(
                 'assets/icons/createsale.svg',
                 width: 18.r,

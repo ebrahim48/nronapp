@@ -402,7 +402,7 @@ class PackingSlipScreen extends StatelessWidget {
                     size: 18.r,
                   ),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 50.h),
               ],
             ),
           ),
