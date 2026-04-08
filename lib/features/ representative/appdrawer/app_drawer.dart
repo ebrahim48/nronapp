@@ -27,7 +27,7 @@ class AppDrawer extends StatelessWidget {
         context.pushNamed(AppRoutes.salesScreen);
         break;
       case 4: // Commission
-        // context.pushNamed(AppRoutes.commissionScreen);
+        context.pushNamed(AppRoutes.commissionScreen);
         break;
       case 5: // Physicians
         // context.pushNamed(AppRoutes.physiciansScreen);

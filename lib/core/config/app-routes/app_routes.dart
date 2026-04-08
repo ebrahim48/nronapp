@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/ representative/commissions/presentation/commissions__screen.dart';
+import '../../../features/ representative/commissions/presentation/commissions_history_screen.dart';
+import '../../../features/ representative/commissions/presentation/commission_detail_screen.dart';
 import '../../../features/ representative/expenses/presentation/create_expense_screen.dart';
 import '../../../features/ representative/expenses/presentation/expense_details_screen.dart';
 import '../../../features/ representative/expenses/presentation/expense_success_screen.dart';
@@ -72,7 +75,9 @@ class AppRoutes {
   static const saleDetailScreen = '/sale-detail';
   static const addRepresentativeScreen = '/add-representative';
   static const packingSlipScreen = '/packing-slip';
-
+static const commissionScreen = '/commission';
+static const commissionHistoryScreen = '/commission-history';
+static const commissionDetailScreen = '/commission-detail';
   static final GoRouter goRouter = GoRouter(
     initialLocation: splashScreen,
     redirect: (context, state) async {
@@ -243,6 +248,21 @@ class AppRoutes {
         path: packingSlipScreen,
         name: packingSlipScreen,
         builder: (context, state) => const PackingSlipScreen(),
+      ),
+      GoRoute(
+        path: commissionScreen,
+        name: commissionScreen,
+        builder: (context, state) => const CommissionScreen(),
+      ),
+      GoRoute(
+        path: commissionHistoryScreen,
+        name: commissionHistoryScreen,
+        builder: (context, state) => const CommissionHistoryScreen(),
+      ),
+      GoRoute(
+        path: commissionDetailScreen,
+        name: commissionDetailScreen,
+        builder: (context, state) => const CommissionDetailScreen(),
       ),
     ],
   );
