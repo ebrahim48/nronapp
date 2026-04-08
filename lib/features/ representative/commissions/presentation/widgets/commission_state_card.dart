@@ -26,13 +26,13 @@ class CommissionStatCard extends StatelessWidget {
           border: Border.all(color: const Color(0xFF3A3A3A), width: 0.8),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomText(
               text: label,
               fontsize: 13.sp,
               color: AppColors.secondaryTextColor,
-              textAlign: TextAlign.start,
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 8.h),
             CustomText(
@@ -40,7 +40,7 @@ class CommissionStatCard extends StatelessWidget {
               fontsize: 20.sp,
               fontWeight: FontWeight.w700,
               color: valueColor,
-              textAlign: TextAlign.start,
+              textAlign: TextAlign.center,
             ),
           ],
         ),

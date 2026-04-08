@@ -9,6 +9,7 @@ class AppDrawerController extends GetxController {
     {'icon': 'assets/icons/expense.svg', 'label': 'Expenses'},
     {'icon': 'assets/icons/sales.svg', 'label': 'Sales'},
     {'icon': 'assets/icons/commission.svg', 'label': 'Commission'},
+    {'icon': 'assets/icons/shipmentsicon.svg', 'label': 'Shipments'},
     {'icon': 'assets/icons/physicians.svg', 'label': 'Physicians'},
     {'icon': 'assets/icons/surgeries.svg', 'label': 'All Surgeries'},
     {'icon': 'assets/icons/settings.svg', 'label': 'Setting & Profile'},
