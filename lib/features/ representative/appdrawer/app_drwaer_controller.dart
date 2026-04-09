@@ -1,4 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/config/app-routes/app_routes.dart';
+import 'sign_out_dialog.dart';
 
 class AppDrawerController extends GetxController {
   final selectedIndex = 0.obs;
@@ -24,8 +29,17 @@ class AppDrawerController extends GetxController {
     // Removed Get.back() to avoid contextless navigation error
   }
 
-  void signOut() {
-    // Sign out logic
+  void showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => SignOutDialog(
+        onConfirm: () {
+          Navigator.of(dialogContext).pop(); // Close dialog first
+          context.go(AppRoutes.signInScreen);
+        },
+      ),
+    );
   }
 
   void editProfile() {

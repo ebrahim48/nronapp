@@ -42,10 +42,10 @@ class AppDrawer extends StatelessWidget {
         context.pushNamed(AppRoutes.activityLogScreen);
         break;
       case 9: // Setting & Profile
-        // context.pushNamed(AppRoutes.settingsScreen);
+        context.pushNamed(AppRoutes.settingProfileScreen);
         break;
       case 10: // Contact Support
-        // context.pushNamed(AppRoutes.contactSupportScreen);
+        context.pushNamed(AppRoutes.contactSupportScreen);
         break;
       case 11: // About App
         // context.pushNamed(AppRoutes.aboutAppScreen);
@@ -100,7 +100,7 @@ class AppDrawer extends StatelessWidget {
             iconPath: 'assets/icons/logout.svg',
             label: 'Sign Out',
             isActive: false,
-            onTap: c.signOut,
+            onTap: () => c.showSignOutDialog(context),
           ),
 
           SizedBox(height: 24.h),
