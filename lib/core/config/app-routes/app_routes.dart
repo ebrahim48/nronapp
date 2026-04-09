@@ -36,8 +36,14 @@ import '../../../features/ representative/sales/packing_slip_screen.dart';
 import '../../../features/ representative/sales/sales_details_screen.dart';
 import '../../../features/ representative/sales/sales_screen.dart';
 import '../../../features/ representative/sales/select_implants_screen.dart';
+import '../../../features/ representative/settingsprofile/presentation/contact_support_screen.dart';
+import '../../../features/ representative/settingsprofile/presentation/others_screen.dart';
+import '../../../features/ representative/settingsprofile/presentation/privacy_policy_screen.dart';
+import '../../../features/ representative/settingsprofile/presentation/profile_screen.dart';
+import '../../../features/ representative/settingsprofile/presentation/settings_profile_screen.dart';
 import '../../../features/ representative/shipment/presentation/shipment_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
+import '../../../features/auth/presentation/screens/signin_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
 import '../../../features/auth/verify/verify_screen.dart';
@@ -52,6 +58,7 @@ class AppRoutes {
   static const String roleSelection = "/roleSelection";
   static const String representativeHome = "/representativeHome";
   static const String signUpScreen = "/signUpScreen";
+  static const String signInScreen = "/signInScreen";
   static const String forgetPasswordScreen = "/forgetPasswordScreen";
   static const String verifyScreen = "/verifyScreen";
   static const String resetPasswordScreen = "/resetPasswordScreen";
@@ -94,6 +101,12 @@ static const addSurgeryScreen = '/add-surgery';
 static const surgeryDetailScreen = '/surgery-detail';
 static const activityLogScreen = '/activityLogScreen';
 
+  static const settingProfileScreen = '/setting-profile';
+  static const profileScreen = '/profile';
+  static const contactSupportScreen = '/contact-support';
+  static const othersScreen = '/others';
+  static const privacyPolicyScreen = '/privacy-policy';
+
 
 
 
@@ -122,6 +135,11 @@ static const activityLogScreen = '/activityLogScreen';
         path: signUpScreen,
         name: signUpScreen,
         builder: (context, state) =>  SignUpScreen(),
+      ),
+      GoRoute(
+        path: signInScreen,
+        name: signInScreen,
+        builder: (context, state) =>  const SignInScreen(),
       ),
       GoRoute(
         path: forgetPasswordScreen,
@@ -312,6 +330,31 @@ static const activityLogScreen = '/activityLogScreen';
         path: activityLogScreen,
         name: activityLogScreen,
         builder: (context, state) => const ActivityLogScreen(),
+      ),
+      GoRoute(
+        path: profileScreen ,
+        name: profileScreen ,
+        builder: (context, state) => const ProfileScreen (),
+      ),
+      GoRoute(
+        path: settingProfileScreen ,
+        name: settingProfileScreen ,
+        builder: (context, state) => const SettingProfileScreen (),
+      ),
+      GoRoute(
+        path: contactSupportScreen  ,
+        name: contactSupportScreen ,
+        builder: (context, state) => const ContactSupportScreen  (),
+      ),
+      GoRoute(
+        path: othersScreen   ,
+        name: othersScreen ,
+        builder: (context, state) => const OthersScreen   (),
+      ),
+      GoRoute(
+        path: privacyPolicyScreen    ,
+        name: privacyPolicyScreen  ,
+        builder: (context, state) => const PrivacyPolicyScreen    (),
       ),
       // GoRoute(
       //   path: physicianProfileScreen,
