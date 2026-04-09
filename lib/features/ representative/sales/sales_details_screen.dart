@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -348,8 +349,8 @@ class SaleDetailScreen extends StatelessWidget {
 
             CustomButton(
               title: 'Preview Packing Slip',
-              onpress: () => Navigator.pushNamed(
-                  context, AppRoutes.packingSlipScreen),
+              onpress: () => context.pushNamed(
+                  AppRoutes.packingSlipScreen),
               color: Colors.transparent,
               borderColor: AppColors.warningColor,
               borderWidth: 2,

@@ -147,8 +147,7 @@ class SalesScreen extends StatelessWidget {
                   .map(
                     (sale) => SaleListCard(
                   sale: sale,
-                  onTap: () => Navigator.pushNamed(
-                    context,
+                  onTap: () => context.pushNamed(
                     AppRoutes.saleDetailScreen,
                   ),
                 ),

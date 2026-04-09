@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../core/config/app-routes/app_routes.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
@@ -72,8 +73,7 @@ class PhysicianDropdown extends StatelessWidget {
                         .toList(),
                     onChanged: (v) {
                       c.selectedPhysician.value = v ?? '';
-                      Navigator.pushNamed(
-                          context, AppRoutes.surgeryDetailScreen);
+                      context.pushNamed(AppRoutes.surgeryDetailScreen);
                     },
                   ),
                 ),

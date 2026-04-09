@@ -21,13 +21,23 @@ import '../../../features/ representative/rep_home/presentation/add_products_scr
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/add_bio_inventory_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/add_implant_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/create_implant_sale_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/create_shipment_implant_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/details_bio_inventory_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/implants_details_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/implants_details_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/missing_instrument_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/receive_tray_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/receiving_session_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/report_success_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/send_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/new_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/rep_inventory_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/serialized_implants_screen.dart';
+import '../../../features/ representative/rep_inventory/model/implant_model.dart';
+import '../../../features/ representative/rep_inventory/presentation/receiving_complete_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/transfer_implant_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/tray_details_screen.dart';
 import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
 import '../../../features/ representative/sales/add_representative_screen.dart';
@@ -106,6 +116,16 @@ static const activityLogScreen = '/activityLogScreen';
   static const contactSupportScreen = '/contact-support';
   static const othersScreen = '/others';
   static const privacyPolicyScreen = '/privacy-policy';
+
+  static const String serializedImplantsScreen = '/serialized-implants';
+  static const String implantDetailsScreen = '/implant-details';
+  static const String addImplantScreen = '/add-implant';
+  static const String transferImplantScreen = '/transfer-implant';
+  static const String createShipmentFromImplantScreen = '/create-shipment-implant';
+  static const String createImplantSaleScreen = '/create-implant-sale';
+
+  static const String receivingSessionScreen = '/receiving-session';
+  static const String receivingSessionCompleteScreen = '/receiving-complete';
 
 
 
@@ -356,11 +376,55 @@ static const activityLogScreen = '/activityLogScreen';
         name: privacyPolicyScreen  ,
         builder: (context, state) => const PrivacyPolicyScreen    (),
       ),
-      // GoRoute(
-      //   path: physicianProfileScreen,
-      //   name: physicianProfileScreen,
-      //   builder: (context, state) => const PhysicianProfileScreen(),
-      // ),
+      GoRoute(
+        path: serializedImplantsScreen,
+        name: serializedImplantsScreen,
+        builder: (context, state) => const SerializedImplantsScreen(),
+      ),
+      GoRoute(
+        path: implantDetailsScreen,
+        name: implantDetailsScreen,
+        builder: (context, state) => ImplantDetailsScreen(
+          implant: state.extra as ImplantModel,
+        ),
+      ),
+      GoRoute(
+        path: addImplantScreen,
+        name: addImplantScreen,
+        builder: (context, state) => const AddImplantScreen(),
+      ),
+      GoRoute(
+        path: transferImplantScreen,
+        name: transferImplantScreen,
+        builder: (context, state) => TransferImplantScreen(
+          implant: state.extra as ImplantModel,
+        ),
+      ),
+      GoRoute(
+        path: createImplantSaleScreen,
+        name: createImplantSaleScreen,
+        builder: (context, state) => CreateImplantSaleScreen(
+          implant: state.extra as ImplantModel,
+        ),
+      ),
+      GoRoute(
+        path: createShipmentFromImplantScreen,
+        name: createShipmentFromImplantScreen,
+        builder: (context, state) => CreateShipmentFromImplantScreen(
+          implant: state.extra as ImplantModel,
+        ),
+      ),
+      GoRoute(
+        path: receivingSessionScreen,
+        name: receivingSessionScreen,
+        builder: (context, state) => const ReceivingSessionScreen(),
+      ),
+      GoRoute(
+        path: receivingSessionCompleteScreen,
+        name: receivingSessionCompleteScreen,
+        builder: (context, state) => const ReceivingSessionCompleteScreen(),
+      ),
+
     ],
   );
 

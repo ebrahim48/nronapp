@@ -97,6 +97,7 @@ class InventoryScreen extends StatelessWidget {
                       iconPath: 'assets/icons/implantsinventory.svg',
                       label: 'Serialized Implants',
                       value: c.serializedImplants.value.toString(),
+                      onTap: () => context.pushNamed(AppRoutes.serializedImplantsScreen),
                     ),
                     SizedBox(width: 12.w),
                     InventoryStatCard(
@@ -127,7 +128,7 @@ class InventoryScreen extends StatelessWidget {
 
             SizedBox(height: 24.h),
 
-            StartReceivingButton(onTap: c.startReceivingSession),
+            StartReceivingButton(onTap: () => context.pushNamed(AppRoutes.receivingSessionScreen)),
 
             SizedBox(height: 24.h),
 
