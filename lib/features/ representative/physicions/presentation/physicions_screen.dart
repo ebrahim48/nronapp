@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../appdrawer/app_drawer.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/physicians_controller.dart';
 import 'add_physicians_screen.dart';
@@ -19,13 +20,19 @@ class PhysiciansScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         elevation: 0,
         toolbarHeight: 60.h,
         automaticallyImplyLeading: false,
         centerTitle: false,
-        titleSpacing: 24.w,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Icon(Icons.arrow_back_ios,
+              color: AppColors.primaryTextColor, size: 18.r),
+        ),
+        titleSpacing: 8.w,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -47,17 +54,13 @@ class PhysiciansScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 24.w),
-            child: GestureDetector(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: SvgPicture.asset(
-                'assets/icons/drawer.svg',
-                width: 22.r,
-                height: 22.r,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.primaryTextColor,
-                  BlendMode.srcIn,
+          Builder(
+            builder: (ctx) => Padding(
+              padding: EdgeInsets.only(right: 24.w),
+              child: GestureDetector(
+                onTap: () => Scaffold.of(ctx).openDrawer(),
+                child: SvgPicture.asset(
+                  'assets/icons/drawer.svg',
                 ),
               ),
             ),
@@ -68,7 +71,6 @@ class PhysiciansScreen extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 40.h),
         child: Column(
           children: [
-            // ── Search bar ──────────────────────────────────────────
             Container(
               height: 48.h,
               decoration: BoxDecoration(
@@ -157,13 +159,7 @@ class PhysiciansScreen extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: 12.h),
                 child: PhysicianCard(
                   physician: p,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          PhysicianProfileScreen(physician: p),
-                    ),
-                  ),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PhysicianProfileScreen(physician: p),),),
                   onAddSurgeries: () {
                     // TODO: navigate to add surgeries
                   },
