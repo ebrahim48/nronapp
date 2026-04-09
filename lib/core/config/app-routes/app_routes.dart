@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../features/ representative/activity/presentation/activity-log_screen.dart';
+import '../../../features/ representative/all_surgeries/presentation/add_surgery_screen.dart';
+import '../../../features/ representative/all_surgeries/presentation/allsurgeries_screen.dart';
+import '../../../features/ representative/all_surgeries/presentation/surgery_details_screen.dart';
 import '../../../features/ representative/commissions/presentation/commissions__screen.dart';
 import '../../../features/ representative/commissions/presentation/commissions_history_screen.dart';
 import '../../../features/ representative/commissions/presentation/commission_detail_screen.dart';
@@ -8,6 +12,7 @@ import '../../../features/ representative/expenses/presentation/create_expense_s
 import '../../../features/ representative/expenses/presentation/expense_details_screen.dart';
 import '../../../features/ representative/expenses/presentation/expense_success_screen.dart';
 import '../../../features/ representative/expenses/presentation/expenses_screen.dart';
+import '../../../features/ representative/physicions/presentation/physicions_profile_screen.dart';
 import '../../../features/ representative/physicions/presentation/physicions_screen.dart';
 import '../../../features/ representative/purchaseorder/presentation/purchase_order_screen.dart';
 import '../../../features/ representative/rep_bottomnavbar/rep_bottomNavbar_screen.dart';
@@ -82,6 +87,12 @@ static const commissionHistoryScreen = '/commission-history';
 static const commissionDetailScreen = '/commission-detail';
 static const shipmentsScreen = '/shipmentsScreen';
 static const physiciansScreen = '/physiciansScreen';
+static const physicianProfileScreen = '/physicianProfileScreen';
+
+static const allSurgeriesScreen = '/all-surgeries';
+static const addSurgeryScreen = '/add-surgery';
+static const surgeryDetailScreen = '/surgery-detail';
+static const activityLogScreen = '/activityLogScreen';
 
 
 
@@ -282,6 +293,31 @@ static const physiciansScreen = '/physiciansScreen';
         name: physiciansScreen,
         builder: (context, state) => const PhysiciansScreen(),
       ),
+      GoRoute(
+        path: allSurgeriesScreen,
+        name: allSurgeriesScreen,
+        builder: (context, state) => const AllSurgeriesScreen(),
+      ),
+      GoRoute(
+        path: addSurgeryScreen,
+        name: addSurgeryScreen,
+        builder: (context, state) => const AddSurgeryScreen(),
+      ),
+      GoRoute(
+        path: surgeryDetailScreen,
+        name: surgeryDetailScreen,
+        builder: (context, state) => const SurgeryDetailScreen(),
+      ),
+      GoRoute(
+        path: activityLogScreen,
+        name: activityLogScreen,
+        builder: (context, state) => const ActivityLogScreen(),
+      ),
+      // GoRoute(
+      //   path: physicianProfileScreen,
+      //   name: physicianProfileScreen,
+      //   builder: (context, state) => const PhysicianProfileScreen(),
+      // ),
     ],
   );
 
