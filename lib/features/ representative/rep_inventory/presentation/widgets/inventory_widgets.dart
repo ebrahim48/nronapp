@@ -9,17 +9,21 @@ class InventoryStatCard extends StatelessWidget {
   final String iconPath;
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   const InventoryStatCard({
     super.key,
     required this.iconPath,
     required this.label,
     required this.value,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       width: 165.w,
       height: 110.h,
       decoration: BoxDecoration(
@@ -57,6 +61,7 @@ class InventoryStatCard extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
       ),
     );
   }

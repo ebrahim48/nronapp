@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nron_app/features/%20representative/commissions/presentation/widgets/commission_card.dart';
 import 'package:nron_app/features/%20representative/commissions/presentation/widgets/commissions_history_filter_tabs.dart';
 import 'package:nron_app/features/%20representative/commissions/presentation/widgets/history_group_header.dart';
@@ -81,8 +82,8 @@ class CommissionHistoryScreen extends StatelessWidget {
                 ...group.items.map(
                       (item) => CommissionCard(
                     commission: item,
-                    onTap: () => Navigator.pushNamed(
-                        context, AppRoutes.commissionDetailScreen),
+                    onTap: () => context.pushNamed(
+                        AppRoutes.commissionDetailScreen),
                   ),
                 ),
                 SizedBox(height: 8.h),
