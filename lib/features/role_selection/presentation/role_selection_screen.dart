@@ -83,7 +83,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 subtitle:
                 'Direct team logistics, inventory intelligence, and executive approvals.',
                 style: RoleCardStyle.manager,
-                onTap: () => context.go(AppRoutes.representativeHome),
+                onTap: () => context.go(AppRoutes.managerBottomNavBar),
               ),
 
               SizedBox(height: 16.h),
