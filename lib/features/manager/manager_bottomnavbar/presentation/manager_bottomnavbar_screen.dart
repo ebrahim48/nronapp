@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../manager_home/presentation/manager_home_screen.dart';
 import '../../manager_home/presentation/manager_purchase_order_screen.dart';
+import '../../managerinventory/presentation/manager_inventory_screen.dart';
 import '../controller/manager_main_nav_controller.dart';
 
 
@@ -19,7 +20,7 @@ class ManagerBottomNavBar extends StatelessWidget {
 
     final pages = [
       const ManagerHomeScreen(),
-      const ManagerHomeScreen(),
+      const ManagerInventoryScreen(),
       const ManagerPurchaseOrderScreen(),
 
     ];
