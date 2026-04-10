@@ -62,6 +62,11 @@ import '../../../features/manager/manager_home/presentation/manager_home_screen.
 import '../../../features/manager/manager_home/presentation/manager_purchase_order_screen.dart';
 import '../../../features/manager/manager_home/presentation/po_details_screen.dart';
 import '../../../features/manager/manager_home/presentation/po_review_screen.dart';
+import '../../../features/manager/managerinventory/presentation/manager_inventory_screen.dart';
+import '../../../features/manager/managerinventory/presentation/manager_missing_report_screen.dart';
+import '../../../features/manager/managerinventory/presentation/manager_report_details_screen.dart';
+import '../../../features/manager/managerinventory/controller/manager_missing_report_controller.dart';
+import '../../../features/manager/managerinventory/presentation/manager_transfer_requests_screen.dart';
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
@@ -141,6 +146,10 @@ static const activityLogScreen = '/activityLogScreen';
   static const poReviewScreen = '/po-review';
   static const poDetailsScreen = '/po-details';
   static const managerBottomNavBar = '/managerBottomNavBar';
+  static const managerInventoryScreen = '/managerInventoryScreen';
+  static const managerMissingReportScreen = '/managerMissingReportScreen';
+  static const managerTransferRequestsScreen = '/managerTransferRequestsScreen';
+  static const managerReportDetailsScreen = '/managerReportDetailsScreen';
 
 
   static final GoRouter goRouter = GoRouter(
@@ -469,6 +478,28 @@ static const activityLogScreen = '/activityLogScreen';
         path: managerBottomNavBar,
         name: managerBottomNavBar,
         builder: (context, state) => const ManagerBottomNavBar(),
+      ),
+      GoRoute(
+        path: managerInventoryScreen,
+        name: managerInventoryScreen,
+        builder: (context, state) => const ManagerInventoryScreen(),
+      ),
+      GoRoute(
+        path: managerMissingReportScreen,
+        name: managerMissingReportScreen,
+        builder: (context, state) => const ManagerMissingReportScreen(),
+      ),
+      GoRoute(
+        path: managerTransferRequestsScreen,
+        name: managerTransferRequestsScreen,
+        builder: (context, state) => const ManagerTransferRequestsScreen(),
+      ),
+      GoRoute(
+        path: managerReportDetailsScreen,
+        name: managerReportDetailsScreen,
+        builder: (context, state) => ManagerReportDetailsScreen(
+          item: state.extra as MissingReportItem,
+        ),
       ),
 
 
