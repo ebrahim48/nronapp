@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import '../../../core/constants/app_colors.dart';
-import '../../../core/custom_widgets/custom_text.dart';
-import '../purchaseorder/presentation/purchase_order_screen.dart';
-import '../rep_home/presentation/representative_home_screen.dart';
-import '../rep_inventory/presentation/rep_inventory_screen.dart';
-import '../rep_qrscan/rep_qr_scan_screen.dart';
-import 'controller/rep_bottomnavbar_controller.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/custom_widgets/custom_text.dart';
+import '../../purchaseorder/presentation/purchase_order_screen.dart';
+import '../../rep_home/presentation/representative_home_screen.dart';
+import '../../rep_inventory/presentation/rep_inventory_screen.dart';
+import '../../rep_qrscan/rep_qr_scan_screen.dart';
+import '../../settingsprofile/presentation/settings_profile_screen.dart';
+import '../controller/rep_bottomnavbar_controller.dart';
 
 
 class RepBottomNavBar extends StatelessWidget {
@@ -23,7 +24,7 @@ class RepBottomNavBar extends StatelessWidget {
       const InventoryScreen(),
       const QrScanScreen(),
       const PurchaseOrderScreen(),
-      // const AnalyticsScreen(),
+      const SettingProfileScreen(),
     ];
 
     return Obx(() => Scaffold(
@@ -40,7 +41,6 @@ class RepBottomNavBar extends StatelessWidget {
   }
 }
 
-// ── Bottom Nav Bar ────────────────────────────────────────────────────────────
 class _AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -90,8 +90,8 @@ class _AppBottomNavBar extends StatelessWidget {
             onTap: () => onTap(3),
           ),
           _NavItem(
-            iconPath: 'assets/icons/analytics.svg',
-            label: 'Analytics',
+            iconPath: 'assets/icons/profile.svg',
+            label: 'Profile',
             isActive: currentIndex == 4,
             onTap: () => onTap(4),
           ),

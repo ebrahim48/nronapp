@@ -15,7 +15,7 @@ import '../../../features/ representative/expenses/presentation/expenses_screen.
 import '../../../features/ representative/physicions/presentation/physicions_profile_screen.dart';
 import '../../../features/ representative/physicions/presentation/physicions_screen.dart';
 import '../../../features/ representative/purchaseorder/presentation/purchase_order_screen.dart';
-import '../../../features/ representative/rep_bottomnavbar/rep_bottomNavbar_screen.dart';
+import '../../../features/ representative/rep_bottomnavbar/presentation/rep_bottomNavbar_screen.dart';
 import '../../../features/ representative/rep_home/create_purchase_order_screen.dart';
 import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
@@ -57,6 +57,11 @@ import '../../../features/auth/presentation/screens/signin_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
 import '../../../features/auth/verify/verify_screen.dart';
+import '../../../features/manager/manager_bottomnavbar/presentation/manager_bottomnavbar_screen.dart';
+import '../../../features/manager/manager_home/presentation/manager_home_screen.dart';
+import '../../../features/manager/manager_home/presentation/manager_purchase_order_screen.dart';
+import '../../../features/manager/manager_home/presentation/po_details_screen.dart';
+import '../../../features/manager/manager_home/presentation/po_review_screen.dart';
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
@@ -92,7 +97,6 @@ class AppRoutes {
   static const String expenseSuccessScreen = "/expenseSuccessScreen";
   static const String expensesScreen = "/expensesScreen";
   static const String expenseDetailScreen = "/expenseDetailScreen";
-
   static const salesScreen = '/sales';
   static const createSaleScreen = '/create-sale';
   static const selectImplantsScreen = '/select-implants';
@@ -128,6 +132,15 @@ static const activityLogScreen = '/activityLogScreen';
   static const String receivingSessionCompleteScreen = '/receiving-complete';
 
 
+  /// ================================================> Manager ==========================================>
+
+
+
+  static const managerHomeScreen = '/manager-home';
+  static const managerPurchaseOrderScreen = '/manager-po';
+  static const poReviewScreen = '/po-review';
+  static const poDetailsScreen = '/po-details';
+  static const managerBottomNavBar = '/managerBottomNavBar';
 
 
   static final GoRouter goRouter = GoRouter(
@@ -424,6 +437,47 @@ static const activityLogScreen = '/activityLogScreen';
         name: receivingSessionCompleteScreen,
         builder: (context, state) => const ReceivingSessionCompleteScreen(),
       ),
+
+
+
+     /// ========================================> Manager ========================================>
+
+
+      GoRoute(
+        path: managerHomeScreen,
+        name: managerHomeScreen,
+        builder: (context, state) => const ManagerHomeScreen(),
+      ),
+      GoRoute(
+        path: managerPurchaseOrderScreen,
+        name: managerPurchaseOrderScreen,
+        builder: (context, state) => const ManagerPurchaseOrderScreen(),
+      ),
+      GoRoute(
+        path: poReviewScreen,
+        name: poReviewScreen,
+        builder: (context, state) => const POReviewScreen(),
+      ),
+
+      GoRoute(
+        path: poDetailsScreen,
+        name: poDetailsScreen,
+        builder: (context, state) => const PODetailsScreen(),
+      ),
+
+      GoRoute(
+        path: managerBottomNavBar,
+        name: managerBottomNavBar,
+        builder: (context, state) => const ManagerBottomNavBar(),
+      ),
+
+
+
+
+
+
+
+
 
     ],
   );

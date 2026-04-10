@@ -71,12 +71,16 @@ class CustomButton extends StatelessWidget {
                     prefixIcon!,
                     SizedBox(width: 10.w),
                   ],
-                  CustomText(
-                    text: title,
-                    fontsize: fontSize ?? 14.sp,
-                    color: titlecolor ?? AppColors.primaryTextColor,
-                    fontWeight: fontWeight ?? FontWeight.w400,
-                    textAlign: TextAlign.center,
+                  Flexible(
+                    child: CustomText(
+                      text: title,
+                      fontsize: fontSize ?? 14.sp,
+                      color: titlecolor ?? AppColors.primaryTextColor,
+                      fontWeight: fontWeight ?? FontWeight.w400,
+                      textAlign: TextAlign.center,
+                      textOverflow: TextOverflow.ellipsis,
+                      maxline: 1,
+                    ),
                   ),
                   if (suffixIcon != null) ...[
                     SizedBox(width: 10.w),
