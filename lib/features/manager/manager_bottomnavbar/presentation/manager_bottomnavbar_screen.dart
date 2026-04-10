@@ -22,7 +22,6 @@ class ManagerBottomNavBar extends StatelessWidget {
       const ManagerHomeScreen(),
       const ManagerInventoryScreen(),
       const ManagerPurchaseOrderScreen(),
-
     ];
 
     return Obx(() => Scaffold(
@@ -78,14 +77,14 @@ class _AppBottomNavBar extends StatelessWidget {
           _NavItem(
             iconPath: 'assets/icons/purchase.svg',
             label: 'P. Order',
-            isActive: currentIndex == 3,
-            onTap: () => onTap(3),
+            isActive: currentIndex == 2,
+            onTap: () => onTap(2),
           ),
           _NavItem(
             iconPath: 'assets/icons/shipments.svg',
             label: 'Shipments',
-            isActive: currentIndex == 4,
-            onTap: () => onTap(4),
+            isActive: currentIndex == 3,
+            onTap: () => onTap(3),
           ),
         ],
       ),
