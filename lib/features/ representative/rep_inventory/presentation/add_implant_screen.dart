@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/dotted_upload_box.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -26,7 +28,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
 
   Widget _dropdownField({
     required String hint,
-    required IconData icon,
+    required String? svgIcon,
     required List<String>? items,
     required String? value,
     required ValueChanged<String?> onChanged,
@@ -37,7 +39,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (label != null) ...[
+          if (label != null)
             CustomText(
               text: label,
               fontsize: 12.sp,
@@ -46,7 +48,6 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
               left: 2.w,
               bottom: 6.h,
             ),
-          ],
           Container(
             height: 50.h,
             padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -58,7 +59,16 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
             ),
             child: Row(
               children: [
-                Icon(icon, color: AppColors.secondaryTextColor, size: 16.r),
+                if (svgIcon != null)
+                  SvgPicture.asset(
+                    svgIcon,
+                    width: 16.r,
+                    height: 16.r,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.secondaryTextColor,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 SizedBox(width: 10.w),
                 Expanded(
                   child: items != null
@@ -102,6 +112,49 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
     );
   }
 
+  Widget _imageGrid(List<File> images, void Function(int) onRemove) {
+    if (images.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.h),
+      child: Wrap(
+        spacing: 8.w,
+        runSpacing: 8.h,
+        children: images.asMap().entries.map((e) {
+          return Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: Image.file(
+                  e.value,
+                  width: 80.r,
+                  height: 80.r,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 2,
+                right: 2,
+                child: GestureDetector(
+                  onTap: () => onRemove(e.key),
+                  child: Container(
+                    width: 20.r,
+                    height: 20.r,
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.close,
+                        color: Colors.white, size: 12.r),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,7 +193,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                       // Facility
                       _dropdownField(
                         hint: 'Search Facility (e.g., City Hospital)',
-                        icon: Icons.add,
+                        svgIcon: 'assets/icons/location.svg',
                         items: null,
                         value: null,
                         onChanged: (_) {},
@@ -151,19 +204,141 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                       CustomTextField(
                         controller: _ctrl.vendorController,
                         labelText: 'Vendor',
-                        hintText: 'Vendor',
-                        prefixIcon: Icon(Icons.business_outlined,
-                            color: AppColors.secondaryTextColor, size: 16.r),
+                        hintText: 'Enter vendor name',
+                        prefixIcon: SvgPicture.asset(
+                          'assets/icons/vendor.svg',
+                          width: 16.r,
+                          height: 16.r,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.secondaryTextColor,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                       ),
 
-                      // System Type
-                      _dropdownField(
-                        hint: 'Select System',
-                        icon: Icons.settings_outlined,
-                        items: _ctrl.systemTypes,
-                        value: _ctrl.selectedSystemType,
-                        onChanged: _ctrl.setSystemType,
-                        label: 'System Type',
+                      // System Type — 2 dropdowns side by side
+                      CustomText(
+                        text: 'System Type',
+                        fontsize: 12.sp,
+                        color: AppColors.primaryTextColor,
+                        textAlign: TextAlign.start,
+                        left: 2.w,
+                        bottom: 6.h,
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 12.h),
+                              child: Container(
+                                height: 50.h,
+                                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                decoration: BoxDecoration(
+                                  color: const Color(0x1A4A4A4A),
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(
+                                      color: AppColors.dotButtonInactiveColor,
+                                      width: 0.8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/systemtype.svg',
+                                      width: 16.r,
+                                      height: 16.r,
+                                      colorFilter: ColorFilter.mode(
+                                        AppColors.secondaryTextColor,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Expanded(
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: _ctrl.selectedSystemType,
+                                          hint: CustomText(
+                                            text: 'System',
+                                            fontsize: 12.sp,
+                                            color: AppColors.secondaryTextColor,
+                                          ),
+                                          isExpanded: true,
+                                          dropdownColor: const Color(0xFF252525),
+                                          iconEnabledColor: AppColors.secondaryTextColor,
+                                          style: TextStyle(
+                                            color: AppColors.primaryTextColor,
+                                            fontSize: 12.sp,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                          onChanged: _ctrl.setSystemType,
+                                          items: _ctrl.systemTypes
+                                              .map((e) => DropdownMenuItem(
+                                              value: e, child: Text(e)))
+                                              .toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: 12.h),
+                              child: Container(
+                                height: 50.h,
+                                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                decoration: BoxDecoration(
+                                  color: const Color(0x1A4A4A4A),
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(
+                                      color: AppColors.dotButtonInactiveColor,
+                                      width: 0.8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/systemtype.svg',
+                                      width: 16.r,
+                                      height: 16.r,
+                                      colorFilter: ColorFilter.mode(
+                                        AppColors.secondaryTextColor,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Expanded(
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: _ctrl.selectedSystemSubType,
+                                          hint: CustomText(
+                                            text: 'Sub-Type',
+                                            fontsize: 12.sp,
+                                            color: AppColors.secondaryTextColor,
+                                          ),
+                                          isExpanded: true,
+                                          dropdownColor: const Color(0xFF252525),
+                                          iconEnabledColor: AppColors.secondaryTextColor,
+                                          style: TextStyle(
+                                            color: AppColors.primaryTextColor,
+                                            fontSize: 12.sp,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                          onChanged: _ctrl.setSystemSubType,
+                                          items: _ctrl.systemSubTypes
+                                              .map((e) => DropdownMenuItem(
+                                              value: e, child: Text(e)))
+                                              .toList(),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
                       // Recipient Email
@@ -177,6 +352,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                             color: AppColors.secondaryTextColor, size: 16.r),
                       ),
 
+                      // Serial Information
                       Container(
                         padding: EdgeInsets.all(14.r),
                         margin: EdgeInsets.only(bottom: 16.h),
@@ -214,12 +390,13 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                               controller: _ctrl.serial2Controller,
                               labelText: 'Serial Number 2 (Optional)',
                               hintText: 'Enter SN2',
-                              validator: (_) => null, // optional
+                              validator: (_) => null,
                             ),
                           ],
                         ),
                       ),
 
+                      // Inbound Image Upload
                       CustomText(
                         text: 'Inbound Image',
                         fontsize: 13.sp,
@@ -228,8 +405,11 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                         textAlign: TextAlign.start,
                         bottom: 8.h,
                       ),
+                      _imageGrid(_ctrl.inboundImages, _ctrl.removeInboundImage),
                       DottedUploadBox(
-                        onTap: () => _ctrl.addInboundImage('placeholder'),
+                        label: 'Inbound Image Upload',
+                        subtitle: 'Tap to capture or select from gallery',
+                        onTap: () => _ctrl.pickInboundImage(context),
                       ),
                       SizedBox(height: 14.h),
 
@@ -258,6 +438,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                       ),
                       SizedBox(height: 14.h),
 
+                      // Broken Instruments Upload
                       CustomText(
                         text: 'Broken Instruments',
                         fontsize: 13.sp,
@@ -266,8 +447,11 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                         textAlign: TextAlign.start,
                         bottom: 8.h,
                       ),
+                      _imageGrid(_ctrl.brokenImages, _ctrl.removeBrokenImage),
                       DottedUploadBox(
-                        onTap: () => _ctrl.addBrokenImage('placeholder'),
+                        label: 'Broken Instrument Image',
+                        subtitle: 'Tap to capture or select from gallery',
+                        onTap: () => _ctrl.pickBrokenImage(context),
                       ),
                       SizedBox(height: 14.h),
 

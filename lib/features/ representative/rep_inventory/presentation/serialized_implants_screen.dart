@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/implant_list_tile.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../../appdrawer/app_drawer.dart';
 import '../controller/implant_controller.dart';
 
 
@@ -33,6 +35,7 @@ class _SerializedImplantsScreenState extends State<SerializedImplantsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      drawer: const AppDrawer(),
       bottomNavigationBar: _BottomNav(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed(AppRoutes.addImplantScreen),
@@ -55,26 +58,41 @@ class _SerializedImplantsScreenState extends State<SerializedImplantsScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-                          CustomText(
-                            text: 'Serialized Implants',
-                            fontsize: 18.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryTextColor,
-                            textAlign: TextAlign.start,
+                          GestureDetector(
+                            onTap: () => context.pop(),
+                            child: Icon(Icons.arrow_back_ios,
+                                color: AppColors.primaryTextColor, size: 18.r),
                           ),
-                          CustomText(
-                            text: 'Manage and track medical hardware',
-                            fontsize: 11.sp,
-                            color: AppColors.secondaryTextColor,
-                            textAlign: TextAlign.start,
+                          SizedBox(width: 8.w),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomText(
+                                text: 'Serialized Implants',
+                                fontsize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryTextColor,
+                                textAlign: TextAlign.start,
+                              ),
+                              CustomText(
+                                text: 'Manage and track medical hardware',
+                                fontsize: 11.sp,
+                                color: AppColors.secondaryTextColor,
+                                textAlign: TextAlign.start,
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      Icon(Icons.menu,
-                          color: AppColors.primaryTextColor, size: 22.r),
+                      Builder(
+                        builder: (ctx) => GestureDetector(
+                          onTap: () => Scaffold.of(ctx).openDrawer(),
+                          child: Icon(Icons.menu,
+                              color: AppColors.primaryTextColor, size: 22.r),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -139,8 +157,15 @@ class _SerializedImplantsScreenState extends State<SerializedImplantsScreen> {
                               color: AppColors.dotButtonInactiveColor,
                               width: 0.6),
                         ),
-                        child: Icon(Icons.tune,
-                            color: AppColors.secondaryTextColor, size: 20.r),
+                        child: SvgPicture.asset(
+                          'assets/icons/filter.svg',
+                          width: 20.r,
+                          height: 20.r,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.secondaryTextColor,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                       ),
                     ],
                   ),
