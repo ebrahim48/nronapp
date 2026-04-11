@@ -76,6 +76,8 @@ import '../../../features/manager/managerinventory/controller/manager_missing_re
 import '../../../features/manager/managerinventory/presentation/manager_transfer_requests_screen.dart';
 import '../../../features/manager/managersales/presentation/manager_details_sales_screen.dart';
 import '../../../features/manager/managersales/presentation/manager_sales_screen.dart';
+import '../../../features/manager/managershipment/presentation/job_review_screen.dart';
+import '../../../features/manager/managershipment/presentation/shipments_screen.dart';
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
@@ -169,6 +171,9 @@ static const activityLogScreen = '/activityLogScreen';
   static const managerCommissionDetailScreen = '/managerCommissionDetailScreen';
   static const commissionManagementScreen = '/commission-management';
   static const transactionDetailScreen = '/transaction-detail';
+
+  static const managerShipmentsScreen = '/managerShipmentsScreen';
+  static const jobReviewScreen = '/job-review';
 
 
   static final GoRouter goRouter = GoRouter(
@@ -565,6 +570,16 @@ static const activityLogScreen = '/activityLogScreen';
         path: transactionDetailScreen,
         name: transactionDetailScreen,
         builder: (context, state) => const TransactionDetailScreen(),
+      ),
+      GoRoute(
+        path: managerShipmentsScreen,
+        name: managerShipmentsScreen,
+        builder: (context, state) => const ManagerShipmentsScreen(),
+      ),
+      GoRoute(
+        path: jobReviewScreen,
+        name: jobReviewScreen,
+        builder: (context, state) => const JobReviewScreen(),
       ),
 
 
