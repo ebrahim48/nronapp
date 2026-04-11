@@ -69,6 +69,8 @@ import '../../../features/manager/managerinventory/presentation/manager_missing_
 import '../../../features/manager/managerinventory/presentation/manager_report_details_screen.dart';
 import '../../../features/manager/managerinventory/controller/manager_missing_report_controller.dart';
 import '../../../features/manager/managerinventory/presentation/manager_transfer_requests_screen.dart';
+import '../../../features/manager/managersales/presentation/manager_details_sales_screen.dart';
+import '../../../features/manager/managersales/presentation/manager_sales_screen.dart';
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
@@ -154,6 +156,8 @@ static const activityLogScreen = '/activityLogScreen';
   static const managerReportDetailsScreen = '/managerReportDetailsScreen';
   static const managerExpenseDetailScreen = '/managerExpenseDetailScreen';
   static const managerExpenseScreen = '/managerExpenseScreen';
+  static const managerSalesScreen = '/managerSalesScreen';
+  static const managerSaleDetailScreen = '/managerSaleDetailScreen';
 
 
   static final GoRouter goRouter = GoRouter(
@@ -515,6 +519,16 @@ static const activityLogScreen = '/activityLogScreen';
         path: managerExpenseScreen,
         name: managerExpenseScreen,
         builder: (context, state) => const ManagerExpenseScreen(),
+      ),
+      GoRoute(
+        path: managerSalesScreen,
+        name: managerSalesScreen,
+        builder: (context, state) => const ManagerSalesScreen(),
+      ),
+      GoRoute(
+        path: managerSaleDetailScreen,
+        name: managerSaleDetailScreen,
+        builder: (context, state) => const ManagerSaleDetailScreen(),
       ),
 
 
