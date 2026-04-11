@@ -39,7 +39,7 @@ class CommissionDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<CommissionController>();
+    final c = Get.put(CommissionController());
     final d = c.commissionDetail;
     final statusColor = _statusColor(d.status);
 

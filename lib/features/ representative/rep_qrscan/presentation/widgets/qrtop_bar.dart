@@ -7,11 +7,13 @@ import '../../../../../core/custom_widgets/custom_text.dart';
 import '../controller/rep_qr_scan_controller.dart';
 
 class QrTopBar extends StatelessWidget {
-  const QrTopBar({super.key});
+  final QrScanController controller;
+
+  const QrTopBar({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<QrScanController>();
+    final c = controller;
 
     return Positioned(
       top: 47.h,

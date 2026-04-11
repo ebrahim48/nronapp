@@ -108,7 +108,7 @@ class _QrScanScreenState extends State<QrScanScreen> {
               : const QrFrameCorners()),
 
           // Top bar: X + flash
-          const QrTopBar(),
+          QrTopBar(controller: _c),
 
           // Bottom actions — hidden after scan
           Obx(() => _c.hasScanned.value

@@ -57,6 +57,11 @@ import '../../../features/auth/presentation/screens/signin_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
 import '../../../features/auth/verify/verify_screen.dart';
+import '../../../features/manager/commission/commission_dashboard_screen.dart';
+import '../../../features/manager/commission/presentation/commission_details_screen.dart';
+import '../../../features/manager/commission/presentation/commission_list_screen.dart';
+import '../../../features/manager/commission/presentation/commission_management_screen.dart';
+import '../../../features/manager/commission/presentation/transaction_details_screen.dart';
 import '../../../features/manager/manager_bottomnavbar/presentation/manager_bottomnavbar_screen.dart';
 import '../../../features/manager/manager_home/presentation/manager_home_screen.dart';
 import '../../../features/manager/manager_home/presentation/manager_purchase_order_screen.dart';
@@ -158,6 +163,12 @@ static const activityLogScreen = '/activityLogScreen';
   static const managerExpenseScreen = '/managerExpenseScreen';
   static const managerSalesScreen = '/managerSalesScreen';
   static const managerSaleDetailScreen = '/managerSaleDetailScreen';
+
+  static const commissionDashboardScreen = '/commission-dashboard';
+  static const commissionListScreen = '/commission-list';
+  static const managerCommissionDetailScreen = '/managerCommissionDetailScreen';
+  static const commissionManagementScreen = '/commission-management';
+  static const transactionDetailScreen = '/transaction-detail';
 
 
   static final GoRouter goRouter = GoRouter(
@@ -530,6 +541,34 @@ static const activityLogScreen = '/activityLogScreen';
         name: managerSaleDetailScreen,
         builder: (context, state) => const ManagerSaleDetailScreen(),
       ),
+      GoRoute(
+        path: commissionDashboardScreen,
+        name: commissionDashboardScreen,
+        builder: (context, state) => const CommissionDashboardScreen(),
+      ),
+      GoRoute(
+        path: commissionListScreen,
+        name: commissionListScreen,
+        builder: (context, state) => const CommissionListScreen(),
+      ),
+      GoRoute(
+        path: managerCommissionDetailScreen,
+        name: managerCommissionDetailScreen,
+        builder: (context, state) => const ManagerCommissionDetailScreen(),
+      ),
+      GoRoute(
+        path: commissionManagementScreen,
+        name: commissionManagementScreen,
+        builder: (context, state) => const CommissionManagementScreen(),
+      ),
+      GoRoute(
+        path: transactionDetailScreen,
+        name: transactionDetailScreen,
+        builder: (context, state) => const TransactionDetailScreen(),
+      ),
+
+
+
 
 
 

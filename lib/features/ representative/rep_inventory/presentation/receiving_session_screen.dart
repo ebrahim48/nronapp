@@ -36,7 +36,7 @@ class _ReceivingSessionScreenState extends State<ReceivingSessionScreen> {
         elevation: 0,
         toolbarHeight: 52.h,
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
+          onTap: () => context.pop(),
           child: Icon(Icons.arrow_back_ios_new,
               color: AppColors.primaryTextColor, size: 18.r),
         ),
@@ -190,7 +190,7 @@ class _ReceivingSessionScreenState extends State<ReceivingSessionScreen> {
               SizedBox(height: 16.h),
 
               // Scan Item button
-              ScanItemButton(onTap: _ctrl.scanItem),
+              ScanItemButton(onTap: () => context.push(AppRoutes.qrScanScreen)),
               SizedBox(height: 20.h),
 
               // Recent Scans header
@@ -230,7 +230,9 @@ class _ReceivingSessionScreenState extends State<ReceivingSessionScreen> {
 
               SizedBox(height: 10.h),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+
+                },
                 child: Center(
                   child: CustomText(
                     text: 'View All Receive Items',
@@ -321,7 +323,7 @@ class _ReceivingSessionScreenState extends State<ReceivingSessionScreen> {
           SizedBox(height: 16.h),
 
           // Scan Item button
-          ScanItemButton(onTap: _ctrl.scanItem),
+          ScanItemButton(onTap: () => context.push(AppRoutes.qrScanScreen)),
           SizedBox(height: 20.h),
 
           // Received Groups / Last group header

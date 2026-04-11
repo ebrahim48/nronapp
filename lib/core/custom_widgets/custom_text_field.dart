@@ -91,7 +91,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               color: AppColors.primaryTextColor,
             ),
           Container(
-            width: 345.w,
+            width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(widget.borderRadio?.r ?? 8.r),
             ),
