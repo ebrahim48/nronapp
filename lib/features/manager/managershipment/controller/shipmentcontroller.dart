@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 
-import '../../../ representative/shipment/model/shipment_model.dart';
-import '../model/shipment_model.dart' hide ShipmentModel;
+import '../model/shipment_model.dart';
 
 
 class ShipmentController extends GetxController {
@@ -10,28 +9,28 @@ class ShipmentController extends GetxController {
   final inTransit = 2.obs;
   final delivered = 12.obs;
 
-  // final activeShipments = <ShipmentModel>[
-  //   ShipmentModel(
-  //     id: '1',
-  //     title: 'Spinal Kit - Dr. Aris',
-  //     refNumber: 'Ref: #JOB-88224',
-  //     driver: 'Unassigned',
-  //     pickupDate: 'Oct 25, 09:00 AM',
-  //     pickup: 'North Sterilization Center',
-  //     dropAddress: 'General Health Clinic, Surgical Wing',
-  //     status: ShipmentStatus.pending,
-  //   ),
-  //   ShipmentModel(
-  //     id: '2',
-  //     title: 'Spinal Kit - Dr. Aris',
-  //     refNumber: 'Ref: #JOB-88224',
-  //     driver: 'Unassigned',
-  //     pickupDate: 'Oct 25, 09:00 AM',
-  //     pickup: 'North Sterilization Center',
-  //     dropAddress: 'General Health Clinic, Surgical Wing',
-  //     status: ShipmentStatus.inTransit,
-  //   ),
-  // ].obs;
+  final activeShipments = <ShipmentModel>[
+    ShipmentModel(
+      id: '1',
+      title: 'Spinal Kit - Dr. Aris',
+      refNumber: 'Ref: #JOB-88224',
+      driver: 'Unassigned',
+      pickupDate: 'Oct 25, 09:00 AM',
+      pickup: 'North Sterilization Center',
+      dropAddress: 'General Health Clinic, Surgical Wing',
+      status: ShipmentStatus.pending,
+    ),
+    ShipmentModel(
+      id: '2',
+      title: 'Spinal Kit - Dr. Aris',
+      refNumber: 'Ref: #JOB-88224',
+      driver: 'Unassigned',
+      pickupDate: 'Oct 25, 09:00 AM',
+      pickup: 'North Sterilization Center',
+      dropAddress: 'General Health Clinic, Surgical Wing',
+      status: ShipmentStatus.inTransit,
+    ),
+  ].obs;
 
   final jobReview = const JobReviewModel(
     status: 'In Transit',

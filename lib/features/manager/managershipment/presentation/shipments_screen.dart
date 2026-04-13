@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nron_app/features/manager/managershipment/presentation/widgets/shipment_card.dart';
 import 'package:nron_app/features/manager/managershipment/presentation/widgets/state_card.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
@@ -26,12 +27,16 @@ class ManagerShipmentsScreen extends StatelessWidget {
         elevation: 0,
         toolbarHeight: 52.h,
         automaticallyImplyLeading: false,
-        title: CustomText(
-          text: 'Shipments',
-          fontsize: 18.sp,
-          fontWeight: FontWeight.w700,
-          color: AppColors.primaryTextColor,
-          textAlign: TextAlign.start,
+        centerTitle: false,
+        title: Padding(
+          padding: EdgeInsets.only(left: 16.w),
+          child: CustomText(
+            text: 'Shipments',
+            fontsize: 18.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.start,
+          ),
         ),
         actions: [
           Builder(
@@ -90,8 +95,6 @@ class ManagerShipmentsScreen extends StatelessWidget {
             )),
 
             SizedBox(height: 20.h),
-
-            // Active Shipments header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -116,18 +119,16 @@ class ManagerShipmentsScreen extends StatelessWidget {
 
             SizedBox(height: 12.h),
 
-            // List
-            // Obx(() => Column(
-            //   children: c.activeShipments
-            //       .map(
-            //         (s) => ActiveShipmentCard(
-            //       shipment: s,
-            //       onTap: () => Navigator.pushNamed(
-            //           context, AppRoutes.jobReviewScreen),
-            //     ),
-            //   )
-            //       .toList(),
-            // )),
+            Obx(() => Column(
+              children: c.activeShipments
+                  .map(
+                    (s) => ActiveShipmentCard(
+                  shipment: s,
+                  onTap: () => context.push(AppRoutes.jobReviewScreen),
+                ),
+              )
+                  .toList(),
+            )),
 
             SizedBox(height: 24.h),
           ],
