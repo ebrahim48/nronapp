@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
@@ -17,7 +19,7 @@ class ReceivingSessionCompleteScreen extends StatelessWidget {
         elevation: 0,
         toolbarHeight: 52.h,
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
+          onTap: () => context.go(AppRoutes.receivingSessionScreen),
           child: Icon(Icons.arrow_back_ios_new,
               color: AppColors.primaryTextColor, size: 18.r),
         ),
@@ -140,7 +142,7 @@ class ReceivingSessionCompleteScreen extends StatelessWidget {
               title: 'Add to Inventory',
               suffixIcon: Icon(Icons.save_outlined,
                   color: AppColors.primaryTextColor, size: 18.r),
-              onpress: () => Navigator.pop(context),
+              onpress: () => context.go(AppRoutes.inventoryScreen),
             ),
             SizedBox(height: 10.h),
             CustomButton(
@@ -149,7 +151,7 @@ class ReceivingSessionCompleteScreen extends StatelessWidget {
               borderColor: AppColors.primaryColor,
               prefixIcon: Icon(Icons.arrow_back,
                   color: AppColors.primaryTextColor, size: 18.r),
-              onpress: () => Navigator.pop(context),
+              onpress: () => context.go(AppRoutes.inventoryScreen),
             ),
           ],
         ),
