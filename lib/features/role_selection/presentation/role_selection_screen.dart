@@ -100,6 +100,19 @@ class RoleSelectionScreen extends StatelessWidget {
 
               SizedBox(height: 16.h),
 
+              RoleCard(
+                iconPath: 'assets/icons/reprentative.svg',
+                label: 'Driver',
+                subtitle:
+                'Driver Map',
+                style: RoleCardStyle.representative,
+                onTap: () => context.go(AppRoutes.driverBottomNavBar),
+              ),
+
+
+
+              SizedBox(height: 16.h),
+
               // ── Privacy First Card ────────────────────────────────────────
               _PrivacyCard(),
 
