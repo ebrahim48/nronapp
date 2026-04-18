@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nron_app/features/%20representative/shipment/presentation/widgets/section_card.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
@@ -39,7 +38,6 @@ class JobDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Status + Job ID header ─────────────────────────────────────
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -79,7 +77,7 @@ class JobDetailsScreen extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
 
-            // ── Job Info ───────────────────────────────────────────────────
+
             SectionCard(
               title: 'Job Info',
               children: [
@@ -172,7 +170,7 @@ class JobDetailsScreen extends StatelessWidget {
               ],
             ),
 
-            // ── Active Shipments (Map) ──────────────────────────────────────
+
             CustomText(
               text: 'Active Shipments',
               fontsize: 15.sp,
@@ -215,7 +213,6 @@ class JobDetailsScreen extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
 
-            // ── Pickup Details ─────────────────────────────────────────────
             _LocationCard(
               type: 'pickup',
               title: 'Pickup Details',
@@ -226,7 +223,6 @@ class JobDetailsScreen extends StatelessWidget {
               warningIcon: Icons.info_outline,
             ),
 
-            // ── Dropoff Details ────────────────────────────────────────────
             _LocationCard(
               type: 'dropoff',
               title: 'Dropoff Details',
@@ -245,7 +241,6 @@ class JobDetailsScreen extends StatelessWidget {
   }
 }
 
-// ── Status Chip ───────────────────────────────────────────────────────────────
 
 class _StatusChip extends StatelessWidget {
   final String status;
@@ -289,7 +284,6 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-// ── Location Card ─────────────────────────────────────────────────────────────
 
 class _LocationCard extends StatelessWidget {
   final String type; // 'pickup' | 'dropoff'

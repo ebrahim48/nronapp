@@ -51,12 +51,19 @@ import '../../../features/ representative/settingsprofile/presentation/others_sc
 import '../../../features/ representative/settingsprofile/presentation/privacy_policy_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/profile_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/settings_profile_screen.dart';
+import '../../../features/ representative/shipment/presentation/job_details_screen.dart' as rep_job_details;
+import '../../../features/driver/driver_home/presentation/job_details_screen.dart';
 import '../../../features/ representative/shipment/presentation/shipment_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
 import '../../../features/auth/presentation/screens/signin_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
 import '../../../features/auth/verify/verify_screen.dart';
+import '../../../features/driver/driver_bottomnavbar/presentation/driver_bottomnavbar_screen.dart';
+import '../../../features/driver/driver_home/presentation/driver_home_screen.dart';
+import '../../../features/driver/driverjob/presentation/driver_job_details_screen.dart';
+import '../../../features/driver/driverjob/presentation/driver_job_screen.dart';
+import '../../../features/driver/driverjob/presentation/new_delivery_details_screen.dart';
 import '../../../features/manager/commission/commission_dashboard_screen.dart';
 import '../../../features/manager/commission/presentation/commission_details_screen.dart';
 import '../../../features/manager/commission/presentation/commission_list_screen.dart';
@@ -174,6 +181,15 @@ static const activityLogScreen = '/activityLogScreen';
 
   static const managerShipmentsScreen = '/managerShipmentsScreen';
   static const jobReviewScreen = '/job-review';
+
+  /// -------------------------------------------------- Driver -----------------------------------------------------------------
+  static const String driverBottomNavBar = "/driverBottomNavBar";
+  static const driverHomeScreen = '/driver-home';
+  static const jobDetailsScreen = '/job-details';
+  static const driverJobsScreen = '/driver-jobs';
+  static const driverJobDetailsScreen = '/driver-job-details';
+  static const newDeliveryDetailsScreen = '/newDeliveryDetailsScreen';
+
 
 
   static final GoRouter goRouter = GoRouter(
@@ -580,6 +596,36 @@ static const activityLogScreen = '/activityLogScreen';
         path: jobReviewScreen,
         name: jobReviewScreen,
         builder: (context, state) => const JobReviewScreen(),
+      ),
+      GoRoute(
+        path: driverBottomNavBar,
+        name: driverBottomNavBar,
+        builder: (context, state) => const DriverBottomNavBar(),
+      ),
+      GoRoute(
+        path: driverHomeScreen,
+        name: driverHomeScreen,
+        builder: (context, state) => const DriverHomeScreen(),
+      ),
+      GoRoute(
+        path: jobDetailsScreen,
+        name: jobDetailsScreen,
+        builder: (context, state) => const JobDetailsScreen(),
+      ),
+      GoRoute(
+        path: driverJobsScreen,
+        name: driverJobsScreen,
+        builder: (context, state) => const DriverJobsScreen(),
+      ),
+      GoRoute(
+        path: driverJobDetailsScreen,
+        name: driverJobDetailsScreen,
+        builder: (context, state) => const DriverJobDetailsScreen(),
+      ),
+      GoRoute(
+        path: newDeliveryDetailsScreen,
+        name: newDeliveryDetailsScreen,
+        builder: (context, state) => const NewDeliveryDetailsScreen(),
       ),
 
 
