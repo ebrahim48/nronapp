@@ -21,6 +21,13 @@ class DriverHomeScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.pushNamed(AppRoutes.chatbotScreen),
+        backgroundColor: AppColors.primaryColor,
+        shape: const CircleBorder(),
+        child: Icon(Icons.smart_toy_outlined,
+            color: AppColors.blackColor, size: 24.r),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16.w),

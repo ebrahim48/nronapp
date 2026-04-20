@@ -61,6 +61,7 @@ import '../../../features/auth/reset/reset_password_screen.dart';
 import '../../../features/auth/verify/verify_screen.dart';
 import '../../../features/driver/driver_bottomnavbar/presentation/driver_bottomnavbar_screen.dart';
 import '../../../features/driver/driver_home/presentation/driver_home_screen.dart';
+import '../../../features/driver/chatbot/presentation/chatbot_screen.dart';
 import '../../../features/driver/driver_map/presentation/complete_delivery_screen.dart';
 import '../../../features/driver/driver_map/presentation/delivery_completed_screen.dart';
 import '../../../features/driver/driver_map/presentation/driver_map_screen.dart';
@@ -199,6 +200,7 @@ static const activityLogScreen = '/activityLogScreen';
   static const deliveryCompletedScreen = '/deliveryCompletedScreen';
   static const earningsScreen = '/earningsScreen';
   static const allEarningScreen = '/allEarningScreen';
+  static const chatbotScreen = '/chatbotScreen';
 
 
 
@@ -661,6 +663,11 @@ static const activityLogScreen = '/activityLogScreen';
         path: allEarningScreen,
         name: allEarningScreen,
         builder: (context, state) => const AllEarningScreen(),
+      ),
+      GoRoute(
+        path: chatbotScreen,
+        name: chatbotScreen,
+        builder: (context, state) => const ChatbotScreen(),
       ),
 
 
