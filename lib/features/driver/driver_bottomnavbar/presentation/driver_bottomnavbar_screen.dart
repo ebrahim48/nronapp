@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:nron_app/features/driver/driver_map/presentation/driver_map_screen.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/driver_job_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../driver_home/presentation/driver_home_screen.dart';
+import '../../earning/presentation/earning_screen.dart';
 import '../controller/driver_man-nav_controller.dart';
 
 
@@ -20,6 +22,8 @@ class DriverBottomNavBar extends StatelessWidget {
     final pages = [
       const DriverHomeScreen(),
       const DriverJobsScreen(),
+      const DriverMapScreen(),
+      const EarningsScreen(),
 
     ];
 
@@ -80,8 +84,8 @@ class _AppBottomNavBar extends StatelessWidget {
             onTap: () => onTap(2),
           ),
           _NavItem(
-            iconPath: 'assets/icons/history.svg',
-            label: 'History',
+            iconPath: 'assets/icons/earning.svg',
+            label: 'Earnings',
             isActive: currentIndex == 3,
             onTap: () => onTap(3),
           ),

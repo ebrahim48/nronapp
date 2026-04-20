@@ -61,9 +61,14 @@ import '../../../features/auth/reset/reset_password_screen.dart';
 import '../../../features/auth/verify/verify_screen.dart';
 import '../../../features/driver/driver_bottomnavbar/presentation/driver_bottomnavbar_screen.dart';
 import '../../../features/driver/driver_home/presentation/driver_home_screen.dart';
+import '../../../features/driver/driver_map/presentation/complete_delivery_screen.dart';
+import '../../../features/driver/driver_map/presentation/delivery_completed_screen.dart';
+import '../../../features/driver/driver_map/presentation/driver_map_screen.dart';
 import '../../../features/driver/driverjob/presentation/driver_job_details_screen.dart';
 import '../../../features/driver/driverjob/presentation/driver_job_screen.dart';
 import '../../../features/driver/driverjob/presentation/new_delivery_details_screen.dart';
+import '../../../features/driver/earning/presentation/all_earning_screen.dart';
+import '../../../features/driver/earning/presentation/earning_screen.dart';
 import '../../../features/manager/commission/commission_dashboard_screen.dart';
 import '../../../features/manager/commission/presentation/commission_details_screen.dart';
 import '../../../features/manager/commission/presentation/commission_list_screen.dart';
@@ -189,6 +194,11 @@ static const activityLogScreen = '/activityLogScreen';
   static const driverJobsScreen = '/driver-jobs';
   static const driverJobDetailsScreen = '/driver-job-details';
   static const newDeliveryDetailsScreen = '/newDeliveryDetailsScreen';
+  static const driverMapScreen = '/driverMapScreen';
+  static const completeDeliveryScreen = '/completeDeliveryScreen';
+  static const deliveryCompletedScreen = '/deliveryCompletedScreen';
+  static const earningsScreen = '/earningsScreen';
+  static const allEarningScreen = '/allEarningScreen';
 
 
 
@@ -626,6 +636,31 @@ static const activityLogScreen = '/activityLogScreen';
         path: newDeliveryDetailsScreen,
         name: newDeliveryDetailsScreen,
         builder: (context, state) => const NewDeliveryDetailsScreen(),
+      ),
+      GoRoute(
+        path: driverMapScreen,
+        name: driverMapScreen,
+        builder: (context, state) => const DriverMapScreen(),
+      ),
+      GoRoute(
+        path: completeDeliveryScreen,
+        name: completeDeliveryScreen,
+        builder: (context, state) => const CompleteDeliveryScreen(),
+      ),
+      GoRoute(
+        path: deliveryCompletedScreen,
+        name: deliveryCompletedScreen,
+        builder: (context, state) => const DeliveryCompletedScreen(),
+      ),
+      GoRoute(
+        path: earningsScreen,
+        name: earningsScreen,
+        builder: (context, state) => const EarningsScreen(),
+      ),
+      GoRoute(
+        path: allEarningScreen,
+        name: allEarningScreen,
+        builder: (context, state) => const AllEarningScreen(),
       ),
 
 
