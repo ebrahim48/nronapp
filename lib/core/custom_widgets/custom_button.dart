@@ -75,7 +75,7 @@ class CustomButton extends StatelessWidget {
                     child: CustomText(
                       text: title,
                       fontsize: fontSize ?? 14.sp,
-                      color: titlecolor ?? AppColors.primaryTextColor,
+                      color: titlecolor ?? const Color(0xFF1E2121),
                       fontWeight: fontWeight ?? FontWeight.w400,
                       textAlign: TextAlign.center,
                       textOverflow: TextOverflow.ellipsis,

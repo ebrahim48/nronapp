@@ -1,9 +1,9 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:nron_app/core/config/app-routes/app_routes.dart';
 
 class BulkProductItem {
@@ -57,11 +57,9 @@ class BulkPurchaseController extends GetxController {
   ].obs;
 
   // Attached documents
-  final attachedDocs = <Map<String, String>>[
-    {'name': 'rep_sheet_INV43.pdf', 'time': 'Uploaded 2m ago'},
-  ].obs;
+  final attachedDocs = <File>[].obs;
 
-  final statusOptions = ['Complete', 'Pending', 'In Progress', 'Cancelled'];
+  final statusOptions = ['Op', 'Lost', 'Complete'];
 
   void toggleVendorEmail(bool val) => sendVendorEmail.value = val;
 
@@ -76,23 +74,17 @@ class BulkPurchaseController extends GetxController {
   final _picker = ImagePicker();
   final isUploading = false.obs;
 
-  String _uploadedAt() {
-    final now = DateTime.now();
-    return 'Uploaded at ${DateFormat('hh:mm a').format(now)}';
-  }
-
   Future<void> uploadPDF() async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf'],
+        allowedExtensions: ['pdf', 'doc', 'docx'],
+        allowMultiple: true,
       );
       if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        attachedDocs.add({
-          'name': file.name,
-          'time': _uploadedAt(),
-        });
+        for (final f in result.files) {
+          if (f.path != null) attachedDocs.add(File(f.path!));
+        }
       }
     } catch (e) {
       Get.snackbar(
@@ -111,15 +103,7 @@ class BulkPurchaseController extends GetxController {
         source: ImageSource.camera,
         imageQuality: 85,
       );
-      if (photo != null) {
-        final name = photo.name.isNotEmpty
-            ? photo.name
-            : 'photo_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        attachedDocs.add({
-          'name': name,
-          'time': _uploadedAt(),
-        });
-      }
+      if (photo != null) attachedDocs.add(File(photo.path));
     } catch (e) {
       Get.snackbar(
         'Error',

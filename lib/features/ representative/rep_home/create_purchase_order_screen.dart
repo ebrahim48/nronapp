@@ -197,10 +197,9 @@ class CreatePurchaseScreen extends StatelessWidget {
                         .asMap()
                         .entries
                         .map((e) => PoDocumentItem(
-                      fileName: e.value['name']!,
-                      uploadTime: e.value['time']!,
-                      onDelete: () => c.deleteDoc(e.key),
-                    ))
+                          file: e.value,
+                          onDelete: () => c.deleteDoc(e.key),
+                        ))
                         .toList(),
                   )),
 

@@ -24,15 +24,8 @@ class RepQuickActions extends StatelessWidget {
         ),
         SizedBox(height: 13.h),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            _ActionCard(
-              iconPath: 'assets/icons/scanitem.svg',
-              label: 'Scan Item',
-              onTap: () {
-                context.pushNamed(AppRoutes.qrScanScreen);
-              },
-            ),
             _ActionCard(
               iconPath: 'assets/icons/createpo.svg',
               label: 'Create PO',
@@ -40,10 +33,13 @@ class RepQuickActions extends StatelessWidget {
                 context.pushNamed(AppRoutes.newPoScreen);
               },
             ),
+            SizedBox(width: 12.h,),
             _ActionCard(
               iconPath: 'assets/icons/expense.svg',
               label: 'Expenses',
-              onTap: () {},
+              onTap: () {
+                context.pushNamed(AppRoutes.newPoScreen);
+              },
             ),
           ],
         ),

@@ -247,7 +247,7 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
                   SizedBox(height: 14.h),
 
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () => context.goNamed(AppRoutes.signInScreen),
                     child: Container(
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(vertical: 14.h),
