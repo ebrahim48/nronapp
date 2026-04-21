@@ -51,12 +51,12 @@ class SettingsController extends GetxController {
     OthersTileModel(
       iconPath: 'assets/icons/terms.svg',
       title: 'Term & Condition',
-      route: AppRoutes.privacyPolicyScreen,
+      route: AppRoutes.termsConditionsScreen,
     ),
     OthersTileModel(
       iconPath: 'assets/icons/about.svg',
       title: 'About H.O.L.E',
-      route: AppRoutes.privacyPolicyScreen,
+      route: AppRoutes.aboutHoleScreen,
     ),
     OthersTileModel(
       iconPath: 'assets/icons/logout.svg',

@@ -31,6 +31,24 @@ class _DrivingLicenseScreenState extends State<DrivingLicenseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1E2427),
+        elevation: 0,
+        toolbarHeight: 52.h,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Icon(Icons.arrow_back_ios,
+              color: AppColors.primaryTextColor, size: 18.r),
+        ),
+        title: CustomText(
+          text: 'Driving License',
+          fontsize: 18.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primaryTextColor,
+          textAlign: TextAlign.start,
+        ),
+        centerTitle: false,
+      ),
       body: ListenableBuilder(
         listenable: _ctrl,
         builder: (context, _) {
@@ -75,8 +93,7 @@ class _DrivingLicenseScreenState extends State<DrivingLicenseScreen> {
                         ),
                         DocUploadBox(
                           imagePath: _ctrl.frontImagePath,
-                          onTap: () =>
-                              _ctrl.setFrontImage('front_placeholder'),
+                          onTap: _ctrl.setFrontImage,
                         ),
                         SizedBox(height: 20.h),
 
@@ -93,8 +110,7 @@ class _DrivingLicenseScreenState extends State<DrivingLicenseScreen> {
                         ),
                         DocUploadBox(
                           imagePath: _ctrl.backImagePath,
-                          onTap: () =>
-                              _ctrl.setBackImage('back_placeholder'),
+                          onTap: _ctrl.setBackImage,
                         ),
                       ],
                     ),

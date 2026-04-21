@@ -14,7 +14,7 @@ class ContactSupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<SettingsController>();
+    final c = Get.put(SettingsController());
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -93,15 +93,37 @@ class ContactSupportScreen extends StatelessWidget {
             ),
 
             // Message field
-            CustomTextField(
-              controller: c.messageController,
-              labelText: 'Your Message',
-              hintText: 'How can we help you?',
-              maxLine: 4,
-              prefixIcon: Icon(
-                Icons.chat_bubble_outline,
-                color: AppColors.secondaryTextColor,
-                size: 18.r,
+            Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: 'Your Message',
+                    bottom: 6.h,
+                    left: 2.w,
+                    color: AppColors.primaryTextColor,
+                  ),
+                  Stack(
+                    children: [
+                      CustomTextField(
+                        controller: c.messageController,
+                        hintText: 'How can we help you?',
+                        maxLine: 4,
+                        contentPaddingHorizontal: 44.w,
+                      ),
+                      Positioned(
+                        left: 12.w,
+                        top: 14.h,
+                        child: Icon(
+                          Icons.chat_bubble_outline,
+                          color: AppColors.secondaryTextColor,
+                          size: 18.r,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
 

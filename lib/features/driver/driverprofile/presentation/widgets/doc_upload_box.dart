@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -32,29 +33,29 @@ class DocUploadBox extends StatelessWidget {
           ),
           child: imagePath != null
               ? ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: Image.asset(
-              imagePath!,
-              fit: BoxFit.cover,
-            ),
-          )
+                  borderRadius: BorderRadius.circular(10.r),
+                  child: Image.file(
+                    File(imagePath!),
+                    fit: BoxFit.cover,
+                  ),
+                )
               : Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.camera_alt_outlined,
-                color: AppColors.primaryTextColor,
-                size: 30.r,
-              ),
-              SizedBox(height: 10.h),
-              CustomText(
-                text: 'Upload',
-                fontsize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.primaryTextColor,
-              ),
-            ],
-          ),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      color: AppColors.primaryTextColor,
+                      size: 30.r,
+                    ),
+                    SizedBox(height: 10.h),
+                    CustomText(
+                      text: 'Upload',
+                      fontsize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryTextColor,
+                    ),
+                  ],
+                ),
         ),
       ),
     );
