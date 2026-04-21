@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class DrivingLicenseController extends ChangeNotifier {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -9,14 +10,22 @@ class DrivingLicenseController extends ChangeNotifier {
   String? backImagePath;
   bool isLoading = false;
 
-  void setFrontImage(String path) {
-    frontImagePath = path;
-    notifyListeners();
+  final _picker = ImagePicker();
+
+  Future<void> setFrontImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    if (picked != null) {
+      frontImagePath = picked.path;
+      notifyListeners();
+    }
   }
 
-  void setBackImage(String path) {
-    backImagePath = path;
-    notifyListeners();
+  Future<void> setBackImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    if (picked != null) {
+      backImagePath = picked.path;
+      notifyListeners();
+    }
   }
 
   Future<bool> submit() async {

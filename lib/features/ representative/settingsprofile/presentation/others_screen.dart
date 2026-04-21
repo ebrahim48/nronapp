@@ -8,12 +8,67 @@ import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/setting_controller.dart';
 
 
+void _showDeleteDialog(BuildContext context, SettingsController c) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      backgroundColor: const Color(0xFF242424),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      title: Text(
+        'Delete Account',
+        style: TextStyle(
+          color: AppColors.primaryTextColor,
+          fontSize: 16.sp,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      content: Text(
+        'Are you sure you want to delete your account? This action cannot be undone.',
+        style: TextStyle(
+          color: AppColors.secondaryTextColor,
+          fontSize: 13.sp,
+          fontFamily: 'Poppins',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            'Cancel',
+            style: TextStyle(
+              color: AppColors.secondaryTextColor,
+              fontFamily: 'Poppins',
+              fontSize: 13.sp,
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            c.deleteAccount();
+          },
+          child: Text(
+            'Delete',
+            style: TextStyle(
+              color: AppColors.redColorFF1D1D,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600,
+              fontSize: 13.sp,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class OthersScreen extends StatelessWidget {
   const OthersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<SettingsController>();
+    final c = Get.put(SettingsController());
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -55,7 +110,7 @@ class OthersScreen extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       if (isDelete) {
-                        c.deleteAccount();
+                        _showDeleteDialog(context, c);
                       } else if (tile.route.isNotEmpty) {
                         context.push(tile.route);
                       }

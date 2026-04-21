@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class PersonalInfoController extends ChangeNotifier {
+  String? profileImagePath;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   final TextEditingController fullNameController =
@@ -19,6 +22,17 @@ class PersonalInfoController extends ChangeNotifier {
   bool isLoading = false;
 
   int get bioCharCount => bioController.text.length;
+
+  Future<void> pickProfileImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (picked != null) {
+      profileImagePath = picked.path;
+      notifyListeners();
+    }
+  }
 
   void setGender(String value) {
     selectedGender = value;

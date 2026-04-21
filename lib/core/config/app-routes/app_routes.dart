@@ -46,7 +46,9 @@ import '../../../features/ representative/sales/packing_slip_screen.dart';
 import '../../../features/ representative/sales/sales_details_screen.dart';
 import '../../../features/ representative/sales/sales_screen.dart';
 import '../../../features/ representative/sales/select_implants_screen.dart';
+import '../../../features/ representative/settingsprofile/presentation/about_hole_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/contact_support_screen.dart';
+import '../../../features/ representative/settingsprofile/presentation/terms_conditions_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/others_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/privacy_policy_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/profile_screen.dart';
@@ -65,6 +67,8 @@ import '../../../features/driver/chatbot/presentation/chatbot_screen.dart';
 import '../../../features/driver/driver_map/presentation/complete_delivery_screen.dart';
 import '../../../features/driver/driver_map/presentation/delivery_completed_screen.dart';
 import '../../../features/driver/driver_map/presentation/driver_map_screen.dart';
+import '../../../features/driver/driver_payment/presentation/add_card_screen.dart';
+import '../../../features/driver/driver_payment/presentation/payments_methods_screen.dart';
 import '../../../features/driver/driverjob/presentation/driver_job_details_screen.dart';
 import '../../../features/driver/driverjob/presentation/driver_job_screen.dart';
 import '../../../features/driver/driverjob/presentation/new_delivery_details_screen.dart';
@@ -156,6 +160,8 @@ static const activityLogScreen = '/activityLogScreen';
   static const contactSupportScreen = '/contact-support';
   static const othersScreen = '/others';
   static const privacyPolicyScreen = '/privacy-policy';
+  static const aboutHoleScreen = '/about-hole';
+  static const termsConditionsScreen = '/terms-conditions';
 
   static const String serializedImplantsScreen = '/serialized-implants';
   static const String implantDetailsScreen = '/implant-details';
@@ -215,6 +221,8 @@ static const activityLogScreen = '/activityLogScreen';
   static const drivingLicenseScreen = '/drivingLicenseScreen';
   static const documentsScreen = '/documentsScreen';
   static const carPicturesScreen = '/carPicturesScreen';
+  static const addCardScreen = '/addCardScreen';
+  static const paymentMethodsScreen = '/paymentMethodsScreen';
 
 
 
@@ -463,6 +471,16 @@ static const activityLogScreen = '/activityLogScreen';
         path: privacyPolicyScreen    ,
         name: privacyPolicyScreen  ,
         builder: (context, state) => const PrivacyPolicyScreen    (),
+      ),
+      GoRoute(
+        path: aboutHoleScreen,
+        name: aboutHoleScreen,
+        builder: (context, state) => const AboutHoleScreen(),
+      ),
+      GoRoute(
+        path: termsConditionsScreen,
+        name: termsConditionsScreen,
+        builder: (context, state) => const TermsConditionsScreen(),
       ),
       GoRoute(
         path: serializedImplantsScreen,
@@ -717,6 +735,16 @@ static const activityLogScreen = '/activityLogScreen';
         path: carPicturesScreen,
         name: carPicturesScreen,
         builder: (context, state) => const CarPicturesScreen(),
+      ),
+      GoRoute(
+        path: addCardScreen,
+        name: addCardScreen,
+        builder: (context, state) => const AddCardScreen(),
+      ),
+      GoRoute(
+        path: paymentMethodsScreen,
+        name: paymentMethodsScreen,
+        builder: (context, state) => const PaymentMethodsScreen(),
       ),
 
 

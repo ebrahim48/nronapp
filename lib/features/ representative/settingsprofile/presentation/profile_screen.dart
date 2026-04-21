@@ -15,7 +15,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<SettingsController>();
+    final c = Get.put(SettingsController());
     final profile = c.userProfile;
 
     return Scaffold(

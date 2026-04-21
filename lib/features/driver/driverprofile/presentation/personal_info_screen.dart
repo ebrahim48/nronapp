@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -109,41 +110,51 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     children: [
                       // ── Avatar ──────────────────────────────────────
                       Center(
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Container(
-                              width: 80.r,
-                              height: 80.r,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppColors.primaryColor,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.person_outline,
-                                color: AppColors.primaryColor,
-                                size: 40.r,
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                width: 24.r,
-                                height: 24.r,
+                        child: GestureDetector(
+                          onTap: _ctrl.pickProfileImage,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: 80.r,
+                                height: 80.r,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryTextColor,
                                   shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: AppColors.primaryColor,
+                                    width: 2,
+                                  ),
                                 ),
-                                child: Icon(Icons.edit,
-                                    size: 13.r,
-                                    color: AppColors.backgroundColor),
+                                child: ClipOval(
+                                  child: _ctrl.profileImagePath != null
+                                      ? Image.file(
+                                          File(_ctrl.profileImagePath!),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Icon(
+                                          Icons.person_outline,
+                                          color: AppColors.primaryColor,
+                                          size: 40.r,
+                                        ),
+                                ),
                               ),
-                            ),
-                          ],
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 24.r,
+                                  height: 24.r,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryTextColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.edit,
+                                      size: 13.r,
+                                      color: AppColors.backgroundColor),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 28.h),
@@ -169,7 +180,30 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         controller: _ctrl.dobController,
                         labelText: 'Date of birth*',
                         hintText: 'dd/mm/yyyy',
-                        keyboardType: TextInputType.datetime,
+                        readOnly: true,
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime(2000),
+                            firstDate: DateTime(1950),
+                            lastDate: DateTime.now(),
+                            builder: (context, child) => Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: ColorScheme.dark(
+                                  primary: AppColors.primaryColor,
+                                  surface: const Color(0xFF242424),
+                                  onSurface: AppColors.primaryTextColor,
+                                ),
+                                dialogBackgroundColor: const Color(0xFF1E2427),
+                              ),
+                              child: child!,
+                            ),
+                          );
+                          if (picked != null) {
+                            _ctrl.dobController.text =
+                                '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+                          }
+                        },
                         suffixIcon: Icon(Icons.calendar_today,
                             size: 16.r,
                             color: AppColors.secondaryTextColor),
