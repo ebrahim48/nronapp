@@ -7,6 +7,7 @@ import 'package:nron_app/features/driver/driverjob/presentation/driver_job_scree
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../driver_home/presentation/driver_home_screen.dart';
+import '../../driverprofile/presentation/driver_profile_screen.dart';
 import '../../earning/presentation/earning_screen.dart';
 import '../controller/driver_man-nav_controller.dart';
 
@@ -24,6 +25,7 @@ class DriverBottomNavBar extends StatelessWidget {
       const DriverJobsScreen(),
       const DriverMapScreen(),
       const EarningsScreen(),
+      const DriverProfileScreen(),
 
     ];
 
