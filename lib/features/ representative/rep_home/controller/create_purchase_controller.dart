@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,7 +15,7 @@ class CreatePurchaseController extends GetxController {
   final itemPrice = '\$4,200'.obs;
 
   // Form fields
-  final selectedStatus = 'Complete'.obs;
+  final selectedStatus = 'Op'.obs;
   final patientIdController = TextEditingController();
   final surgeonNameController = TextEditingController();
   final facilityController = TextEditingController();
@@ -29,13 +30,11 @@ class CreatePurchaseController extends GetxController {
   final sendVendorEmail = true.obs;
 
   // Attached documents
-  final attachedDocs = <Map<String, String>>[
-    {'name': 'rep_sheet_INV43.pdf', 'time': 'Uploaded 2m ago'},
-  ].obs;
+  final attachedDocs = <File>[].obs;
 
   final isPickingFile = false.obs;
 
-  final statusOptions = ['Complete', 'Pending', 'In Progress', 'Cancelled'];
+  final statusOptions = ['Op', 'Lost', 'Complete'];
 
   void toggleVendorEmail(bool val) => sendVendorEmail.value = val;
 
@@ -66,11 +65,8 @@ class CreatePurchaseController extends GetxController {
         allowMultiple: true,
       );
       if (result != null && result.files.isNotEmpty) {
-        for (final file in result.files) {
-          attachedDocs.add({
-            'name': file.name,
-            'time': 'Uploaded just now',
-          });
+        for (final f in result.files) {
+          if (f.path != null) attachedDocs.add(File(f.path!));
         }
       }
     } finally {
@@ -81,18 +77,11 @@ class CreatePurchaseController extends GetxController {
   Future<void> _pickFromCamera() async {
     isPickingFile.value = true;
     try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(
+      final picked = await ImagePicker().pickImage(
         source: ImageSource.camera,
         imageQuality: 85,
       );
-      if (picked != null) {
-        final name = picked.path.split('/').last;
-        attachedDocs.add({
-          'name': name,
-          'time': 'Uploaded just now',
-        });
-      }
+      if (picked != null) attachedDocs.add(File(picked.path));
     } finally {
       isPickingFile.value = false;
     }
@@ -106,11 +95,8 @@ class CreatePurchaseController extends GetxController {
         allowMultiple: true,
       );
       if (result != null && result.files.isNotEmpty) {
-        for (final file in result.files) {
-          attachedDocs.add({
-            'name': file.name,
-            'time': 'Uploaded just now',
-          });
+        for (final f in result.files) {
+          if (f.path != null) attachedDocs.add(File(f.path!));
         }
       }
     } finally {

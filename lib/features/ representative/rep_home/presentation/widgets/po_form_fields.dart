@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -532,42 +533,62 @@ class PoVendorEmailToggle extends StatelessWidget {
 }
 
 class PoDocumentItem extends StatelessWidget {
-  final String fileName;
-  final String uploadTime;
+  final File file;
   final VoidCallback onDelete;
 
   const PoDocumentItem({
     super.key,
-    required this.fileName,
-    required this.uploadTime,
+    required this.file,
     required this.onDelete,
   });
 
+  String _getFileIcon(String fileName) {
+    final ext = fileName.split('.').last.toLowerCase();
+    if (ext == 'pdf') return 'assets/icons/pdf.svg';
+    if (['jpg', 'jpeg', 'png', 'gif'].contains(ext)) return 'assets/icons/image.svg';
+    return 'assets/icons/document.svg';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final fileName = file.path.split('/').last;
+    final sizeKb = (file.lengthSync() / 1024).toStringAsFixed(1);
+
     return Container(
-      width: 345.w,
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
       margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0x1A4A4A4A),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0xFF3A3A3A), width: 0.8),
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: const Color(0xFF3A3A3A)),
       ),
       child: Row(
         children: [
-          // Doc icon
-          SvgPicture.asset(
-            'assets/icons/document.svg',
-            width: 20.r,
-            height: 20.r,
-            colorFilter: const ColorFilter.mode(
-              AppColors.secondaryTextColor,
-              BlendMode.srcIn,
+          Container(
+            width: 36.r,
+            height: 36.r,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1B1B1B),
+              borderRadius: BorderRadius.circular(6.r),
+            ),
+            child: Center(
+              child: SvgPicture.asset(
+                _getFileIcon(fileName),
+                width: 18.r,
+                height: 18.r,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.secondaryTextColor,
+                  BlendMode.srcIn,
+                ),
+                errorBuilder: (_, __, ___) => Icon(
+                  Icons.insert_drive_file_outlined,
+                  color: AppColors.secondaryTextColor,
+                  size: 18.r,
+                ),
+              ),
             ),
           ),
           SizedBox(width: 10.w),
-          // File info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -581,7 +602,7 @@ class PoDocumentItem extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 CustomText(
-                  text: uploadTime,
+                  text: '$sizeKb KB',
                   fontsize: 11.sp,
                   fontWeight: FontWeight.w400,
                   color: AppColors.secondaryTextColor,
@@ -590,17 +611,12 @@ class PoDocumentItem extends StatelessWidget {
               ],
             ),
           ),
-          // Delete icon
           GestureDetector(
             onTap: onDelete,
-            child: SvgPicture.asset(
-              'assets/icons/delete.svg',
-              width: 20.r,
-              height: 20.r,
-              colorFilter: const ColorFilter.mode(
-                Color(0xFFEC0101),
-                BlendMode.srcIn,
-              ),
+            child: Icon(
+              Icons.close_rounded,
+              color: const Color(0xFFEC0101),
+              size: 20.r,
             ),
           ),
         ],
@@ -622,79 +638,63 @@ class PoAttachDocumentBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 345.w,
-        height: 110.h,
-        decoration: BoxDecoration(
-          color: const Color(0x1A4A4A4A),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
+      onTap: isLoading ? null : onTap,
+      child: SizedBox(
+        width: double.infinity,
+        height: 80.h,
         child: CustomPaint(
           painter: _DashedBorderPainter(
-            color: const Color(0xFFD4D4D4),
-            borderRadius: 8,
-            dashWidth: 5,
-            dashSpace: 5,
+            color: const Color(0xFF3A3A3A),
+            borderRadius: 12,
+            dashWidth: 6,
+            dashSpace: 4,
           ),
-          child: isLoading
-              ? Center(
-                  child: SizedBox(
-                    width: 24.r,
-                    height: 24.r,
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0x0D1AC8DB),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: isLoading
+                ? const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       color: AppColors.primaryColor,
                     ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.attach_file_rounded,
+                        color: AppColors.primaryColor,
+                        size: 22.r,
+                      ),
+                      SizedBox(width: 10.w),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Attach File',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          Text(
+                            'PDF, JPG, PNG (max 10MB)',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontFamily: 'Poppins',
+                              color: AppColors.secondaryTextColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                )
-              : Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Camera icon circle
-              Container(
-                width: 36.r,
-                height: 36.r,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF332F2F),
-                  borderRadius: BorderRadius.circular(8.r),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x26000000),
-                      blurRadius: 5,
-                      offset: Offset(1, 1),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/icons/camera.svg',
-                    width: 18.r,
-                    height: 18.r,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.primaryTextColor,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 8.h),
-              CustomText(
-                text: 'Attach PO Docum...',
-                fontsize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryTextColor,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 2.h),
-              CustomText(
-                text: 'Tap to open camera or upload PDF',
-                fontsize: 11.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.secondaryTextColor,
-                textAlign: TextAlign.center,
-              ),
-            ],
           ),
         ),
       ),
