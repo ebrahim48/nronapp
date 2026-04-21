@@ -76,7 +76,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
               SizedBox(height: 36.h),
 
-              // ── Manager Card ──────────────────────────────────────────────
+
               RoleCard(
                 iconPath: 'assets/icons/managericon.svg',
                 label: 'Manager',
@@ -88,7 +88,6 @@ class RoleSelectionScreen extends StatelessWidget {
 
               SizedBox(height: 16.h),
 
-              // ── Representative Card ───────────────────────────────────────
               RoleCard(
                 iconPath: 'assets/icons/reprentative.svg',
                 label: 'Representative',
@@ -101,7 +100,7 @@ class RoleSelectionScreen extends StatelessWidget {
               SizedBox(height: 16.h),
 
               RoleCard(
-                iconPath: 'assets/icons/reprentative.svg',
+                iconPath: 'assets/icons/driver.svg',
                 label: 'Driver',
                 subtitle:
                 'Driver Map',

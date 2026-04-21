@@ -68,6 +68,13 @@ import '../../../features/driver/driver_map/presentation/driver_map_screen.dart'
 import '../../../features/driver/driverjob/presentation/driver_job_details_screen.dart';
 import '../../../features/driver/driverjob/presentation/driver_job_screen.dart';
 import '../../../features/driver/driverjob/presentation/new_delivery_details_screen.dart';
+import '../../../features/driver/driverprofile/presentation/car_picture_screen.dart';
+import '../../../features/driver/driverprofile/presentation/documents_screen.dart';
+import '../../../features/driver/driverprofile/presentation/driving_license_screen.dart';
+import '../../../features/driver/driverprofile/presentation/nid_rax_id_screen.dart';
+import '../../../features/driver/driverprofile/presentation/password_screen.dart';
+import '../../../features/driver/driverprofile/presentation/personal_info_screen.dart';
+import '../../../features/driver/driverprofile/presentation/driver_profile_screen.dart';
 import '../../../features/driver/earning/presentation/all_earning_screen.dart';
 import '../../../features/driver/earning/presentation/earning_screen.dart';
 import '../../../features/manager/commission/commission_dashboard_screen.dart';
@@ -201,6 +208,13 @@ static const activityLogScreen = '/activityLogScreen';
   static const earningsScreen = '/earningsScreen';
   static const allEarningScreen = '/allEarningScreen';
   static const chatbotScreen = '/chatbotScreen';
+  static const driverProfileScreen = '/driverProfileScreen';
+  static const personalInfoScreen = '/personalInfoScreen';
+  static const changePasswordScreen = '/changePasswordScreen';
+  static const nidTaxIdScreen = '/nidTaxIdScreen';
+  static const drivingLicenseScreen = '/drivingLicenseScreen';
+  static const documentsScreen = '/documentsScreen';
+  static const carPicturesScreen = '/carPicturesScreen';
 
 
 
@@ -668,6 +682,41 @@ static const activityLogScreen = '/activityLogScreen';
         path: chatbotScreen,
         name: chatbotScreen,
         builder: (context, state) => const ChatbotScreen(),
+      ),
+      GoRoute(
+        path: driverProfileScreen,
+        name: driverProfileScreen,
+        builder: (context, state) => const DriverProfileScreen(),
+      ),
+      GoRoute(
+        path: personalInfoScreen,
+        name: personalInfoScreen,
+        builder: (context, state) => const PersonalInfoScreen(),
+      ),
+      GoRoute(
+        path: changePasswordScreen,
+        name: changePasswordScreen,
+        builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: nidTaxIdScreen,
+        name: nidTaxIdScreen,
+        builder: (context, state) => const NidTaxIdScreen(),
+      ),
+      GoRoute(
+        path: drivingLicenseScreen,
+        name: drivingLicenseScreen,
+        builder: (context, state) => const DrivingLicenseScreen(),
+      ),
+      GoRoute(
+        path: documentsScreen,
+        name: documentsScreen,
+        builder: (context, state) => const DocumentsScreen(),
+      ),
+      GoRoute(
+        path: carPicturesScreen,
+        name: carPicturesScreen,
+        builder: (context, state) => const CarPicturesScreen(),
       ),
 
 
