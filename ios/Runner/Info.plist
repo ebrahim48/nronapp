@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app uses the camera to scan QR codes and capture photos for documents and deliveries.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app accesses your photo library to select images for uploads and attachments.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app saves photos to your library for captured documents and delivery confirmations.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app uses the microphone when recording video for delivery documentation.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses your location to show your position on the map during deliveries.</string>
 </dict>
 </plist>
