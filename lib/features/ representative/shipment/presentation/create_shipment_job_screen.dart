@@ -25,7 +25,6 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
   final _ctrl = CreateShipmentController();
   final _imagePicker = ImagePicker();
 
-  // Uploaded files: maps file path → isPdf
   final List<_UploadedFile> _uploadedFiles = [];
 
   @override
@@ -34,7 +33,6 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
     super.dispose();
   }
 
-  // ── Date picker ──────────────────────────────────────────────────────────────
   Future<void> _pickDate(TextEditingController controller) async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -60,7 +58,7 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
     }
   }
 
-  // ── File upload ──────────────────────────────────────────────────────────────
+
   Future<void> _showUploadOptions() async {
     await showModalBottomSheet(
       context: context,
@@ -150,7 +148,6 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
     );
   }
 
-  // ── Custom Toggle ────────────────────────────────────────────────────────────
   Widget _customToggle(bool value, ValueChanged<bool> onChanged) {
     return GestureDetector(
       onTap: () => onChanged(!value),
@@ -182,7 +179,6 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
     );
   }
 
-  // ── Dropdown ─────────────────────────────────────────────────────────────────
   Widget _buildDropdown({
     required String label,
     required String value,
@@ -232,7 +228,6 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
     );
   }
 
-  // ── Section header ───────────────────────────────────────────────────────────
   Widget _sectionHeader(String title, String iconAsset) {
     return Padding(
       padding: EdgeInsets.only(bottom: 14.h),
@@ -681,14 +676,12 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
   }
 }
 
-// ── Uploaded file model ──────────────────────────────────────────────────────
 class _UploadedFile {
   final String path;
   final bool isPdf;
   const _UploadedFile({required this.path, required this.isPdf});
 }
 
-// ── Dashed border painter ────────────────────────────────────────────────────
 class _DashedBorderPainter extends CustomPainter {
   final Color color;
   final double borderRadius;
