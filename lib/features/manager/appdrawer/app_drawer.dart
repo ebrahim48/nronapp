@@ -27,10 +27,10 @@ class ManagerAppDrawer extends StatelessWidget {
         context.pushNamed(AppRoutes.commissionDashboardScreen);
         break;
       case 4: // Shipments
-        // context.pushNamed(AppRoutes.shipmentsScreen);
+        context.pushNamed(AppRoutes.managerShipmentsScreen);
         break;
       case 5: // Activity
-        // context.pushNamed(AppRoutes.activityLogScreen);
+        context.pushNamed(AppRoutes.activityLogScreen);
         break;
       case 6: // Setting & Profile
         context.pushNamed(AppRoutes.settingProfileScreen);
@@ -39,10 +39,10 @@ class ManagerAppDrawer extends StatelessWidget {
         context.pushNamed(AppRoutes.contactSupportScreen);
         break;
       case 8: // About App
-        // context.pushNamed(AppRoutes.aboutAppScreen);
+        context.pushNamed(AppRoutes.aboutHoleScreen);
         break;
       case 9: // Terms & Conditions
-        // context.pushNamed(AppRoutes.termsScreen);
+        context.pushNamed(AppRoutes.termsConditionsScreen);
         break;
     }
   }
