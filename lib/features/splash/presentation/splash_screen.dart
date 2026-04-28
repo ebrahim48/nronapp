@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/custom_widgets/custom_text.dart';
 import '../../../core/config/app-routes/app_routes.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/app_colors.dart';
 import '../../../global/custom_assets/assets.gen.dart';
 
 class SplashScreen extends StatefulWidget {

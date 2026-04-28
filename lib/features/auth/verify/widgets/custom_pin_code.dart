@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 
 class CustomPinCodeTextField extends StatelessWidget {
-  final TextEditingController? textEditingController;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onCompleted;
 
-  const CustomPinCodeTextField({super.key, this.textEditingController});
+  const CustomPinCodeTextField({
+    super.key,
+    this.onChanged,
+    this.onCompleted,
+  });
 
   @override
   Widget build(BuildContext context) {
     return PinCodeTextField(
       backgroundColor: Colors.transparent,
       cursorColor: AppColors.primaryTextColor,
-      controller: textEditingController,
       textStyle: TextStyle(
         color: AppColors.primaryTextColor,
         fontSize: 18.sp,
@@ -29,13 +33,10 @@ class CustomPinCodeTextField extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.r),
         fieldHeight: 55.h,
         fieldWidth: 43.w,
-        // inactive (empty, not focused)
         inactiveFillColor: const Color(0xFF1E2121),
         inactiveColor: AppColors.dotButtonInactiveColor,
-        // selected (focused)
         selectedFillColor: const Color(0xFF1E2121),
         selectedColor: AppColors.primaryColor,
-        // active (filled)
         activeFillColor: const Color(0xFF1E2121),
         activeColor: AppColors.dotButtonInactiveColor,
         borderWidth: 1,
@@ -43,10 +44,8 @@ class CustomPinCodeTextField extends StatelessWidget {
       enableActiveFill: true,
       obscureText: false,
       keyboardType: TextInputType.number,
-      onChanged: (value) {},
-      onCompleted: (value) {
-        textEditingController?.text = value;
-      },
+      onChanged: (value) => onChanged?.call(value),
+      onCompleted: (value) => onCompleted?.call(value),
     );
   }
 }

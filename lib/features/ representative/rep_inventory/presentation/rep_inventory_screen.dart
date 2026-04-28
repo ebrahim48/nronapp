@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../appdrawer/app_drawer.dart';
 import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/inventory_widgets.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/rep_inventory_controller.dart';
 

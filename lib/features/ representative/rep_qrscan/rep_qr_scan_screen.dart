@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/app_colors.dart';
 import 'presentation/controller/rep_qr_scan_controller.dart';
 import 'presentation/widgets/qr_bottom_actions.dart';
 import 'presentation/widgets/qr_frame_corners.dart';

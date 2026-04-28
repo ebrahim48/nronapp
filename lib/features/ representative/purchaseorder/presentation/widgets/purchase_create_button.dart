@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../../core/config/app-routes/app_routes.dart';
-import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/utils/app_colors.dart';
 import '../../controller/purchase_order_controller.dart';
 
 

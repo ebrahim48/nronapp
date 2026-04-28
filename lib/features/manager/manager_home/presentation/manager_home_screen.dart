@@ -10,7 +10,7 @@ import 'package:nron_app/features/manager/manager_home/presentation/widgets/pend
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/team_activity_tile.dart';
 import '../../../ representative/appdrawer/app_drawer.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../manager_controller/manager_home_controller.dart';

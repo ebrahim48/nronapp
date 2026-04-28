@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:nron_app/features/driver/driverprofile/presentation/widgets/doc_upload_box.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';

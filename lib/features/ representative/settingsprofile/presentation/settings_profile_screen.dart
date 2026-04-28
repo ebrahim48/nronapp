@@ -8,7 +8,7 @@ import 'package:nron_app/features/%20representative/settingsprofile/presentation
 import 'package:nron_app/features/%20representative/settingsprofile/presentation/widgets/profile_state_row.dart';
 import 'package:nron_app/features/%20representative/settingsprofile/presentation/widgets/settings_section_card.dart';
 import 'package:nron_app/features/%20representative/settingsprofile/presentation/widgets/settings_tile.dart';
-import '../../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../controller/setting_controller.dart';

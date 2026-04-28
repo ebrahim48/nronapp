@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/utils/app_colors.dart';
 import '../../controller/manager_sales_controller.dart';
 
 class SalesSearchBar extends StatelessWidget {

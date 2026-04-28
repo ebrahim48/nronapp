@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:nron_app/features/driver/driver_payment/presentation/widgets/payment_card_tile.dart';
 import 'package:nron_app/features/driver/driver_payment/presentation/widgets/payment_info_note.dart';
 import 'package:nron_app/features/driver/driver_payment/presentation/widgets/secured_payment_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/payment_mthod_controller.dart';
 import 'add_card_screen.dart';

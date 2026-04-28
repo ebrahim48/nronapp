@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../controller/chatbot_controller.dart';
 import '../model/chat_message_model.dart';
 

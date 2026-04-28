@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/features/%20representative/sales/presentation/widgets/sales_list_card.dart';
 import 'package:nron_app/features/%20representative/sales/presentation/widgets/sales_state_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../core/config/app-routes/app_routes.dart';

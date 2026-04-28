@@ -4,9 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/app-routes/app_routes.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/app_colors.dart';
 import '../../../core/custom_widgets/custom_text.dart';
 import '../../../global/custom_assets/assets.gen.dart';
+import '../../auth/data/auth_temp_data.dart';
 import 'widgets/role_card.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
@@ -83,7 +84,10 @@ class RoleSelectionScreen extends StatelessWidget {
                 subtitle:
                 'Direct team logistics, inventory intelligence, and executive approvals.',
                 style: RoleCardStyle.manager,
-                onTap: () => context.go(AppRoutes.managerBottomNavBar),
+                onTap: () {
+                  AuthTempData.selectedRole = 'manager';
+                  context.push(AppRoutes.signInScreen);
+                },
               ),
 
               SizedBox(height: 16.h),
@@ -94,7 +98,10 @@ class RoleSelectionScreen extends StatelessWidget {
                 subtitle:
                 'Optimize field operations, procurement workflows, and commission tracking.',
                 style: RoleCardStyle.representative,
-                onTap: () => context.go(AppRoutes.signUpScreen),
+                onTap: () {
+                  AuthTempData.selectedRole = 'representative';
+                  context.push(AppRoutes.signInScreen);
+                },
               ),
 
               SizedBox(height: 16.h),
@@ -103,9 +110,12 @@ class RoleSelectionScreen extends StatelessWidget {
                 iconPath: 'assets/icons/driver.svg',
                 label: 'Driver',
                 subtitle:
-                'Driver Map',
-                style: RoleCardStyle.representative,
-                onTap: () => context.go(AppRoutes.driverBottomNavBar),
+                'Manage deliveries, track routes, and handle logistics operations.',
+                style: RoleCardStyle.driver,
+                onTap: () {
+                  AuthTempData.selectedRole = 'driver';
+                  context.push(AppRoutes.signInScreen);
+                },
               ),
 
 

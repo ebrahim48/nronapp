@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
-import 'package:nron_app/core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../global/custom_assets/assets.gen.dart';
+import 'package:nron_app/core/utils/app_colors.dart';
+
+import '../../../core/custom_widgets/animated_entry.dart';
 import '../../../core/custom_widgets/custom_button.dart';
 import '../../../core/custom_widgets/custom_text.dart';
 import '../../../core/custom_widgets/custom_text_field.dart';
+import '../../../global/custom_assets/assets.gen.dart';
 import '../../auth/presentation/widgets/auth_field_label.dart';
 import '../../auth/presentation/widgets/auth_grid_decoration.dart';
 import 'controllers/forget_controller.dart';
@@ -22,15 +22,13 @@ class ForgetPasswordScreen extends StatefulWidget {
 }
 
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
-  late ForgetController controller;
+  late ForgetController _c;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(ForgetController());
-    if (widget.email.isNotEmpty) {
-      controller.setEmail(widget.email);
-    }
+    _c = Get.put(ForgetController());
+    if (widget.email.isNotEmpty) _c.setEmail(widget.email);
   }
 
   @override
@@ -47,53 +45,56 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               children: [
                 SizedBox(height: 60.h),
 
-                // Back button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8.w),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: AppColors.primaryTextColor,
-                        size: 22.r,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 8.w),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back,
+                            color: AppColors.primaryTextColor, size: 22.r),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
                 ),
 
                 SizedBox(height: 12.h),
 
-                // Logo
-                Center(
-                  child: Assets.images.splashicon.image(
-                    width: 158.w,
-                    height: 125.h,
-                    fit: BoxFit.contain,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 80),
+                  child: Center(
+                    child: Assets.images.splashicon.image(
+                      width: 158.w, height: 125.h, fit: BoxFit.contain,
+                    ),
                   ),
                 ),
 
                 SizedBox(height: 24.h),
 
-                // Title
-                CustomText(
-                  text: 'Forgot Password',
-                  fontsize: 24.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.center,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 160),
+                  child: CustomText(
+                    text: 'Forgot Password',
+                    fontsize: 24.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
 
                 SizedBox(height: 8.h),
 
-                // Subtitle
-                CustomText(
-                  text: 'Enter email address to reset your password.',
-                  fontsize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.secondaryTextColor,
-                  textAlign: TextAlign.center,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 240),
+                  child: CustomText(
+                    text: 'Enter email address to reset your password.',
+                    fontsize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
 
                 SizedBox(height: 32.h),
@@ -103,30 +104,57 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AuthFieldLabel(label: 'Email *'),
-                      Obx(
-                        () => CustomTextField(
-                          controller: controller.emailCtrl,
-                          hintText: 'Enter your email',
-                          keyboardType: TextInputType.emailAddress,
-                          isEmail: true,
-                          errorText: controller.emailError.value.isEmpty
-                              ? null
-                              : controller.emailError.value,
-                          onChanged: (_) => controller.validateEmail(),
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 320),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthFieldLabel(label: 'Email *'),
+                            Obx(() => CustomTextField(
+                              controller: _c.emailCtrl,
+                              hintText: 'Enter your email',
+                              keyboardType: TextInputType.emailAddress,
+                              isEmail: true,
+                              errorText: _c.emailError.value.isEmpty
+                                  ? null
+                                  : _c.emailError.value,
+                              onChanged: (_) {
+                                if (_c.emailError.value.isNotEmpty) {
+                                  _c.emailError.value = '';
+                                }
+                              },
+                            )),
+                          ],
                         ),
+                      ),
+
+                      // General error
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 320),
+                        child: Obx(() {
+                          if (_c.generalError.value.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 8.h),
+                            child: CustomText(
+                              text: _c.generalError.value,
+                              fontsize: 12.sp,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w400,
+                              textAlign: TextAlign.start,
+                            ),
+                          );
+                        }),
                       ),
 
                       SizedBox(height: 200.h),
 
-                      Obx(
-                        () => CustomButton(
-                          title: controller.isLoading.value ? 'Sending...' : 'Send Code',
-                          loading: controller.isLoading.value,
-                          onpress: () {
-                            context.pushNamed(AppRoutes.verifyScreen);
-                          },
-                        ),
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 400),
+                        child: Obx(() => CustomButton(
+                          title: 'Send Code',
+                          loading: _c.isLoading.value,
+                          onpress: () => _c.sendCode(context),
+                        )),
                       ),
                     ],
                   ),

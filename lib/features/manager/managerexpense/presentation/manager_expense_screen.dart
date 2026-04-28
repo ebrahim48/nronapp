@@ -9,7 +9,7 @@ import 'package:nron_app/features/manager/managerexpense/presentation/widgets/sy
 import '../../../ representative/appdrawer/app_drawer.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../appdrawer/app_drawer.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_expense_controller.dart';
 

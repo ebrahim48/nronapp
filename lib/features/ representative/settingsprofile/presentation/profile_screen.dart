@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:nron_app/features/%20representative/settingsprofile/presentation/widgets/password_field.dart';
 import 'package:nron_app/features/%20representative/settingsprofile/presentation/widgets/profile_header.dart';
 import 'package:nron_app/features/%20representative/settingsprofile/presentation/widgets/profile_state_row.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../controller/setting_controller.dart';

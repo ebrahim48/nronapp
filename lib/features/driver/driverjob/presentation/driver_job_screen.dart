@@ -8,7 +8,7 @@ import 'package:nron_app/features/driver/driverjob/presentation/widgets/complete
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/job_tab_bar.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/new_job_card.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/driver_job_controller.dart';
 import '../model/driver_job_model.dart';

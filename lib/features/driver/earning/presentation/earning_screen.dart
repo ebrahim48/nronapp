@@ -5,7 +5,7 @@ import 'package:nron_app/features/driver/earning/presentation/widgets/earnings_s
 import 'package:nron_app/features/driver/earning/presentation/widgets/request_pay_button.dart';
 import 'package:nron_app/features/driver/earning/presentation/widgets/total_balance_card.dart';
 import 'package:nron_app/features/driver/earning/presentation/widgets/weekly_overview_chart.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/earnings_controller.dart';
 import 'all_earning_screen.dart';

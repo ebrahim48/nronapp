@@ -7,7 +7,7 @@ import 'package:nron_app/features/%20representative/expenses/presentation/widget
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/form_section_header.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/paidtoggle.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/expense_controller.dart';

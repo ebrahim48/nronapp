@@ -7,7 +7,7 @@ import 'package:nron_app/features/driver/driverjob/presentation/widgets/navigati
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/route_information_card.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/shipment_summary_card.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/status_eta_bar.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../driver_home/presentation/widgets/job_package_card.dart';
 import '../../driver_home/presentation/widgets/special_instructions_card.dart';

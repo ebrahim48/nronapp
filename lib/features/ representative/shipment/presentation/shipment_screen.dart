@@ -5,7 +5,7 @@ import 'package:nron_app/features/%20representative/shipment/presentation/shipme
 import 'package:nron_app/features/%20representative/shipment/presentation/track_shipment_screen.dart';
 import 'package:nron_app/features/%20representative/shipment/presentation/widgets/shipment_card.dart';
 import 'package:nron_app/features/%20representative/shipment/presentation/widgets/state_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../controller/shipments_controller.dart';

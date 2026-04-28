@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 
 class ExpenseSuccessScreen extends StatelessWidget {
   const ExpenseSuccessScreen({super.key});

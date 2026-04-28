@@ -5,7 +5,7 @@ import 'package:nron_app/features/driver/driver_map/presentation/widgets/complet
 import 'package:nron_app/features/driver/driver_map/presentation/widgets/delivery_notes_field.dart';
 import 'package:nron_app/features/driver/driver_map/presentation/widgets/photo_capture_section.dart';
 import 'package:nron_app/features/driver/driver_map/presentation/widgets/pickup_details_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/driver_map_controller.dart';
 

@@ -8,7 +8,7 @@ import 'package:nron_app/features/%20representative/commissions/presentation/wid
 import 'package:nron_app/features/%20representative/commissions/presentation/widgets/commission_trend_chart.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../appdrawer/app_drawer.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/commission_controller.dart';
 

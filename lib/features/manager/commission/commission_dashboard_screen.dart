@@ -7,7 +7,7 @@ import 'package:nron_app/features/manager/appdrawer/app_drawer.dart';
 import 'package:nron_app/features/manager/commission/presentation/widgets/monthly_commission_trend_card.dart';
 import 'package:nron_app/features/manager/commission/presentation/widgets/quick_action_card.dart';
 import '../../ representative/commissions/presentation/widgets/commission_state_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../core/config/app-routes/app_routes.dart';
 import 'controller/manager_commission_controller.dart';
