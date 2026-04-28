@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../controller/setting_controller.dart';
 
-class TermsConditionsScreen extends StatelessWidget {
+class TermsConditionsScreen extends StatefulWidget {
   const TermsConditionsScreen({super.key});
 
-  static const _points = [
-    'By using the H.O.L.E platform, you agree to be bound by these Terms and Conditions. Please read them carefully before accessing or using any features of the application.',
-    'All content, data, and transactions conducted through H.O.L.E are intended solely for authorized business users. Unauthorized access, sharing of credentials, or misuse of the platform is strictly prohibited.',
-    'Users are responsible for maintaining the confidentiality of their account credentials and for all activities that occur under their account. Any suspected unauthorized use must be reported immediately.',
-    'H.O.L.E reserves the right to modify, suspend, or discontinue any part of the service at any time without prior notice. Continued use of the platform constitutes acceptance of any revised terms.',
-    'All intellectual property rights in the platform, including but not limited to software, design, and content, are owned by or licensed to H.O.L.E. You may not reproduce or distribute any part of the platform without express written permission.',
-  ];
+  @override
+  State<TermsConditionsScreen> createState() => _TermsConditionsScreenState();
+}
+
+class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
+  late SettingsController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = Get.put(SettingsController());
+    _c.fetchTerms();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,18 +65,13 @@ class TermsConditionsScreen extends StatelessWidget {
                   'assets/images/privacy.png',
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => Center(
-                    child: Icon(
-                      Icons.gavel_outlined,
-                      color: AppColors.primaryColor,
-                      size: 64.r,
-                    ),
+                    child: Icon(Icons.gavel_outlined,
+                        color: AppColors.primaryColor, size: 64.r),
                   ),
                 ),
               ),
             ),
-
             SizedBox(height: 20.h),
-
             CustomText(
               text: 'Terms & Conditions',
               fontsize: 16.sp,
@@ -75,54 +79,63 @@ class TermsConditionsScreen extends StatelessWidget {
               color: AppColors.primaryTextColor,
               textAlign: TextAlign.start,
             ),
-
             SizedBox(height: 12.h),
-
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.r),
-              decoration: BoxDecoration(
-                color: const Color(0xFF242424),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFF3A3A3A)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _points.map((point) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(top: 6.h, right: 8.w),
-                          child: Container(
-                            width: 5.r,
-                            height: 5.r,
-                            decoration: const BoxDecoration(
-                              color: AppColors.secondaryTextColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            point,
-                            style: TextStyle(
-                              fontSize: 12.5.sp,
-                              fontFamily: 'Poppins',
-                              color: AppColors.secondaryTextColor,
-                              height: 1.6,
-                            ),
-                          ),
-                        ),
-                      ],
+            Obx(() {
+              if (_c.isLoadingContent.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Container(
+                    width: double.infinity,
+                    height: 160.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                  );
-                }).toList(),
-              ),
-            ),
-
+                  ),
+                );
+              }
+              final content = _c.termsContent.value;
+              if (content == null || content.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(24.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF242424),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFF3A3A3A)),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Content not available.',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontFamily: 'Poppins',
+                        color: AppColors.secondaryTextColor,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF242424),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFF3A3A3A)),
+                ),
+                child: Text(
+                  content,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontFamily: 'Poppins',
+                    color: AppColors.secondaryTextColor,
+                    height: 1.6,
+                  ),
+                ),
+              );
+            }),
             SizedBox(height: 30.h),
           ],
         ),

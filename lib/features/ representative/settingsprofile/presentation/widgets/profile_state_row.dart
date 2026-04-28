@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
-import '../../model/settings_model.dart';
+import '../../domain/model/settings_model.dart';
 
 class ProfileStatsRow extends StatelessWidget {
   final UserProfileModel profile;

@@ -16,9 +16,17 @@ class ApiConstants {
   static const String forgetPassword = '/auth/forgot-password';
   static const String forgetOtpVerifyPassword = '/auth/forgot-otp-verify';
   static const String resetPassword = '/auth/reset-password';
-  static const String changePassword = '/auth/change-password';
   static const String resend = '/auth/resend-otp';
   static const String refreshToken = '/auth/refresh-token';
+
+  static const String getMyProfile = '/user/get-my-profile';
+  static const String updateMyProfile = '/user/update-my-profile';
+  static const String changePassword = '/auth/change-password';
+  static const String sendSupportMessage = '/support/send-message';
+
+  static const String aboutUs = '/common/about';
+  static const String terms = '/common/terms';
+  static const String privacyPolicy = '/common/privacy-policy';
 
 
 
