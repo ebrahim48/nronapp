@@ -8,7 +8,7 @@ import 'package:nron_app/features/%20representative/purchaseorder/presentation/w
 import 'package:nron_app/features/%20representative/purchaseorder/presentation/widgets/purchase_searchbar_widgets.dart';
 
 import '../../appdrawer/app_drawer.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/purchase_order_controller.dart';
 

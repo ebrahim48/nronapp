@@ -6,7 +6,7 @@ import 'package:nron_app/features/%20representative/rep_home/presentation/widget
 import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/new_pos_ordercard.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 
 import '../controller/rep_purchase_order_controller.dart';
 import 'widgets/new_po_step_header.dart';

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:nron_app/core/constants/app_colors.dart';
+import 'package:get/get.dart';
+import 'package:nron_app/core/utils/app_colors.dart';
 
+import '../../../../core/custom_widgets/animated_entry.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../../../../global/custom_assets/assets.gen.dart';
-import '../controller/auth_controller.dart';
+import '../../data/auth_temp_data.dart';
+import '../controller/register_controller.dart';
 import '../widgets/auth_field_label.dart';
 import '../widgets/auth_google_button.dart';
 import '../widgets/auth_grid_decoration.dart';
@@ -22,12 +25,12 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _controller = AuthController();
+  late RegisterController _c;
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _c = Get.put(RegisterController());
   }
 
   @override
@@ -44,47 +47,59 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 SizedBox(height: 60.h),
 
-                Center(
-                  child: Assets.images.splashicon.image(
-                    width: 100.w, height: 100.h, fit: BoxFit.contain,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 0),
+                  child: Center(
+                    child: Assets.images.splashicon.image(
+                      width: 100.w, height: 100.h, fit: BoxFit.contain,
+                    ),
                   ),
                 ),
 
                 SizedBox(height: 12.h),
 
-                CustomText(
-                  text: 'Sign Up now',
-                  fontsize: 24.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.center,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 80),
+                  child: CustomText(
+                    text: 'Sign Up now',
+                    fontsize: 24.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
 
                 SizedBox(height: 4.h),
 
-                CustomText(
-                  text: 'Create an account or log in to\nexplore about our app',
-                  fontsize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.secondaryTextColor,
-                  textAlign: TextAlign.center,
-                  textHeight: 1.4,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 160),
+                  child: CustomText(
+                    text: 'Create an account or log in to\nexplore about our app',
+                    fontsize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.center,
+                    textHeight: 1.4,
+                  ),
                 ),
 
                 SizedBox(height: 24.h),
 
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: AuthTabSwitcher(
-                    isLogin: false,
-                    onLoginTap: () => Navigator.pushReplacement(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (_, __, ___) => const SignInScreen(),
-                        transitionDuration: Duration.zero,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 240),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: AuthTabSwitcher(
+                      isLogin: false,
+                      onLoginTap: () => Navigator.pushReplacement(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => const SignInScreen(),
+                          transitionDuration: Duration.zero,
+                        ),
                       ),
+                      onSignUpTap: () {},
                     ),
-                    onSignUpTap: () {},
                   ),
                 ),
 
@@ -92,59 +107,150 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
-                  child: Form(
-                    key: _controller.signupFormKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AuthFieldLabel(label: 'Full Name *'),
-                        CustomTextField(
-                          controller: _controller.nameController,
-                          hintText: 'Name',
-                          keyboardType: TextInputType.name,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Full Name
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 320),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthFieldLabel(label: 'Full Name *'),
+                            Obx(() => CustomTextField(
+                              controller: _c.fullNameCtrl,
+                              hintText: 'Full name',
+                              keyboardType: TextInputType.name,
+                              errorText: _c.fullNameError.value.isEmpty
+                                  ? null
+                                  : _c.fullNameError.value,
+                              onChanged: (_) {
+                                if (_c.fullNameError.value.isNotEmpty) {
+                                  _c.fullNameError.value = '';
+                                }
+                              },
+                            )),
+                          ],
                         ),
+                      ),
 
-                        AuthFieldLabel(label: 'Email *'),
-                        CustomTextField(
-                          controller: _controller.signupEmailController,
-                          hintText: 'E-mail',
-                          keyboardType: TextInputType.emailAddress,
-                          isEmail: true,
+                      // Email
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 400),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthFieldLabel(label: 'Email *'),
+                            Obx(() => CustomTextField(
+                              controller: _c.emailCtrl,
+                              hintText: 'E-mail',
+                              keyboardType: TextInputType.emailAddress,
+                              isEmail: true,
+                              errorText: _c.emailError.value.isEmpty
+                                  ? null
+                                  : _c.emailError.value,
+                              onChanged: (_) {
+                                if (_c.emailError.value.isNotEmpty) {
+                                  _c.emailError.value = '';
+                                }
+                              },
+                            )),
+                          ],
                         ),
+                      ),
 
-                        AuthFieldLabel(label: 'Password *'),
-                        CustomTextField(
-                          controller: _controller.signupPasswordController,
-                          hintText: 'Enter your Password',
-                          isPassword: true,
+                      // Password
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 480),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthFieldLabel(label: 'Password *'),
+                            Obx(() => CustomTextField(
+                              controller: _c.passwordCtrl,
+                              hintText: 'Enter your Password',
+                              isPassword: true,
+                              errorText: _c.passwordError.value.isEmpty
+                                  ? null
+                                  : _c.passwordError.value,
+                              onChanged: (_) {
+                                if (_c.passwordError.value.isNotEmpty) {
+                                  _c.passwordError.value = '';
+                                }
+                              },
+                            )),
+                          ],
                         ),
+                      ),
 
-                        AuthFieldLabel(label: 'Confirm Password *'),
-                        CustomTextField(
-                          controller: _controller.confirmPasswordController,
-                          hintText: 'Enter your Confirm Password',
-                          isPassword: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) return 'Please confirm your password';
-                            if (value != _controller.signupPasswordController.text) return 'Passwords do not match';
-                            return null;
-                          },
+                      // Confirm Password
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 560),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthFieldLabel(label: 'Confirm Password *'),
+                            Obx(() => CustomTextField(
+                              controller: _c.confirmPasswordCtrl,
+                              hintText: 'Re-enter your Password',
+                              isPassword: true,
+                              errorText: _c.confirmPasswordError.value.isEmpty
+                                  ? null
+                                  : _c.confirmPasswordError.value,
+                              onChanged: (_) {
+                                if (_c.confirmPasswordError.value.isNotEmpty) {
+                                  _c.confirmPasswordError.value = '';
+                                }
+                              },
+                            )),
+                          ],
                         ),
+                      ),
 
-                        SizedBox(height: 8.h),
+                      // General error
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 560),
+                        child: Obx(() {
+                          if (_c.generalError.value.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 8.h),
+                            child: CustomText(
+                              text: _c.generalError.value,
+                              fontsize: 12.sp,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w400,
+                              textAlign: TextAlign.start,
+                            ),
+                          );
+                        }),
+                      ),
 
-                        CustomButton(
+                      SizedBox(height: 8.h),
+
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 640),
+                        child: Obx(() => CustomButton(
                           title: 'Sign Up',
-                          onpress: () => _controller.validateSignUp(),
-                        ),
+                          loading: _c.isLoading.value,
+                          onpress: () => _c.register(
+                            context,
+                            role: AuthTempData.selectedRole,
+                          ),
+                        )),
+                      ),
 
-                        SizedBox(height: 20.h),
-                        const AuthOrDivider(),
-                        SizedBox(height: 16.h),
-                        const AuthGoogleButton(),
-                        SizedBox(height: 40.h),
-                      ],
-                    ),
+                      SizedBox(height: 20.h),
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 720),
+                        child: const AuthOrDivider(),
+                      ),
+                      SizedBox(height: 16.h),
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 800),
+                        child: const AuthGoogleButton(),
+                      ),
+                      SizedBox(height: 40.h),
+                    ],
                   ),
                 ),
               ],

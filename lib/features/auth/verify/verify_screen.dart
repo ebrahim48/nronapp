@@ -1,45 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
-import 'package:nron_app/core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../global/custom_assets/assets.gen.dart';
+import 'package:nron_app/core/utils/app_colors.dart';
+
+import '../../../core/custom_widgets/animated_entry.dart';
 import '../../../core/custom_widgets/custom_button.dart';
 import '../../../core/custom_widgets/custom_text.dart';
+import '../../../global/custom_assets/assets.gen.dart';
 import '../../auth/presentation/widgets/auth_grid_decoration.dart';
+import '../data/auth_temp_data.dart';
 import 'controller/verify_controller.dart';
 import 'widgets/custom_pin_code.dart';
 
 class VerifyScreen extends StatefulWidget {
-
-
-  const VerifyScreen({
-    super.key,
-
-  });
+  const VerifyScreen({super.key});
 
   @override
   State<VerifyScreen> createState() => _VerifyScreenState();
 }
 
 class _VerifyScreenState extends State<VerifyScreen> {
-  final TextEditingController otpController = TextEditingController();
-  late VerifyController controller;
+  // Track OTP as a plain String — no TextEditingController needed.
+  // This avoids the double-dispose that occurs because pin_code_fields
+  // disposes any TextEditingController it receives internally.
+  String _otp = '';
+  late VerifyController _c;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(VerifyController());
-    controller.startCountdown();
-  }
-
-  @override
-  void dispose() {
-    try {
-      otpController.dispose();
-    } catch (_) {}
-    super.dispose();
+    _c = Get.put(VerifyController());
   }
 
   @override
@@ -56,30 +46,29 @@ class _VerifyScreenState extends State<VerifyScreen> {
               children: [
                 SizedBox(height: 60.h),
 
-                // Back button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8.w),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: AppColors.primaryTextColor,
-                        size: 22.r,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 8.w),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back,
+                            color: AppColors.primaryTextColor, size: 22.r),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
                 ),
 
                 SizedBox(height: 12.h),
 
-                // Logo
-                Center(
-                  child: Assets.images.splashicon.image(
-                    width: 158.w,
-                    height: 125.h,
-                    fit: BoxFit.contain,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 80),
+                  child: Center(
+                    child: Assets.images.splashicon.image(
+                      width: 158.w, height: 125.h, fit: BoxFit.contain,
+                    ),
                   ),
                 ),
 
@@ -90,59 +79,81 @@ class _VerifyScreenState extends State<VerifyScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Title
-                      CustomText(
-                        text: 'Enter verification code',
-                        fontsize: 24.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.primaryTextColor,
-                        textAlign: TextAlign.center,
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 160),
+                        child: CustomText(
+                          text: 'Enter verification code',
+                          fontsize: 24.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primaryTextColor,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
 
                       SizedBox(height: 12.h),
 
-                      // Subtitle
-                      RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.secondaryTextColor,
-                            height: 1.5,
-                          ),
-                          children: [
-                            const TextSpan(
-                              text: "We've sent a verification code to ",
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 240),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w400,
+                              color: AppColors.secondaryTextColor,
+                              height: 1.5,
                             ),
-                            TextSpan(
-                              text: 'email',
-                              style: TextStyle(
-                                color: AppColors.primaryTextColor,
-                                fontWeight: FontWeight.w500,
+                            children: [
+                              const TextSpan(text: "We've sent a verification code to "),
+                              TextSpan(
+                                text: AuthTempData.email,
+                                style: TextStyle(
+                                  color: AppColors.primaryTextColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            const TextSpan(
-                              text:
-                                  ' that will expire in 10 minutes. Please enter the code to continue',
-                            ),
-                          ],
+                              const TextSpan(
+                                text: ' that will expire in 10 minutes. Please enter the code to continue',
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 
                       SizedBox(height: 32.h),
 
-                      // OTP boxes
-                      CustomPinCodeTextField(
-                        textEditingController: otpController,
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 320),
+                        child: CustomPinCodeTextField(
+                          onChanged: (v) => _otp = v,
+                          onCompleted: (v) => _otp = v,
+                        ),
+                      ),
+
+                      // OTP error
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 320),
+                        child: Obx(() {
+                          if (_c.otpError.value.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: EdgeInsets.only(top: 6.h),
+                            child: CustomText(
+                              text: _c.otpError.value,
+                              fontsize: 12.sp,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w400,
+                              textAlign: TextAlign.start,
+                            ),
+                          );
+                        }),
                       ),
 
                       SizedBox(height: 16.h),
 
-                      // Resend row
-                      Obx(
-                        () => Row(
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 400),
+                        child: Obx(() => Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CustomText(
@@ -152,38 +163,51 @@ class _VerifyScreenState extends State<VerifyScreen> {
                               color: AppColors.primaryTextColor,
                             ),
                             GestureDetector(
-                              onTap: controller.isCountingDown.value
+                              onTap: _c.isCountingDown.value
                                   ? null
-                                  : () => controller.resendOtp(),
+                                  : () => _c.resendOtp(),
                               child: CustomText(
-                                text: controller.isCountingDown.value
-                                    ? 'Resend ${controller.countdown.value}s'
+                                text: _c.isCountingDown.value
+                                    ? 'Resend ${_c.countdown.value}s'
                                     : 'Resend',
                                 fontsize: 11.sp,
                                 fontWeight: FontWeight.w500,
-                                color: controller.isCountingDown.value
+                                color: _c.isCountingDown.value
                                     ? AppColors.secondaryTextColor
                                     : const Color(0xFFFF2828),
                               ),
                             ),
                           ],
-                        ),
+                        )),
+                      ),
+
+                      // General error
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 400),
+                        child: Obx(() {
+                          if (_c.generalError.value.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: EdgeInsets.only(top: 8.h),
+                            child: CustomText(
+                              text: _c.generalError.value,
+                              fontsize: 12.sp,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w400,
+                              textAlign: TextAlign.start,
+                            ),
+                          );
+                        }),
                       ),
 
                       SizedBox(height: 200.h),
 
-                      // Continue button
-                      Obx(
-                        () => CustomButton(
-                          title: controller.isLoading.value
-                              ? 'Verifying...'
-                              : 'Verify',
-                          loading: controller.isLoading.value,
-                          onpress: () {
-                            context.pushNamed(AppRoutes.resetPasswordScreen);
-
-                          },
-                        ),
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 480),
+                        child: Obx(() => CustomButton(
+                          title: 'Verify',
+                          loading: _c.isLoading.value,
+                          onpress: () => _c.verify(context, _otp),
+                        )),
                       ),
 
                       SizedBox(height: 40.h),

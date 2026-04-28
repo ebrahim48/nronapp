@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../global/custom_assets/assets.gen.dart';
+import 'package:nron_app/core/utils/app_colors.dart';
+
+import '../../../core/custom_widgets/animated_entry.dart';
 import '../../../core/custom_widgets/custom_button.dart';
 import '../../../core/custom_widgets/custom_text.dart';
 import '../../../core/custom_widgets/custom_text_field.dart';
+import '../../../global/custom_assets/assets.gen.dart';
 import '../../auth/presentation/widgets/auth_field_label.dart';
 import '../../auth/presentation/widgets/auth_grid_decoration.dart';
 import 'controllers/reset_controller.dart';
@@ -18,12 +20,12 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  late ResetController controller;
+  late ResetController _c;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(ResetController());
+    _c = Get.put(ResetController());
   }
 
   @override
@@ -40,53 +42,56 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               children: [
                 SizedBox(height: 60.h),
 
-                // Back button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8.w),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: AppColors.primaryTextColor,
-                        size: 22.r,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 8.w),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back,
+                            color: AppColors.primaryTextColor, size: 22.r),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
-                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
                 ),
 
                 SizedBox(height: 12.h),
 
-                // Logo
-                Center(
-                  child: Assets.images.splashicon.image(
-                    width: 158.w,
-                    height: 125.h,
-                    fit: BoxFit.contain,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 80),
+                  child: Center(
+                    child: Assets.images.splashicon.image(
+                      width: 158.w, height: 125.h, fit: BoxFit.contain,
+                    ),
                   ),
                 ),
 
                 SizedBox(height: 24.h),
 
-                // Title
-                CustomText(
-                  text: 'Reset Password',
-                  fontsize: 24.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.center,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 160),
+                  child: CustomText(
+                    text: 'Reset Password',
+                    fontsize: 24.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
 
                 SizedBox(height: 8.h),
 
-                // Subtitle
-                CustomText(
-                  text: 'Reset your password',
-                  fontsize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.secondaryTextColor,
-                  textAlign: TextAlign.center,
+                AnimatedEntry(
+                  delay: const Duration(milliseconds: 240),
+                  child: CustomText(
+                    text: 'Create a new password for your account.',
+                    fontsize: 12.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
 
                 SizedBox(height: 32.h),
@@ -96,46 +101,73 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AuthFieldLabel(label: 'New Password *'),
-                      Obx(
-                        () => CustomTextField(
-                          controller: controller.passwordCtrl,
-                          hintText: 'Enter new password',
-                          isPassword: true,
-                          errorText: controller.passwordError.value.isEmpty
-                              ? null
-                              : controller.passwordError.value,
-                          onChanged: (_) => controller.validatePassword(),
+                      // New Password
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 320),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthFieldLabel(label: 'New Password *'),
+                            Obx(() => CustomTextField(
+                              controller: _c.passwordCtrl,
+                              hintText: 'Enter new password',
+                              isPassword: true,
+                              errorText: _c.passwordError.value.isEmpty
+                                  ? null
+                                  : _c.passwordError.value,
+                              onChanged: (_) => _c.validatePassword(),
+                            )),
+                          ],
                         ),
                       ),
 
-                      AuthFieldLabel(label: 'Confirm Password *'),
-                      Obx(
-                        () => CustomTextField(
-                          controller: controller.confirmPasswordCtrl,
-                          hintText: 'Re-enter new password',
-                          isPassword: true,
-                          errorText:
-                              controller.confirmPasswordError.value.isEmpty
+                      // Confirm Password
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 400),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthFieldLabel(label: 'Confirm Password *'),
+                            Obx(() => CustomTextField(
+                              controller: _c.confirmPasswordCtrl,
+                              hintText: 'Re-enter new password',
+                              isPassword: true,
+                              errorText: _c.confirmPasswordError.value.isEmpty
                                   ? null
-                                  : controller.confirmPasswordError.value,
-                          onChanged: (_) =>
-                              controller.validateConfirmPassword(),
+                                  : _c.confirmPasswordError.value,
+                              onChanged: (_) => _c.validateConfirmPassword(),
+                            )),
+                          ],
                         ),
+                      ),
+
+                      // General error
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 400),
+                        child: Obx(() {
+                          if (_c.generalError.value.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 8.h),
+                            child: CustomText(
+                              text: _c.generalError.value,
+                              fontsize: 12.sp,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w400,
+                              textAlign: TextAlign.start,
+                            ),
+                          );
+                        }),
                       ),
 
                       SizedBox(height: 200.h),
 
-                      Obx(
-                        () => CustomButton(
-                          title: controller.isLoading.value
-                              ? 'Resetting...'
-                              : 'Reset Password',
-                          loading: controller.isLoading.value,
-                          onpress: () {
-
-                          },
-                        ),
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 480),
+                        child: Obx(() => CustomButton(
+                          title: 'Reset Password',
+                          loading: _c.isLoading.value,
+                          onpress: () => _c.resetPassword(context),
+                        )),
                       ),
 
                       SizedBox(height: 40.h),

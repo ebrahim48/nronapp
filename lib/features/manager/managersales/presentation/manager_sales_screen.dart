@@ -8,7 +8,7 @@ import 'package:nron_app/features/manager/managersales/presentation/widgets/sale
 import 'package:nron_app/features/manager/managersales/presentation/widgets/sales_search_bar.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../appdrawer/app_drawer.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_sales_controller.dart';
 

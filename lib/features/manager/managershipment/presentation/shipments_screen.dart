@@ -7,7 +7,7 @@ import 'package:nron_app/features/manager/managershipment/presentation/widgets/s
 import 'package:nron_app/features/manager/managershipment/presentation/widgets/state_card.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../appdrawer/app_drawer.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/shipmentcontroller.dart';
 

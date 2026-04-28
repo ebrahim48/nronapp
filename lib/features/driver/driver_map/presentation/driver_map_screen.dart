@@ -7,7 +7,7 @@ import 'package:nron_app/features/driver/driver_map/presentation/widgets/destina
 import 'package:nron_app/features/driver/driver_map/presentation/widgets/eta_distance_bar.dart';
 import 'package:nron_app/features/driver/driver_map/presentation/widgets/map_action_buttons.dart';
 import 'package:nron_app/features/driver/driver_map/presentation/widgets/route_stop_list.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/driver_map_controller.dart';
 

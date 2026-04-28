@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/earnings_card.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/location_card.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/packages_details_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../driver_home/presentation/widgets/special_instructions_card.dart';

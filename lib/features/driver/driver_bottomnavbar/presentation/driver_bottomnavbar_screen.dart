@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:nron_app/features/driver/driver_map/presentation/driver_map_screen.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/driver_job_screen.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../driver_home/presentation/driver_home_screen.dart';
 import '../../driverprofile/presentation/driver_profile_screen.dart';

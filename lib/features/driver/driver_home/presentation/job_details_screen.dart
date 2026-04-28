@@ -7,7 +7,7 @@ import 'package:nron_app/features/driver/driver_home/presentation/widgets/job_lo
 import 'package:nron_app/features/driver/driver_home/presentation/widgets/job_package_card.dart';
 import 'package:nron_app/features/driver/driver_home/presentation/widgets/job_shipment_header.dart';
 import 'package:nron_app/features/driver/driver_home/presentation/widgets/special_instructions_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/driver_home_controller.dart';
 

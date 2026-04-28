@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 
 class OnboardingDotsNav extends StatelessWidget {
   final int totalPages;

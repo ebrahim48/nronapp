@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/po_info_grid.dart';
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/po_product_list.dart';
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/po_status_timeline.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../manager_controller/manager_po_controller.dart';

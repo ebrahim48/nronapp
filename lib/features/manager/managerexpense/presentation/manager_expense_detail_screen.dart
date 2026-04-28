@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:nron_app/features/manager/managerexpense/presentation/widgets/approve_dialog.dart';
 import 'package:nron_app/features/manager/managerexpense/presentation/widgets/expense-attachment_tile.dart';
 import 'package:nron_app/features/manager/managerexpense/presentation/widgets/reject-dialog.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_expense_controller.dart';
 import 'widgets/expense_rep_card.dart';

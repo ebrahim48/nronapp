@@ -8,7 +8,7 @@ import 'package:nron_app/features/manager/manager_home/presentation/widgets/mana
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/manager_po_search_bar.dart';
 import '../../../ representative/appdrawer/app_drawer.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../manager_controller/manager_po_controller.dart';

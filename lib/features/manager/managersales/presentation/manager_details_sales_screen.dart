@@ -11,7 +11,7 @@ import 'package:nron_app/features/manager/managersales/presentation/widgets/sale
 import 'package:nron_app/features/manager/managersales/presentation/widgets/sales_note_section.dart';
 import 'package:nron_app/features/manager/managersales/presentation/widgets/sales_rep_split_setion.dart';
 import 'package:nron_app/features/manager/managersales/presentation/widgets/transaction_status_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_sales_controller.dart';
 

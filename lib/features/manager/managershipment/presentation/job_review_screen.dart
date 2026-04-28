@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:nron_app/features/manager/managershipment/presentation/widgets/job_action_button.dart';
 import 'package:nron_app/features/manager/managershipment/presentation/widgets/job_map_widget.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/shipmentcontroller.dart';
 import 'widgets/job_status_header.dart';

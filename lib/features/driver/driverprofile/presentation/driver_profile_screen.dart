@@ -9,7 +9,7 @@ import 'package:nron_app/features/driver/driverprofile/presentation/widgets/perf
 import 'package:nron_app/features/driver/driverprofile/presentation/widgets/profile_state_cards.dart';
 import 'package:nron_app/features/driver/driverprofile/presentation/widgets/settings_menu_cards.dart';
 import 'package:nron_app/features/driver/driverprofile/presentation/widgets/total_earnings_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/profile_controller.dart';
 

@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/config/app-routes/app_routes.dart';
 import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/add_product_widgets.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/add_product_controller.dart';

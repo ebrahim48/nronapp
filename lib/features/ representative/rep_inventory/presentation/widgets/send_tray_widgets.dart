@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:nron_app/core/constants/app_colors.dart';
+import 'package:nron_app/core/utils/app_colors.dart';
 import 'package:nron_app/core/custom_widgets/custom_text.dart';
 import 'package:nron_app/core/custom_widgets/custom_text_field.dart';
 

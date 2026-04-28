@@ -10,7 +10,7 @@ import 'package:nron_app/features/%20representative/expenses/presentation/widget
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/expense_search_bar.dart';
 
 import '../../appdrawer/app_drawer.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/expense_controller.dart';
 import 'expense_details_screen.dart';

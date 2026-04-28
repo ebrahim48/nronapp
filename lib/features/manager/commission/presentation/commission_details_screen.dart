@@ -10,7 +10,7 @@ import 'package:nron_app/features/manager/commission/presentation/widgets/mark_p
 import 'package:nron_app/features/manager/commission/presentation/widgets/split_commission_section.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_commission_controller.dart';
 

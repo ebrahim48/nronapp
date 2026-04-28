@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 
-import '../constants/app_colors.dart';
+import '../utils/app_colors.dart';
 
 class ToastMessageHelper {
   static void showToastMessage(String message, {String title = 'Success'}) {

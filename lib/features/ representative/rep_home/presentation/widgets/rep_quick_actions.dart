@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/config/app-routes/app_routes.dart';
 
-import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 
 class RepQuickActions extends StatelessWidget {
