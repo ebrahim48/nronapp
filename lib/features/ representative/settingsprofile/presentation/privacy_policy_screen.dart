@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../controller/setting_controller.dart';
 
-class PrivacyPolicyScreen extends StatelessWidget {
+class PrivacyPolicyScreen extends StatefulWidget {
   const PrivacyPolicyScreen({super.key});
 
-  static const _points = [
-    'Lorem ipsum dolor sit amet consectetur. Lacus at venenatis gravida vivamus mauris. Quisque mi est vel dis. Donec rhoncus laoreet odio orci sed risus elit accumsan. Mattis ut est tristique amet vitae at aliquet. Ac vel porttitor egestas scelerisque enim quisque senectus. Euismod ultricies vulputate id cras bibendum sollicitudin proin odio bibendum. Velit velit in scelerisque erat etiam rutrum phasellus nunc. Sed lectus sed a at et eget. Nunc purus sed quis at risus. Consectetur nibh justo proin placerat condimentum id at adipiscing.',
-    'Vel blandit mi nulla sodales consectetur. Egestas tristique ultrices gravida duis nisl odio. Posuere curabitur eu platea pellentesque ut. Facilisi elementum neque mauris facilisis in. Cursus condimentum ipsum pretium consequat turpis at porttitor nisi.',
-    'Scelerisque tellus praesent condimentum euismod a faucibus. Auctor at ultricies at urna aliquam massa pellentesque. Vitae vulputate nullam diam placerat at magna egestas. Lectus lectus consequat porta lectus purus. Nulla duis sem sit at imperdiet lobortis dui. Nunc tellus cursus maecenas phasellus sollicitudin donec dictum. Sodales in faucibus libero augue vestibulum urna mattis curabitur. Sed nullam consectetur euismod a laoreet dui. Nulla porttitor urna id blandit.',
-    'Pretium pulvinar morbi suspendisse mattis.',
-  ];
+  @override
+  State<PrivacyPolicyScreen> createState() => _PrivacyPolicyScreenState();
+}
+
+class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
+  late SettingsController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = Get.put(SettingsController());
+    _c.fetchPrivacyPolicy();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +51,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Illustration Card ─────────────────────────────────
             Container(
               width: double.infinity,
               height: 200.h,
@@ -56,18 +65,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   'assets/images/privacy.png',
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => Center(
-                    child: Icon(
-                      Icons.security_outlined,
-                      color: AppColors.primaryColor,
-                      size: 64.r,
-                    ),
+                    child: Icon(Icons.security_outlined,
+                        color: AppColors.primaryColor, size: 64.r),
                   ),
                 ),
               ),
             ),
-
             SizedBox(height: 20.h),
-
             CustomText(
               text: 'Privacy Policy',
               fontsize: 16.sp,
@@ -75,55 +79,63 @@ class PrivacyPolicyScreen extends StatelessWidget {
               color: AppColors.primaryTextColor,
               textAlign: TextAlign.start,
             ),
-
             SizedBox(height: 12.h),
-
-            // ── Policy content card ───────────────────────────────
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.r),
-              decoration: BoxDecoration(
-                color: const Color(0xFF242424),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFF3A3A3A)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _points.map((point) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(top: 6.h, right: 8.w),
-                          child: Container(
-                            width: 5.r,
-                            height: 5.r,
-                            decoration: const BoxDecoration(
-                              color: AppColors.secondaryTextColor,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            point,
-                            style: TextStyle(
-                              fontSize: 12.5.sp,
-                              fontFamily: 'Poppins',
-                              color: AppColors.secondaryTextColor,
-                              height: 1.6,
-                            ),
-                          ),
-                        ),
-                      ],
+            Obx(() {
+              if (_c.isLoadingContent.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Container(
+                    width: double.infinity,
+                    height: 160.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2A2A),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                  );
-                }).toList(),
-              ),
-            ),
-
+                  ),
+                );
+              }
+              final content = _c.privacyContent.value;
+              if (content == null || content.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(24.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF242424),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: const Color(0xFF3A3A3A)),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Content not available.',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontFamily: 'Poppins',
+                        color: AppColors.secondaryTextColor,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF242424),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFF3A3A3A)),
+                ),
+                child: Text(
+                  content,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontFamily: 'Poppins',
+                    color: AppColors.secondaryTextColor,
+                    height: 1.6,
+                  ),
+                ),
+              );
+            }),
             SizedBox(height: 30.h),
           ],
         ),

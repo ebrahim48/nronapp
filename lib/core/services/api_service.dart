@@ -117,6 +117,28 @@ class ApiService {
     }
   }
 
+  Future<Response> patch(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      return await _dio.patch(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      throw UnknownException(e.toString());
+    }
+  }
+
   AppException _handleDioError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:

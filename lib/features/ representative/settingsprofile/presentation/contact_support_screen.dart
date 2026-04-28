@@ -8,7 +8,6 @@ import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/setting_controller.dart';
 
-
 class ContactSupportScreen extends StatelessWidget {
   const ContactSupportScreen({super.key});
 
@@ -42,7 +41,6 @@ class ContactSupportScreen extends StatelessWidget {
           children: [
             SizedBox(height: 32.h),
 
-            // Icon circle
             Container(
               width: 80.r,
               height: 80.r,
@@ -59,7 +57,6 @@ class ContactSupportScreen extends StatelessWidget {
 
             SizedBox(height: 16.h),
 
-            // Faded "Contact Support" watermark text
             ShaderMask(
               shaderCallback: (bounds) => LinearGradient(
                 colors: [
@@ -80,7 +77,6 @@ class ContactSupportScreen extends StatelessWidget {
 
             SizedBox(height: 32.h),
 
-            // Subject field
             CustomTextField(
               controller: c.subjectController,
               labelText: 'Subject',
@@ -92,7 +88,6 @@ class ContactSupportScreen extends StatelessWidget {
               ),
             ),
 
-            // Message field
             Padding(
               padding: EdgeInsets.only(bottom: 12.h),
               child: Column(
@@ -129,13 +124,13 @@ class ContactSupportScreen extends StatelessWidget {
 
             SizedBox(height: 16.h),
 
-            // Submit button
-            CustomButton(
-              title: 'Submit',
-              onpress: c.submitContactSupport,
-              titlecolor: AppColors.blackColor,
-              fontWeight: FontWeight.w600,
-            ),
+            Obx(() => CustomButton(
+                  title: 'Submit',
+                  loading: c.isSubmittingSupport.value,
+                  onpress: c.submitContactSupport,
+                  titlecolor: AppColors.blackColor,
+                  fontWeight: FontWeight.w600,
+                )),
           ],
         ),
       ),
