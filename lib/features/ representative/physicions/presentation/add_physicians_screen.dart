@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../../../core/utils/app_colors.dart';
@@ -9,13 +10,32 @@ import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/add_physicians_controller.dart';
+import '../domain/model/physician_model.dart';
 
-class AddPhysicianScreen extends StatelessWidget {
-  const AddPhysicianScreen({super.key});
+class AddPhysicianScreen extends StatefulWidget {
+  final PhysicianModel? physician;
+  const AddPhysicianScreen({super.key, this.physician});
+
+  @override
+  State<AddPhysicianScreen> createState() => _AddPhysicianScreenState();
+}
+
+class _AddPhysicianScreenState extends State<AddPhysicianScreen> {
+  late AddPhysicianController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    Get.delete<AddPhysicianController>(force: true);
+    _c = Get.put(AddPhysicianController());
+    if (widget.physician != null) {
+      _c.prefillForEdit(widget.physician!);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(AddPhysicianController());
+    final isEdit = widget.physician != null;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -29,7 +49,7 @@ class AddPhysicianScreen extends StatelessWidget {
               color: AppColors.primaryTextColor, size: 18.r),
         ),
         title: CustomText(
-          text: 'Add Physician',
+          text: isEdit ? 'Edit Physician' : 'Add Physician',
           fontsize: 16.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.primaryTextColor,
@@ -46,12 +66,11 @@ class AddPhysicianScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Basic Information ─────────────────────────────
                   _SectionTitle(text: 'Basic Information'),
 
                   _FieldLabel(text: 'Full Name'),
                   CustomTextField(
-                    controller: c.fullNameController,
+                    controller: _c.fullNameController,
                     hintText: 'Dr. Jane Smith',
                     prefixIcon: SvgPicture.asset(
                       'assets/icons/user.svg',
@@ -66,39 +85,45 @@ class AddPhysicianScreen extends StatelessWidget {
 
                   _FieldLabel(text: 'Practice Name'),
                   CustomTextField(
-                    controller: c.practiceNameController,
+                    controller: _c.practiceNameController,
                     hintText: 'Central Orthopedics',
+                  ),
+
+                  _FieldLabel(text: 'Location'),
+                  CustomTextField(
+                    controller: _c.locationController,
+                    hintText: 'New York',
                   ),
 
                   _FieldLabel(text: 'Specialty'),
                   Obx(() => _SpecialtyChips(
-                    specialties: c.specialties,
-                    selected: c.selectedSpecialty.value,
-                    onSelect: c.selectSpecialty,
-                  )),
+                        specialties: _c.specialties,
+                        selected: _c.selectedSpecialty.value,
+                        onSelect: _c.selectSpecialty,
+                      )),
 
                   SizedBox(height: 24.h),
 
-                  // ── Contact ───────────────────────────────────────
+
                   _SectionTitle(text: 'Contact'),
 
                   _FieldLabel(text: 'Phone Number'),
                   CustomTextField(
-                    controller: c.phoneController,
+                    controller: _c.phoneController,
                     hintText: '(555) 000-0000',
                     keyboardType: TextInputType.phone,
                   ),
 
                   _FieldLabel(text: 'Cell'),
                   CustomTextField(
-                    controller: c.cellController,
+                    controller: _c.cellController,
                     hintText: '(555) 000-0000',
                     keyboardType: TextInputType.phone,
                   ),
 
                   _FieldLabel(text: 'Email Address'),
                   CustomTextField(
-                    controller: c.emailController,
+                    controller: _c.emailController,
                     hintText: 'physician@example.com',
                     keyboardType: TextInputType.emailAddress,
                     isEmail: true,
@@ -106,8 +131,8 @@ class AddPhysicianScreen extends StatelessWidget {
 
                   _FieldLabel(text: 'Date of Birth'),
                   _DOBField(
-                    controller: c.dobController,
-                    onTap: () => c.pickDOB(context),
+                    controller: _c.dobController,
+                    onTap: () => _c.pickDOB(context),
                   ),
 
                   SizedBox(height: 24.h),
@@ -134,14 +159,14 @@ class AddPhysicianScreen extends StatelessWidget {
                   SizedBox(height: 12.h),
 
                   // Business Card upload
-                  Obx(() => c.businessCard.value != null
+                  Obx(() => _c.businessCard.value != null
                       ? _UploadedPreview(
-                          file: c.businessCard.value!,
-                          isPdf: c.businessCardIsPdf.value,
-                          onRemove: c.removeBusinessCard,
+                          file: _c.businessCard.value!,
+                          isPdf: _c.businessCardIsPdf.value,
+                          onRemove: _c.removeBusinessCard,
                         )
                       : GestureDetector(
-                          onTap: () => c.pickBusinessCard(context),
+                          onTap: () => _c.pickBusinessCard(context),
                           child: const _UploadBox(
                             icon: Icons.badge_outlined,
                             title: 'Business Card',
@@ -152,14 +177,14 @@ class AddPhysicianScreen extends StatelessWidget {
                   SizedBox(height: 10.h),
 
                   // Profile Picture upload
-                  Obx(() => c.profilePicture.value != null
+                  Obx(() => _c.profilePicture.value != null
                       ? _UploadedPreview(
-                          file: c.profilePicture.value!,
+                          file: _c.profilePicture.value!,
                           isPdf: false,
-                          onRemove: c.removeProfilePicture,
+                          onRemove: _c.removeProfilePicture,
                         )
                       : GestureDetector(
-                          onTap: () => c.pickProfilePicture(context),
+                          onTap: () => _c.pickProfilePicture(context),
                           child: const _UploadBox(
                             icon: Icons.person_outline,
                             title: 'Profile Picture',
@@ -173,7 +198,7 @@ class AddPhysicianScreen extends StatelessWidget {
 
                   _FieldLabel(text: 'Note to Self'),
                   CustomTextField(
-                    controller: c.noteController,
+                    controller: _c.noteController,
                     hintText: 'Add private notes about this physician...',
                     maxLine: 5,
                   ),
@@ -199,25 +224,41 @@ class AddPhysicianScreen extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
             child: Column(
               children: [
-                // Save Physician — teal with createjob.svg arrow
-                CustomButton(
-                  title: 'Save Physician',
-                  titlecolor: const Color(0xFF1E2121),
-                  onpress: () => Navigator.pop(context),
-                  suffixIcon: SvgPicture.asset(
-                    'assets/icons/createjob.svg',
-                    width: 18.r,
-                    height: 18.r,
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFF1E2121),
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
+                Obx(() => _c.isSubmitting.value
+                    ? Container(
+                        width: double.infinity,
+                        height: 48.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Center(
+                          child: SpinKitThreeBounce(
+                            color: const Color(0xFF1E2121),
+                            size: 20.r,
+                          ),
+                        ),
+                      )
+                    : CustomButton(
+                        title: isEdit ? 'Update Physician' : 'Save Physician',
+                        titlecolor: const Color(0xFF1E2121),
+                        onpress: () => _c.submitPhysician(
+                          context,
+                          physicianId: widget.physician?.id,
+                        ),
+                        suffixIcon: SvgPicture.asset(
+                          'assets/icons/createjob.svg',
+                          width: 18.r,
+                          height: 18.r,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF1E2121),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      )),
 
                 SizedBox(height: 10.h),
 
-                // Cancel — outlined
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
@@ -226,9 +267,7 @@ class AddPhysicianScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                       borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(
-                        color: const Color(0xFF3A3A3A),
-                      ),
+                      border: Border.all(color: const Color(0xFF3A3A3A)),
                     ),
                     child: Center(
                       child: CustomText(
@@ -311,11 +350,11 @@ class _SpecialtyChips extends StatelessWidget {
             height: 38,
             child: Stack(
               children: [
-                // Sliding background animation
                 AnimatedAlign(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  alignment: isActive ? Alignment.centerLeft : Alignment(-0.99, 0),
+                  alignment:
+                      isActive ? Alignment.centerLeft : const Alignment(-0.99, 0),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
@@ -327,12 +366,13 @@ class _SpecialtyChips extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Border overlay
                 Container(
                   width: 72.05,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: isActive ? const Color(0xFF00C5DA) : Colors.transparent,
+                    color: isActive
+                        ? const Color(0xFF00C5DA)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: const Color(0xFF00C5DA),
@@ -343,8 +383,10 @@ class _SpecialtyChips extends StatelessWidget {
                     child: CustomText(
                       text: s,
                       fontsize: 13.sp,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                      color: isActive ? Colors.black : const Color(0xFF00C5DA),
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.w400,
+                      color:
+                          isActive ? Colors.black : const Color(0xFF00C5DA),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -409,7 +451,6 @@ class _DOBField extends StatelessWidget {
     );
   }
 }
-
 
 class _UploadBox extends StatelessWidget {
   final IconData icon;

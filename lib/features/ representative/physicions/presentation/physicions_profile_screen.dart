@@ -1,12 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
-import '../controller/physicians_controller.dart';
+import '../domain/model/physician_model.dart';
 import 'widgets/physician_profile_widgets.dart';
 
 class PhysicianProfileScreen extends StatelessWidget {
-  final PhysicianItem physician;
+  final PhysicianModel physician;
 
   const PhysicianProfileScreen({super.key, required this.physician});
 
@@ -53,15 +55,15 @@ class PhysicianProfileScreen extends StatelessWidget {
                       color: const Color(0xFF1A3A3A),
                     ),
                     child: ClipOval(
-                      child: Image.asset(
-                        physician.imagePath,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: const Color(0xFF2A3A3A),
-                          child: Icon(Icons.person,
-                              color: AppColors.primaryColor, size: 48.r),
-                        ),
-                      ),
+                      child: physician.profileUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: physician.profileUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) => _profilePlaceholder(),
+                              errorWidget: (_, __, ___) =>
+                                  _profilePlaceholder(),
+                            )
+                          : _profilePlaceholder(),
                     ),
                   ),
                   Positioned(
@@ -85,7 +87,7 @@ class PhysicianProfileScreen extends StatelessWidget {
             SizedBox(height: 12.h),
 
             CustomText(
-              text: physician.name,
+              text: physician.fullName,
               fontsize: 20.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryTextColor,
@@ -101,7 +103,7 @@ class PhysicianProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: CustomText(
-                text: physician.specialty,
+                text: _specialtyDisplay(physician.specialty),
                 fontsize: 12.sp,
                 fontWeight: FontWeight.w600,
                 color: Colors.black,
@@ -126,18 +128,41 @@ class PhysicianProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   InfoItem(
-                      label: 'Practice Name',
-                      value: 'City Hospital, New York'),
-                  SizedBox(height: 12.h),
-                  InfoItem(label: 'Phone', value: '(212) 555-0198'),
-                  SizedBox(height: 12.h),
-                  InfoItem(label: 'Cell', value: '(917) 555-0123'),
+                    label: 'Practice Name',
+                    value: physician.practice.isNotEmpty
+                        ? physician.practice
+                        : '—',
+                  ),
                   SizedBox(height: 12.h),
                   InfoItem(
-                      label: 'Email Address',
-                      value: 'j.smith@cityhospital.org'),
+                    label: 'Phone',
+                    value: physician.contactInfo.phoneNumber.isNotEmpty
+                        ? physician.contactInfo.phoneNumber
+                        : '—',
+                  ),
                   SizedBox(height: 12.h),
-                  InfoItem(label: 'Birthday', value: 'March 14, 1978'),
+                  InfoItem(
+                    label: 'Cell',
+                    value: physician.contactInfo.cellNumber.isNotEmpty
+                        ? physician.contactInfo.cellNumber
+                        : '—',
+                  ),
+                  SizedBox(height: 12.h),
+                  InfoItem(
+                    label: 'Email Address',
+                    value: physician.contactInfo.email.isNotEmpty
+                        ? physician.contactInfo.email
+                        : '—',
+                  ),
+                  SizedBox(height: 12.h),
+                  InfoItem(
+                    label: 'Birthday',
+                    value: _formatDob(physician.contactInfo.dateOfBirth),
+                  ),
+                  if (physician.location.isNotEmpty) ...[
+                    SizedBox(height: 12.h),
+                    InfoItem(label: 'Location', value: physician.location),
+                  ],
                 ],
               ),
             ),
@@ -145,50 +170,80 @@ class PhysicianProfileScreen extends StatelessWidget {
             SizedBox(height: 20.h),
 
             // ── Notes ───────────────────────────────────────────────
-            SectionTitle(text: 'Notes'),
-
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.r),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2121),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFF3A3A3A)),
+            if (physician.noteToSelf.isNotEmpty) ...[
+              SectionTitle(text: 'Notes'),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E2121),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFF3A3A3A)),
+                ),
+                child: CustomText(
+                  text: physician.noteToSelf,
+                  fontsize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.secondaryTextColor,
+                  textAlign: TextAlign.start,
+                  textHeight: 1.6,
+                ),
               ),
-              child: CustomText(
-                text:
-                    'Highly preferred for complex spinal fusions. Efficient with surgical time and maintains excellent patient outcomes. Follows up personally within 24 hours post-op.',
-                fontsize: 13.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.secondaryTextColor,
-                textAlign: TextAlign.start,
-                textHeight: 1.6,
-              ),
-            ),
-
-            SizedBox(height: 20.h),
+              SizedBox(height: 20.h),
+            ],
 
             // ── Documents ───────────────────────────────────────────
-            SectionTitle(text: 'Documents'),
-
-            DocumentRow(
-              iconColor: const Color(0xFFEC0101),
-              icon: Icons.picture_as_pdf,
-              fileName: 'Surgical_Report_Jenkins.pdf',
-              fileSize: '1.1 MB',
-            ),
-
-            SizedBox(height: 10.h),
-
-            DocumentRow(
-              iconColor: const Color(0xFF137FEC),
-              icon: Icons.description_outlined,
-              fileName: 'Facility_Auth_Letter.docx',
-              fileSize: '842 KB',
-            ),
+            if (physician.documents.isNotEmpty) ...[
+              SectionTitle(text: 'Documents'),
+              ...physician.documents.asMap().entries.map((entry) => Padding(
+                    padding: EdgeInsets.only(bottom: 10.h),
+                    child: DocumentRow(
+                      iconColor: const Color(0xFF137FEC),
+                      icon: Icons.image_outlined,
+                      fileName: _fileNameFromUrl(entry.value),
+                      fileSize: 'Document ${entry.key + 1}',
+                      url: entry.value,
+                    ),
+                  )),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Widget _profilePlaceholder() {
+    return Container(
+      color: const Color(0xFF2A3A3A),
+      child: Icon(Icons.person, color: AppColors.primaryColor, size: 48.r),
+    );
+  }
+
+  String _specialtyDisplay(String specialty) {
+    const map = {
+      'ortho': 'Orthopedic',
+      'neuro': 'Neuro',
+      'pain': 'Pain',
+      'ortho/spine': 'Ortho/Spine',
+      'peds': 'Pediatrician',
+      'dmp': 'DPM',
+    };
+    return map[specialty.toLowerCase()] ?? specialty;
+  }
+
+  String _formatDob(String isoDate) {
+    if (isoDate.isEmpty) return '—';
+    try {
+      final dt = DateTime.parse(isoDate);
+      return DateFormat('MMMM d, yyyy').format(dt);
+    } catch (_) {
+      return isoDate;
+    }
+  }
+
+  String _fileNameFromUrl(String url) {
+    final uri = Uri.tryParse(url);
+    final segments = uri?.pathSegments ?? [];
+    return segments.isNotEmpty ? segments.last : 'document';
   }
 }

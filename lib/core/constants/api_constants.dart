@@ -28,6 +28,12 @@ class ApiConstants {
   static const String terms = '/common/terms';
   static const String privacyPolicy = '/common/privacy-policy';
 
+  static const String getPhysicianAll = '/physician/get-all';
+  static String getSinglePhysician(String id) => '/physician/find/$id';
+  static const String createPhysician = '/physician/create';
+  static String updatePhysician(String id) => '/physician/update/$id';
+  static String deletePhysician(String id) => '/physician/delete/$id';
+
 
 
 

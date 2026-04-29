@@ -1,12 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
-import '../../controller/physicians_controller.dart';
+import '../../domain/model/physician_model.dart';
 
 class PhysicianCard extends StatelessWidget {
-  final PhysicianItem physician;
+  final PhysicianModel physician;
   final VoidCallback onTap;
   final VoidCallback onAddSurgeries;
   final VoidCallback onEdit;
@@ -38,22 +39,16 @@ class PhysicianCard extends StatelessWidget {
             // Avatar
             ClipRRect(
               borderRadius: BorderRadius.circular(10.r),
-              child: Image.asset(
-                physician.imagePath,
-                width: 56.r,
-                height: 56.r,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 56.r,
-                  height: 56.r,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2A3A3A),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(Icons.person,
-                      color: AppColors.primaryColor, size: 28.r),
-                ),
-              ),
+              child: physician.profileUrl.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: physician.profileUrl,
+                      width: 56.r,
+                      height: 56.r,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => _avatarPlaceholder(),
+                      errorWidget: (_, __, ___) => _avatarPlaceholder(),
+                    )
+                  : _avatarPlaceholder(),
             ),
             SizedBox(width: 12.w),
             // Info
@@ -62,7 +57,7 @@ class PhysicianCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomText(
-                    text: physician.name,
+                    text: physician.fullName,
                     fontsize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryTextColor,
@@ -70,7 +65,7 @@ class PhysicianCard extends StatelessWidget {
                   ),
                   SizedBox(height: 2.h),
                   CustomText(
-                    text: physician.specialty,
+                    text: _specialtyDisplay(physician.specialty),
                     fontsize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.primaryColor,
@@ -89,12 +84,14 @@ class PhysicianCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 4.w),
-                      CustomText(
-                        text: physician.facility,
-                        fontsize: 11.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.secondaryTextColor,
-                        textAlign: TextAlign.start,
+                      Expanded(
+                        child: CustomText(
+                          text: physician.practice,
+                          fontsize: 11.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.secondaryTextColor,
+                          textAlign: TextAlign.start,
+                        ),
                       ),
                     ],
                   ),
@@ -111,6 +108,30 @@ class PhysicianCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _avatarPlaceholder() {
+    return Container(
+      width: 56.r,
+      height: 56.r,
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A3A3A),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Icon(Icons.person, color: AppColors.primaryColor, size: 28.r),
+    );
+  }
+
+  String _specialtyDisplay(String specialty) {
+    const map = {
+      'ortho': 'Orthopedic',
+      'neuro': 'Neuro',
+      'pain': 'Pain',
+      'ortho/spine': 'Ortho/Spine',
+      'peds': 'Pediatrician',
+      'dmp': 'DPM',
+    };
+    return map[specialty.toLowerCase()] ?? specialty;
   }
 }
 
@@ -140,17 +161,13 @@ class _PhysicianPopupMenu extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         side: const BorderSide(color: Color(0xFF3A3A3A)),
       ),
-      constraints: BoxConstraints(
-        minWidth: 122.w,
-        maxWidth: 122.w,
-      ),
+      constraints: BoxConstraints(minWidth: 122.w, maxWidth: 122.w),
       onSelected: (value) {
         if (value == 'surgeries') onAddSurgeries();
         if (value == 'edit') onEdit();
         if (value == 'delete') onDelete();
       },
       itemBuilder: (ctx) => [
-        // ── Add Surgeries ──────────────────────────────────────
         PopupMenuItem<String>(
           value: 'surgeries',
           padding: EdgeInsets.zero,
@@ -179,7 +196,6 @@ class _PhysicianPopupMenu extends StatelessWidget {
             ),
           ),
         ),
-        // ── Edit Physicians ────────────────────────────────────
         PopupMenuItem<String>(
           value: 'edit',
           padding: EdgeInsets.zero,
@@ -205,7 +221,6 @@ class _PhysicianPopupMenu extends StatelessWidget {
             ),
           ),
         ),
-        // ── Delete ────────────────────────────────────────────
         PopupMenuItem<String>(
           value: 'delete',
           padding: EdgeInsets.zero,
