@@ -127,6 +127,7 @@ class _AddPhysicianScreenState extends State<AddPhysicianScreen> {
                     hintText: 'physician@example.com',
                     keyboardType: TextInputType.emailAddress,
                     isEmail: true,
+                    readOnly: isEdit,
                   ),
 
                   _FieldLabel(text: 'Date of Birth'),
@@ -410,42 +411,45 @@ class _DOBField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
-      child: Container(
-        height: 48.h,
-        decoration: BoxDecoration(
-          color: const Color(0x1A4A4A4A),
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: const Color(0xFFD4D4D4), width: 0.8),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 14.w),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: controller,
-                readOnly: true,
-                onTap: onTap,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 13.sp,
-                  color: AppColors.primaryTextColor,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'mm/dd/yyyy',
-                  hintStyle: TextStyle(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 48.h,
+          decoration: BoxDecoration(
+            color: const Color(0x1A4A4A4A),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: const Color(0xFFD4D4D4), width: 0.8),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller,
+                  readOnly: true,
+                  onTap: onTap,
+                  style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 13.sp,
-                    color: AppColors.secondaryTextColor,
+                    color: AppColors.primaryTextColor,
                   ),
-                  border: InputBorder.none,
-                  isCollapsed: true,
-                  contentPadding: EdgeInsets.symmetric(vertical: 2.h),
+                  decoration: InputDecoration(
+                    hintText: 'mm/dd/yyyy',
+                    hintStyle: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 13.sp,
+                      color: AppColors.secondaryTextColor,
+                    ),
+                    border: InputBorder.none,
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 2.h),
+                  ),
                 ),
               ),
-            ),
-            Icon(Icons.calendar_today_outlined,
-                color: AppColors.secondaryTextColor, size: 16.r),
-          ],
+              Icon(Icons.calendar_today_outlined,
+                  color: AppColors.secondaryTextColor, size: 16.r),
+            ],
+          ),
         ),
       ),
     );

@@ -19,7 +19,7 @@ class SurgerySearchBar extends StatelessWidget {
         border: Border.all(color: const Color(0xFF3A3A3A)),
       ),
       child: TextField(
-        onChanged: (v) => c.searchQuery.value = v,
+        onChanged: c.onSearch,
         style: TextStyle(
           fontSize: 13.sp,
           fontFamily: 'Poppins',
