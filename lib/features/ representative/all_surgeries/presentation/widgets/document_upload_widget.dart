@@ -17,7 +17,7 @@ class DocumentUploadWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Uploaded files list
-        ...c.uploadedDocs.asMap().entries.map(
+        ...c.uploadedDocFiles.asMap().entries.map(
               (e) => Container(
             margin: EdgeInsets.only(bottom: 8.h),
             padding: EdgeInsets.symmetric(
@@ -34,14 +34,14 @@ class DocumentUploadWidget extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: CustomText(
-                    text: e.value,
+                    text: e.value.path.split('/').last,
                     fontsize: 12.sp,
                     color: AppColors.primaryTextColor,
                     textAlign: TextAlign.start,
                   ),
                 ),
                 GestureDetector(
-                  onTap: () => c.uploadedDocs.removeAt(e.key),
+                  onTap: () => c.removeDoc(e.key),
                   child: Icon(Icons.close,
                       color: AppColors.secondaryTextColor,
                       size: 16.r),

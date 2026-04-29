@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 import '../../model/surgery_model.dart';
@@ -9,6 +10,15 @@ class SurgeryCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const SurgeryCard({super.key, required this.surgery, this.onTap});
+
+  String _formatDate(String iso) {
+    if (iso.isEmpty) return '—';
+    try {
+      return DateFormat('MM/dd/yyyy').format(DateTime.parse(iso));
+    } catch (_) {
+      return iso;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,42 +34,32 @@ class SurgeryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
             ClipRRect(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(14.r),
                 topRight: Radius.circular(14.r),
               ),
-              child: surgery.imageAsset != null
-                  ? Image.asset(
-                surgery.imageAsset!,
-                width: double.infinity,
-                height: 160.h,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Image.asset(
-                  'assets/images/surgery.png',
-                  width: double.infinity,
-                  height: 160.h,
-                  fit: BoxFit.cover,
-                ),
-              )
-                  : Image.asset(
+              child: Image.asset(
                 'assets/images/surgery.png',
                 width: double.infinity,
                 height: 160.h,
                 fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: double.infinity,
+                  height: 160.h,
+                  color: const Color(0xFF2A2A2A),
+                  child: Icon(Icons.medical_services_outlined,
+                      color: const Color(0xFF3A3A3A), size: 40.r),
+                ),
               ),
             ),
-
-            // Info
             Padding(
-              padding:
-              EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomText(
-                    text: surgery.patientName,
+                    text: surgery.patientId.isNotEmpty ? surgery.patientId : '—',
                     fontsize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryTextColor,
@@ -67,7 +67,7 @@ class SurgeryCard extends StatelessWidget {
                   ),
                   SizedBox(height: 2.h),
                   CustomText(
-                    text: surgery.procedureName,
+                    text: surgery.surgeryType.isNotEmpty ? surgery.surgeryType : '—',
                     fontsize: 13.sp,
                     color: AppColors.secondaryTextColor,
                     textAlign: TextAlign.start,
@@ -76,22 +76,22 @@ class SurgeryCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.location_on_outlined,
-                          color: AppColors.secondaryTextColor,
-                          size: 13.r),
+                          color: AppColors.secondaryTextColor, size: 13.r),
                       SizedBox(width: 4.w),
-                      CustomText(
-                        text: surgery.facility,
-                        fontsize: 11.sp,
-                        color: AppColors.secondaryTextColor,
-                        textAlign: TextAlign.start,
+                      Expanded(
+                        child: CustomText(
+                          text: surgery.facilityName.isNotEmpty ? surgery.facilityName : '—',
+                          fontsize: 11.sp,
+                          color: AppColors.secondaryTextColor,
+                          textAlign: TextAlign.start,
+                        ),
                       ),
                       SizedBox(width: 12.w),
                       Icon(Icons.calendar_today_outlined,
-                          color: AppColors.secondaryTextColor,
-                          size: 13.r),
+                          color: AppColors.secondaryTextColor, size: 13.r),
                       SizedBox(width: 4.w),
                       CustomText(
-                        text: surgery.dateTime,
+                        text: _formatDate(surgery.dateOfSurgery),
                         fontsize: 11.sp,
                         color: AppColors.secondaryTextColor,
                         textAlign: TextAlign.start,

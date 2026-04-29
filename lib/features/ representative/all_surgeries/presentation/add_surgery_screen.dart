@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/document_upload_widget.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/physician_dropdown.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/radiology_image_grid.dart';
@@ -14,14 +14,14 @@ import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/surgery_controller.dart';
 
-
-
 class AddSurgeryScreen extends StatelessWidget {
-  const AddSurgeryScreen({super.key});
+  final String? surgeryId;
+  const AddSurgeryScreen({super.key, this.surgeryId});
 
   @override
   Widget build(BuildContext context) {
     final c = Get.find<SurgeryController>();
+    final isEdit = surgeryId != null;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -30,12 +30,12 @@ class AddSurgeryScreen extends StatelessWidget {
         elevation: 0,
         toolbarHeight: 52.h,
         leading: GestureDetector(
-          onTap: () => context.pop(),
+          onTap: () => Navigator.pop(context),
           child: Icon(Icons.arrow_back_ios,
               color: AppColors.primaryTextColor, size: 18.r),
         ),
         title: CustomText(
-          text: 'Add Surgery',
+          text: isEdit ? 'Edit Surgery' : 'Add Surgery',
           fontsize: 18.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryTextColor,
@@ -56,17 +56,15 @@ class AddSurgeryScreen extends StatelessWidget {
             CustomTextField(
               controller: c.patientIdController,
               labelText: 'Patient identifier (PT ID)',
-              hintText: 'Central Orthopedics',
+              hintText: 'Enter patient ID',
             ),
 
-            // Facility
             CustomTextField(
-              controller: c.facilityController,
+              controller: c.facilityIdController,
               labelText: 'Facility',
-              hintText: 'Hospital or Clinic name',
+              hintText: 'Enter facility ID',
             ),
 
-            // Date of Surgery
             Obx(() => GestureDetector(
               onTap: () => c.pickDate(context),
               child: AbsorbPointer(
@@ -77,13 +75,11 @@ class AddSurgeryScreen extends StatelessWidget {
                   hintText: 'mm/dd/yyyy',
                   readOnly: true,
                   suffixIcon: Icon(Icons.calendar_today_outlined,
-                      color: AppColors.secondaryTextColor,
-                      size: 18.r),
+                      color: AppColors.secondaryTextColor, size: 18.r),
                 ),
               ),
             )),
 
-            // Surgery Type
             CustomTextField(
               controller: c.surgeryTypeController,
               labelText: 'Surgery Type',
@@ -91,7 +87,6 @@ class AddSurgeryScreen extends StatelessWidget {
             ),
 
             SizedBox(height: 6.h),
-
 
             const SurgerySectionHeader(title: 'Surgery Materials'),
 
@@ -127,13 +122,11 @@ class AddSurgeryScreen extends StatelessWidget {
 
             SizedBox(height: 6.h),
 
-            const SurgerySectionHeader(
-                title: 'Radiology & Clinical Images'),
+            const SurgerySectionHeader(title: 'Radiology & Clinical Images'),
 
             const RadiologyImageGrid(),
 
             SizedBox(height: 20.h),
-
 
             const SurgerySectionHeader(title: 'Documents & Notes'),
 
@@ -141,7 +134,6 @@ class AddSurgeryScreen extends StatelessWidget {
 
             SizedBox(height: 14.h),
 
-            // Case Notes
             CustomTextField(
               controller: c.caseNotesController,
               labelText: 'Case Notes',
@@ -162,33 +154,38 @@ class AddSurgeryScreen extends StatelessWidget {
 
             SizedBox(height: 24.h),
 
-            CustomButton(
-              title: 'Save Surgery',
-              onpress: c.saveSurgery,
-              titlecolor: AppColors.blackColor,
-              fontWeight: FontWeight.w700,
-              suffixIcon: SvgPicture.asset(
-                'assets/icons/createjob.svg',
-                width: 18.r,
-                height: 18.r,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.blackColor,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
+            Obx(() => c.isSubmitting.value
+                ? Center(
+                    child: SpinKitThreeBounce(
+                      color: AppColors.primaryColor,
+                      size: 28.r,
+                    ),
+                  )
+                : CustomButton(
+                    title: isEdit ? 'Update Surgery' : 'Save Surgery',
+                    onpress: () => c.submitSurgery(context, surgeryId: surgeryId),
+                    titlecolor: AppColors.blackColor,
+                    fontWeight: FontWeight.w700,
+                    suffixIcon: SvgPicture.asset(
+                      'assets/icons/createjob.svg',
+                      width: 18.r,
+                      height: 18.r,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.blackColor,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  )),
 
             SizedBox(height: 12.h),
 
-            // Send to Email button
             CustomButton(
               title: 'Cancel',
-              onpress: () {},
+              onpress: () => Navigator.pop(context),
               color: Colors.transparent,
               borderColor: const Color(0xFF3A3A3A),
               titlecolor: AppColors.secondaryTextColor,
               fontWeight: FontWeight.w500,
-
             ),
 
             SizedBox(height: 30.h),
