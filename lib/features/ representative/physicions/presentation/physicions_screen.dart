@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/physicians_controller.dart';
+import '../domain/model/physician_model.dart';
 import 'add_physicians_screen.dart';
 import 'physicions_profile_screen.dart';
 import 'widgets/physician_card.dart';
-
 
 class PhysiciansScreen extends StatelessWidget {
   const PhysiciansScreen({super.key});
@@ -59,18 +60,18 @@ class PhysiciansScreen extends StatelessWidget {
               padding: EdgeInsets.only(right: 24.w),
               child: GestureDetector(
                 onTap: () => Scaffold.of(ctx).openDrawer(),
-                child: SvgPicture.asset(
-                  'assets/icons/drawer.svg',
-                ),
+                child: SvgPicture.asset('assets/icons/drawer.svg'),
               ),
             ),
           ),
         ],
       ),
       body: SingleChildScrollView(
+        controller: c.scrollController,
         padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 40.h),
         child: Column(
           children: [
+
             Container(
               height: 48.h,
               decoration: BoxDecoration(
@@ -100,7 +101,7 @@ class PhysiciansScreen extends StatelessWidget {
                         color: AppColors.primaryTextColor,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Search by PO#, Surgeon, or facility',
+                        hintText: 'Search by name or practice',
                         hintStyle: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 13.sp,
@@ -118,14 +119,16 @@ class PhysiciansScreen extends StatelessWidget {
 
             SizedBox(height: 14.h),
 
-            // ── Add Physician button ────────────────────────────────
             GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AddPhysicianScreen(),
-                ),
-              ),
+              onTap: () async {
+                final result = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AddPhysicianScreen(),
+                  ),
+                );
+                if (result == true) c.refresh();
+              },
               child: Container(
                 width: double.infinity,
                 height: 48.h,
@@ -152,28 +155,74 @@ class PhysiciansScreen extends StatelessWidget {
 
             SizedBox(height: 16.h),
 
-            // ── Physician cards ─────────────────────────────────────
-            Obx(() => Column(
-              children: c.filtered
-                  .map((p) => Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
-                child: PhysicianCard(
-                  physician: p,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PhysicianProfileScreen(physician: p),),),
-                  onAddSurgeries: () {
-                    // TODO: navigate to add surgeries
-                  },
-                  onEdit: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AddPhysicianScreen(),
+            Obx(() {
+              if (c.isLoading.value) {
+                return Column(
+                  children: List.generate(
+                    5,
+                    (_) => Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: const _PhysicianCardShimmer(),
                     ),
                   ),
-                  onDelete: () => _confirmDelete(context, c, p),
-                ),
-              ))
-                  .toList(),
-            )),
+                );
+              }
+
+              if (c.physicians.isEmpty) {
+                return Padding(
+                  padding: EdgeInsets.only(top: 60.h),
+                  child: Column(
+                    children: [
+                      Icon(Icons.person_search,
+                          color: AppColors.secondaryTextColor, size: 48.r),
+                      SizedBox(height: 12.h),
+                      CustomText(
+                        text: 'No physicians found',
+                        fontsize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.secondaryTextColor,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Column(
+                children: [
+                  ...c.physicians.map((p) => Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: PhysicianCard(
+                          physician: p,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  PhysicianProfileScreen(physician: p),
+                            ),
+                          ),
+                          onAddSurgeries: () {},
+                          onEdit: () async {
+                            final result = await Navigator.push<bool>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    AddPhysicianScreen(physician: p),
+                              ),
+                            );
+                            if (result == true) c.refresh();
+                          },
+                          onDelete: () => _confirmDelete(context, c, p),
+                        ),
+                      )),
+                  if (c.isLoadingMore.value)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      child: const _LoadMoreIndicator(),
+                    ),
+                ],
+              );
+            }),
           ],
         ),
       ),
@@ -181,12 +230,13 @@ class PhysiciansScreen extends StatelessWidget {
   }
 
   void _confirmDelete(
-      BuildContext context, PhysiciansController c, PhysicianItem p) {
+      BuildContext context, PhysiciansController c, PhysicianModel p) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1E2121),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
         title: CustomText(
           text: 'Delete Physician',
           fontsize: 16.sp,
@@ -194,7 +244,7 @@ class PhysiciansScreen extends StatelessWidget {
           color: AppColors.primaryTextColor,
         ),
         content: CustomText(
-          text: 'Are you sure you want to delete ${p.name}?',
+          text: 'Are you sure you want to delete ${p.fullName}?',
           fontsize: 13.sp,
           color: AppColors.secondaryTextColor,
         ),
@@ -209,13 +259,123 @@ class PhysiciansScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              c.deletePhysician(p.id);
               Navigator.pop(context);
+              c.deletePhysician(p.id);
             },
             child: CustomText(
               text: 'Delete',
               fontsize: 13.sp,
               color: const Color(0xFFFF4D4F),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PhysicianCardShimmer extends StatelessWidget {
+  const _PhysicianCardShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2E2E),
+      highlightColor: const Color(0xFF3A3E3E),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(14.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E2121),
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 56.r,
+              height: 56.r,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 14.h,
+                    width: 140.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  SizedBox(height: 6.h),
+                  Container(
+                    height: 12.h,
+                    width: 100.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  SizedBox(height: 6.h),
+                  Container(
+                    height: 10.h,
+                    width: 120.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadMoreIndicator extends StatelessWidget {
+  const _LoadMoreIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2E2E),
+      highlightColor: const Color(0xFF3A3E3E),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 8.r,
+            height: 8.r,
+            margin: EdgeInsets.symmetric(horizontal: 4.w),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Container(
+            width: 8.r,
+            height: 8.r,
+            margin: EdgeInsets.symmetric(horizontal: 4.w),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Container(
+            width: 8.r,
+            height: 8.r,
+            margin: EdgeInsets.symmetric(horizontal: 4.w),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
             ),
           ),
         ],

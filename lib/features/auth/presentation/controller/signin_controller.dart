@@ -55,11 +55,8 @@ class SignInController extends GetxController {
 
       if (res['success'] == true) {
         final data = res['data'] as Map<String, dynamic>? ?? {};
-        debugPrint('LOGIN DATA KEYS: ${data.keys.toList()}');
-        debugPrint('LOGIN TOKEN: ${data['token']}');
-        debugPrint('LOGIN accessToken: ${data['accessToken']}');
-        debugPrint('LOGIN FULL DATA: $data');
-        await PrefsHelper.setString('auth_token', data['token'] ?? '');
+        final token = (data['accessToken'] ?? data['token'] ?? '').toString();
+        await PrefsHelper.setString('auth_token', token);
         await PrefsHelper.setString('auth_refresh_token', data['refreshToken'] ?? '');
         final role = (data['results']?['role'] ?? 'representative').toString();
         await PrefsHelper.setString('user_role', role);

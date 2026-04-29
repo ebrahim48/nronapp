@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/utils/app_colors.dart';
@@ -64,6 +65,7 @@ class DocumentRow extends StatelessWidget {
   final IconData icon;
   final String fileName;
   final String fileSize;
+  final String? url;
 
   const DocumentRow({
     super.key,
@@ -71,6 +73,7 @@ class DocumentRow extends StatelessWidget {
     required this.icon,
     required this.fileName,
     required this.fileSize,
+    this.url,
   });
 
   @override
@@ -85,7 +88,26 @@ class DocumentRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: iconColor, size: 24.r),
+          if (url != null && url!.isNotEmpty)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6.r),
+              child: CachedNetworkImage(
+                imageUrl: url!,
+                width: 36.r,
+                height: 36.r,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => Container(
+                  width: 36.r,
+                  height: 36.r,
+                  color: const Color(0xFF252525),
+                  child: Icon(icon, color: iconColor, size: 18.r),
+                ),
+                errorWidget: (_, __, ___) => Icon(icon,
+                    color: iconColor, size: 24.r),
+              ),
+            )
+          else
+            Icon(icon, color: iconColor, size: 24.r),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
