@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/%20representative/commissions/presentation/widgets/commission_card.dart';
 import 'package:nron_app/features/%20representative/commissions/presentation/widgets/commission_state_card.dart';
 import 'package:nron_app/features/%20representative/commissions/presentation/widgets/commission_trend_chart.dart';
@@ -11,7 +12,6 @@ import '../../appdrawer/app_drawer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/commission_controller.dart';
-
 
 class CommissionScreen extends StatelessWidget {
   const CommissionScreen({super.key});
@@ -54,95 +54,152 @@ class CommissionScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Obx(() => Column(
-              children: [
-                Row(
-                  children: [
-                    CommissionStatCard(
-                      label: 'Total Sales',
-                      value: '\$${c.totalSales.value.toInt()}',
-                      valueColor: AppColors.primaryTextColor,
-                    ),
-                    SizedBox(width: 12.w),
-                    CommissionStatCard(
-                      label: 'This Month',
-                      value: '\$${c.thisMonth.value.toInt()}',
-                      valueColor: AppColors.primaryTextColor,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-                Row(
-                  children: [
-                    CommissionStatCard(
-                      label: 'Pending Payment',
-                      value: '\$${c.pendingPayment.value.toInt()}',
-                      valueColor: AppColors.warningColor,
-                    ),
-                    SizedBox(width: 12.w),
-                    CommissionStatCard(
-                      label: 'Paid',
-                      value: '\$${c.paid.value.toInt()}',
-                      valueColor: const Color(0xFF1DB954),
-                    ),
-                  ],
-                ),
-              ],
-            )),
+      body: Obx(() {
+        if (c.isLoadingOverview.value) return _CommissionOverviewShimmer();
 
-            SizedBox(height: 16.h),
+        return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CommissionStatCard(
+                    label: 'Total Sales',
+                    value: '\$${c.totalSales.value.toStringAsFixed(2)}',
+                    valueColor: AppColors.primaryTextColor,
+                  ),
+                  SizedBox(width: 12.w),
+                  CommissionStatCard(
+                    label: 'This Month',
+                    value: '\$${c.thisMonth.value.toStringAsFixed(2)}',
+                    valueColor: AppColors.primaryTextColor,
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
+                  CommissionStatCard(
+                    label: 'Pending Payment',
+                    value: '\$${c.pendingPayment.value.toStringAsFixed(2)}',
+                    valueColor: AppColors.warningColor,
+                  ),
+                  SizedBox(width: 12.w),
+                  CommissionStatCard(
+                    label: 'Paid',
+                    value: '\$${c.paid.value.toStringAsFixed(2)}',
+                    valueColor: const Color(0xFF1DB954),
+                  ),
+                ],
+              ),
 
-            CommissionTrendChart(points: c.trendPoints),
+              SizedBox(height: 16.h),
 
-            SizedBox(height: 20.h),
+              CommissionTrendChart(points: c.trendPoints.toList()),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CustomText(
-                  text: 'Recent Commissions',
-                  fontsize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.start,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    context.pushNamed(AppRoutes.commissionHistoryScreen);
-                  },
-                  child: CustomText(
-                    text: 'View All',
-                    fontsize: 13.sp,
-                    color: AppColors.primaryColor,
+              SizedBox(height: 20.h),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(
+                    text: 'Recent Commissions',
+                    fontsize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryTextColor,
                     textAlign: TextAlign.start,
                   ),
-                ),
-              ],
-            ),
+                  GestureDetector(
+                    onTap: () =>
+                        context.pushNamed(AppRoutes.commissionHistoryScreen),
+                    child: CustomText(
+                      text: 'View All',
+                      fontsize: 13.sp,
+                      color: AppColors.primaryColor,
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                ],
+              ),
 
-            SizedBox(height: 12.h),
+              SizedBox(height: 12.h),
 
-            Obx(() => Column(
-              children: c.recentCommissions
-                  .map(
-                    (item) => CommissionCard(
+              ...c.recentCommissions.map(
+                (item) => CommissionCard(
                   commission: item,
                   onTap: () {
+                    c.fetchDetail(item.id);
                     context.pushNamed(AppRoutes.commissionDetailScreen);
                   },
                 ),
-              )
-                  .toList(),
-            )),
+              ),
 
-            SizedBox(height: 24.h),
+              SizedBox(height: 24.h),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _CommissionOverviewShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                _ShimmerBox(width: 160.w, height: 72.h, radius: 12.r),
+                SizedBox(width: 12.w),
+                _ShimmerBox(width: 160.w, height: 72.h, radius: 12.r),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Row(
+              children: [
+                _ShimmerBox(width: 160.w, height: 72.h, radius: 12.r),
+                SizedBox(width: 12.w),
+                _ShimmerBox(width: 160.w, height: 72.h, radius: 12.r),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            _ShimmerBox(width: double.infinity, height: 210.h, radius: 12.r),
+            SizedBox(height: 20.h),
+            _ShimmerBox(width: double.infinity, height: 70.h, radius: 12.r),
+            SizedBox(height: 10.h),
+            _ShimmerBox(width: double.infinity, height: 70.h, radius: 12.r),
+            SizedBox(height: 10.h),
+            _ShimmerBox(width: double.infinity, height: 70.h, radius: 12.r),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ShimmerBox extends StatelessWidget {
+  final double width;
+  final double height;
+  final double radius;
+
+  const _ShimmerBox(
+      {required this.width, required this.height, required this.radius});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
       ),
     );
   }

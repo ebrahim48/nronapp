@@ -43,6 +43,18 @@ class ApiConstants {
   static String deleteSurgery(String id) => '/surgery/delete/$id';
   static String getCommonAllFacilities = '/common/all-facilities';
 
+  static const String getCommissionOverview = '/commission/my-overview';
+  static const String getCommissionHistory = '/commission/get-my';
+  static String getCommissionDetails(String id) => '/commission/find/$id';
+
+
+  static String getExpenseMyAll = '/expense/my-all';
+  static String getExpenseDetails = '/expense/find/69f2f4a29af5307fc7b86edc'; // id
+  static String createExpense = '/expense/create';
+  static String updateExpense = '/expense/update/69d0d1da3c027fd6339e1724'; // id
+  static String deleteExpense = '/expense/delete/69cceac58f443179210b324f'; // id
+  static String getCommonAllRepresentative = '/common/all-representatives?search=r';
+
 
 
 
