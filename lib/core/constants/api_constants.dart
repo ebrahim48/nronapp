@@ -48,12 +48,12 @@ class ApiConstants {
   static String getCommissionDetails(String id) => '/commission/find/$id';
 
 
-  static String getExpenseMyAll = '/expense/my-all';
-  static String getExpenseDetails = '/expense/find/69f2f4a29af5307fc7b86edc'; // id
-  static String createExpense = '/expense/create';
-  static String updateExpense = '/expense/update/69d0d1da3c027fd6339e1724'; // id
-  static String deleteExpense = '/expense/delete/69cceac58f443179210b324f'; // id
-  static String getCommonAllRepresentative = '/common/all-representatives?search=r';
+  static const String getExpenseMyAll = '/expense/my-all';
+  static String getExpenseDetails(String id) => '/expense/find/$id';
+  static const String createExpense = '/expense/create';
+  static String updateExpense(String id) => '/expense/update/$id';
+  static String deleteExpense(String id) => '/expense/delete/$id';
+  static const String getCommonAllRepresentative = '/common/all-representatives';
 
 
 

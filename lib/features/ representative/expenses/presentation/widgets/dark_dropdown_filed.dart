@@ -7,6 +7,7 @@ class DarkDropdown extends StatelessWidget {
   final String hint;
   final String? value;
   final List<String> items;
+  final List<String>? values;
   final void Function(String?) onChanged;
 
   const DarkDropdown({
@@ -16,7 +17,32 @@ class DarkDropdown extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.values,
   });
+
+  List<DropdownMenuItem<String>> _buildItems() {
+    final seen = <String>{};
+    final result = <DropdownMenuItem<String>>[];
+    for (int i = 0; i < items.length; i++) {
+      final itemValue = (values != null && i < values!.length)
+          ? values![i]
+          : items[i];
+      if (seen.add(itemValue)) {
+        result.add(DropdownMenuItem(
+          value: itemValue,
+          child: Text(
+            items[i],
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontFamily: 'Poppins',
+              color: AppColors.primaryTextColor,
+            ),
+          ),
+        ));
+      }
+    }
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,19 +82,7 @@ class DarkDropdown extends StatelessWidget {
               dropdownColor: const Color(0xFF2A2A2A),
               icon: Icon(Icons.keyboard_arrow_down,
                   color: AppColors.secondaryTextColor, size: 20.r),
-              items: items
-                  .map((item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontFamily: 'Poppins',
-                    color: AppColors.primaryTextColor,
-                  ),
-                ),
-              ))
-                  .toList(),
+              items: _buildItems(),
               onChanged: onChanged,
             ),
           ),

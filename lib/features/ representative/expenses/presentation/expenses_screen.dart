@@ -2,20 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
-import 'package:nron_app/core/config/app-routes/app_routes.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/expense_card.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/expense_create_button.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/expense_filter_tabs.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/expense_search_bar.dart';
-
 import '../../appdrawer/app_drawer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/expense_controller.dart';
 import 'expense_details_screen.dart';
-
-
 
 class ExpensesScreen extends StatelessWidget {
   const ExpensesScreen({super.key});
@@ -72,20 +68,16 @@ class ExpensesScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 16.h),
-
-            // Search Bar
             const ExpenseSearchBar(),
-
             SizedBox(height: 12.h),
-
-            // Create Expense Button
             const ExpenseCreateButton(),
-
             SizedBox(height: 16.h),
-
-            // Expense List
             Expanded(
               child: Obx(() {
+                if (controller.isLoading.value) {
+                  return _ExpenseListShimmer();
+                }
+
                 final expenses = controller.filteredExpenses;
 
                 if (expenses.isEmpty) {
@@ -99,24 +91,66 @@ class ExpensesScreen extends StatelessWidget {
                 }
 
                 return ListView.builder(
-                  itemCount: expenses.length,
+                  controller: controller.scrollController,
+                  itemCount: expenses.length +
+                      (controller.isLoadingMore.value ? 1 : 0),
                   padding: EdgeInsets.only(bottom: 30.h),
                   itemBuilder: (context, index) {
+                    if (index == expenses.length) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        child: Center(
+                          child: SizedBox(
+                            width: 22.r,
+                            height: 22.r,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                     return ExpenseCard(
                       expense: expenses[index],
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ExpenseDetailScreen(
-                              expense: expenses[index]),
-                        ),
-                      ),
+                      onTap: () {
+                        controller.fetchDetail(expenses[index].id);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ExpenseDetailScreen(
+                                expenseId: expenses[index].id),
+                          ),
+                        );
+                      },
                     );
                   },
                 );
               }),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpenseListShimmer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: ListView.builder(
+        itemCount: 6,
+        padding: EdgeInsets.only(bottom: 30.h),
+        itemBuilder: (_, __) => Container(
+          margin: EdgeInsets.only(bottom: 12.h),
+          height: 90.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+          ),
         ),
       ),
     );
