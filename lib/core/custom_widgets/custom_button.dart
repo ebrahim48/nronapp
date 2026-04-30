@@ -61,7 +61,7 @@ class CustomButton extends StatelessWidget {
               : null,
         ),
         child: loading
-            ? const Center(child: CustomLoader())
+            ? Center(child: CustomLoader(size: 24.h))
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
