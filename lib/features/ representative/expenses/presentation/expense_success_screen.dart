@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../controller/expense_controller.dart';
 
 class ExpenseSuccessScreen extends StatelessWidget {
   const ExpenseSuccessScreen({super.key});
@@ -153,15 +155,19 @@ class ExpenseSuccessScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 2.h),
-                      Text(
-                        'INV-EXP-9482-X2',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryTextColor,
-                        ),
-                      ),
+                      Obx(() {
+                        final c = Get.find<ExpenseController>();
+                        final id = c.lastCreatedId.value;
+                        return Text(
+                          id.isNotEmpty ? id : 'INV-EXP-9482-X2',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryTextColor,
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ],

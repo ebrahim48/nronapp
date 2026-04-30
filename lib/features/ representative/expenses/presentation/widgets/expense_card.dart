@@ -24,6 +24,17 @@ class ExpenseCard extends StatelessWidget {
     }
   }
 
+  Widget _receiptIcon() => Container(
+        width: 48.r,
+        height: 48.r,
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Icon(Icons.receipt_long,
+            color: AppColors.secondaryTextColor, size: 22.r),
+      );
+
   String _statusLabel(ExpenseStatus status) {
     switch (status) {
       case ExpenseStatus.approved:
@@ -122,30 +133,19 @@ class ExpenseCard extends StatelessWidget {
             SizedBox(width: 10.w),
 
             // Thumbnail
-            if (expense.thumbnailAsset != null)
+            if (expense.thumbnailUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8.r),
-                child: Image.asset(
-                  expense.thumbnailAsset!,
+                child: Image.network(
+                  expense.thumbnailUrl!,
                   width: 48.r,
                   height: 48.r,
                   fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _receiptIcon(),
                 ),
               )
             else
-              Container(
-                width: 48.r,
-                height: 48.r,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2A2A2A),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Icon(
-                  Icons.receipt_long,
-                  color: AppColors.secondaryTextColor,
-                  size: 22.r,
-                ),
-              ),
+              _receiptIcon(),
           ],
         ),
       ),

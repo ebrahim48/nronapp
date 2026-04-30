@@ -2,23 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/attachment_section.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/dark_dropdown_filed.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/form_section_header.dart';
 import 'package:nron_app/features/%20representative/expenses/presentation/widgets/paidtoggle.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
+import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/expense_controller.dart';
 
+class CreateExpenseScreen extends StatefulWidget {
+  final String? expenseId;
+  const CreateExpenseScreen({super.key, this.expenseId});
 
-class CreateExpenseScreen extends StatelessWidget {
-  const CreateExpenseScreen({super.key});
+  @override
+  State<CreateExpenseScreen> createState() => _CreateExpenseScreenState();
+}
+
+class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
+  late final ExpenseController c;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.isRegistered<ExpenseController>()
+        ? Get.find<ExpenseController>()
+        : Get.put(ExpenseController());
+    c.fetchRepresentatives();
+    c.fetchPhysiciansForDropdown();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ExpenseController>();
+    final isEdit = widget.expenseId != null;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -33,7 +52,7 @@ class CreateExpenseScreen extends StatelessWidget {
         ),
         centerTitle: false,
         title: CustomText(
-          text: 'Create Expense',
+          text: isEdit ? 'Edit Expense' : 'Create Expense',
           fontsize: 18.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryTextColor,
@@ -47,36 +66,67 @@ class CreateExpenseScreen extends StatelessWidget {
           children: [
             const FormSectionHeader(title: 'Basic Information'),
 
-            _FieldLabel(text: 'Representative Name'),
-            CustomTextField(
-              controller: controller.representativeNameController,
-              hintText: 'Enter name',
-              prefixIcon: Icon(
-                Icons.person_outline,
-                color: AppColors.secondaryTextColor,
-                size: 18.r,
-              ),
-            ),
+            _FieldLabel(text: 'Representative'),
+            Obx(() {
+              if (c.isLoadingRepresentatives.value) return _ShimmerDropdown();
+              final ids = c.representatives.map((r) => r.id).toList();
+              final names = c.representatives.map((r) => r.fullName).toList();
+              final safeVal = ids.contains(c.selectedRepresentativeId.value)
+                  ? c.selectedRepresentativeId.value
+                  : null;
+              return DarkDropdown(
+                label: '',
+                hint: 'Select Representative',
+                value: safeVal,
+                items: names,
+                values: ids,
+                onChanged: (id) {
+                  if (id != null) {
+                    final rep =
+                        c.representatives.firstWhereOrNull((r) => r.id == id);
+                    if (rep != null) c.selectRepresentative(rep.id, rep.fullName);
+                  }
+                },
+              );
+            }),
 
             _FieldLabel(text: 'Physician'),
-            Obx(() => DarkDropdown(
-              label: '',
-              hint: 'Select Physician',
-              value: controller.selectedPhysician.value,
-              items: controller.physicians,
-              onChanged: (v) =>
-                  controller.selectedPhysician.value = v ?? '',
-            )),
+            Obx(() {
+              if (c.isLoadingPhysicians.value) return _ShimmerDropdown();
+              final ids = c.physicianList.map((p) => p.id).toList();
+              final names = c.physicianList.map((p) => p.fullName).toList();
+              final safeVal = ids.contains(c.selectedPhysicianId.value)
+                  ? c.selectedPhysicianId.value
+                  : null;
+              return DarkDropdown(
+                label: '',
+                hint: 'Select Physician',
+                value: safeVal,
+                items: names,
+                values: ids,
+                onChanged: (id) {
+                  if (id != null) {
+                    final ph =
+                        c.physicianList.firstWhereOrNull((p) => p.id == id);
+                    if (ph != null) c.selectPhysician(ph.id, ph.fullName);
+                  }
+                },
+              );
+            }),
 
             _FieldLabel(text: 'Category'),
-            Obx(() => DarkDropdown(
-              label: '',
-              hint: 'Select Category',
-              value: controller.selectedCategory.value,
-              items: controller.categories,
-              onChanged: (v) =>
-                  controller.selectedCategory.value = v ?? '',
-            )),
+            Obx(() {
+              final safeVal = c.categories.contains(c.selectedCategory.value)
+                  ? c.selectedCategory.value
+                  : null;
+              return DarkDropdown(
+                label: '',
+                hint: 'Select Category',
+                value: safeVal,
+                items: c.categories,
+                onChanged: (v) => c.selectedCategory.value = v ?? '',
+              );
+            }),
 
             SizedBox(height: 6.h),
 
@@ -84,15 +134,12 @@ class CreateExpenseScreen extends StatelessWidget {
 
             _FieldLabel(text: 'Expense Date'),
             CustomTextField(
-              controller: controller.expenseDateController,
+              controller: c.expenseDateController,
               hintText: 'mm/dd/yyyy',
               readOnly: true,
-              onTap: () => controller.pickDate(context),
-              suffixIcon: Icon(
-                Icons.calendar_today_outlined,
-                color: AppColors.secondaryTextColor,
-                size: 18.r,
-              ),
+              onTap: () => c.pickDate(context),
+              suffixIcon: Icon(Icons.calendar_today_outlined,
+                  color: AppColors.secondaryTextColor, size: 18.r),
             ),
 
             Row(
@@ -102,14 +149,19 @@ class CreateExpenseScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _FieldLabel(text: 'Year'),
-                      Obx(() => DarkDropdown(
-                        label: '',
-                        hint: '2026',
-                        value: controller.selectedYear.value,
-                        items: controller.years,
-                        onChanged: (v) =>
-                            controller.selectedYear.value = v ?? '2026',
-                      )),
+                      Obx(() {
+                        final safeVal = c.years.contains(c.selectedYear.value)
+                            ? c.selectedYear.value
+                            : null;
+                        return DarkDropdown(
+                          label: '',
+                          hint: '2026',
+                          value: safeVal,
+                          items: c.years,
+                          onChanged: (v) =>
+                              c.selectedYear.value = v ?? c.selectedYear.value,
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -119,14 +171,20 @@ class CreateExpenseScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _FieldLabel(text: 'Month'),
-                      Obx(() => DarkDropdown(
-                        label: '',
-                        hint: 'MARCH',
-                        value: controller.selectedMonth.value,
-                        items: controller.months,
-                        onChanged: (v) =>
-                            controller.selectedMonth.value = v ?? 'MARCH',
-                      )),
+                      Obx(() {
+                        final safeVal =
+                            c.months.contains(c.selectedMonth.value)
+                                ? c.selectedMonth.value
+                                : null;
+                        return DarkDropdown(
+                          label: '',
+                          hint: 'Month',
+                          value: safeVal,
+                          items: c.months,
+                          onChanged: (v) =>
+                              c.selectedMonth.value = v ?? c.selectedMonth.value,
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -139,7 +197,7 @@ class CreateExpenseScreen extends StatelessWidget {
 
             _FieldLabel(text: 'Amount'),
             CustomTextField(
-              controller: controller.amountController,
+              controller: c.amountController,
               hintText: '\$ 0.00',
               keyboardType: TextInputType.number,
             ),
@@ -152,7 +210,7 @@ class CreateExpenseScreen extends StatelessWidget {
 
             _FieldLabel(text: 'Description'),
             CustomTextField(
-              controller: controller.descriptionController,
+              controller: c.descriptionController,
               hintText: 'Business purpose of this expense...',
               maxLine: 4,
             ),
@@ -172,64 +230,109 @@ class CreateExpenseScreen extends StatelessWidget {
 
             const AttachmentSection(),
 
-            GestureDetector(
-              onTap: () {
-                controller.submitExpense();
-                context.pushNamed(AppRoutes.expenseSuccessScreen);
-              },
-              child: Container(
-                width: double.infinity,
-                height: 52.h,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Submit Expense',
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.blackColor,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Icon(Icons.arrow_forward,
-                        color: AppColors.blackColor, size: 18.r),
-                  ],
-                ),
-              ),
-            ),
+            Obx(() => CustomButton(
+                  title: isEdit ? 'Update Expense' : 'Submit Expense',
+                  loading: c.isSubmitting.value,
+                  titlecolor: AppColors.blackColor,
+                  fontWeight: FontWeight.w700,
+                  onpress: () async {
+                    final ok = await c.submitExpense(
+                      context,
+                      expenseId: widget.expenseId,
+                    );
+                    if (ok && context.mounted) {
+                      if (isEdit) {
+                        Navigator.pop(context);
+                      } else {
+                        context.pushNamed(AppRoutes.expenseSuccessScreen);
+                      }
+                    }
+                  },
+                )),
 
             SizedBox(height: 12.h),
 
-            // Cancel Button
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: double.infinity,
-                height: 52.h,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(color: const Color(0xFF3A3A3A)),
-                ),
-                child: Center(
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.secondaryTextColor,
-                    ),
-                  ),
-                ),
-              ),
+            CustomButton(
+              title: 'Cancel',
+              onpress: () => Navigator.pop(context),
+              color: Colors.transparent,
+              borderColor: const Color(0xFF3A3A3A),
+              titlecolor: AppColors.secondaryTextColor,
+              fontWeight: FontWeight.w500,
             ),
+
+            if (isEdit) ...[
+              SizedBox(height: 10.h),
+              Obx(() => CustomButton(
+                    title: 'Delete Expense',
+                    loading: c.isDeleting.value,
+                    color: Colors.transparent,
+                    borderColor: AppColors.redColorFF1D1D,
+                    titlecolor: AppColors.redColorFF1D1D,
+                    fontWeight: FontWeight.w500,
+                    onpress: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: const Color(0xFF1E2427),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          title: Text(
+                            'Delete Expense',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.primaryTextColor,
+                            ),
+                          ),
+                          content: Text(
+                            'Are you sure you want to delete this expense? This action cannot be undone.',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontFamily: 'Poppins',
+                              color: AppColors.secondaryTextColor,
+                              height: 1.5,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.secondaryTextColor,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.redColorFF1D1D,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true && context.mounted) {
+                        final ok =
+                            await c.deleteExpense(widget.expenseId!);
+                        if (ok && context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
+                    },
+                  )),
+            ],
 
             SizedBox(height: 30.h),
           ],
@@ -253,6 +356,24 @@ class _FieldLabel extends StatelessWidget {
         fontWeight: FontWeight.w600,
         color: AppColors.primaryTextColor,
         textAlign: TextAlign.start,
+      ),
+    );
+  }
+}
+
+class _ShimmerDropdown extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: Container(
+        height: 48.h,
+        margin: EdgeInsets.only(bottom: 14.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.r),
+        ),
       ),
     );
   }
