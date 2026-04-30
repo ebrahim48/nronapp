@@ -6,7 +6,8 @@
       "Bash(wc -l /c/Users/ebu/Desktop/office_work/nron-app/lib/core/custom_widgets/*.dart)",
       "Bash(\"/c/Users/ebu/fvm/versions/3.32.5/bin/flutter.bat\" analyze:*)",
       "PowerShell(Get-Command *)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(flutter pub *)"
     ]
   }
 }

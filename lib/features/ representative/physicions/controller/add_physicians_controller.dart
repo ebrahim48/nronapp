@@ -94,9 +94,6 @@ class AddPhysicianController extends GetxController {
     final note = noteController.text.trim();
 
     if (fullName.isEmpty || practice.isEmpty || location.isEmpty || phone.isEmpty) {
-      ToastMessageHelper.showToastMessage(
-          'Full name, practice, location and phone are required.',
-          title: 'Warning');
       return;
     }
 
@@ -154,20 +151,11 @@ class AddPhysicianController extends GetxController {
       }
 
       if (res['success'] == true) {
-        final msg = physicianId == null
-            ? 'Physician created successfully.'
-            : 'Physician updated successfully.';
-        ToastMessageHelper.showToastMessage(msg, title: 'Success');
         if (context.mounted) Navigator.pop(context, true);
       }
     } on NoInternetException {
-      ToastMessageHelper.showToastMessage('No internet connection.',
-          title: 'Error');
-    } on ServerException catch (e) {
-      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } on ServerException catch (_) {
     } catch (_) {
-      ToastMessageHelper.showToastMessage('Failed to save physician.',
-          title: 'Error');
     } finally {
       isSubmitting.value = false;
     }

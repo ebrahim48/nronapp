@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/document_upload_widget.dart';
+import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/facility_dropdown.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/physician_dropdown.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/radiology_image_grid.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/surgery_material_field.dart';
@@ -59,11 +60,7 @@ class AddSurgeryScreen extends StatelessWidget {
               hintText: 'Enter patient ID',
             ),
 
-            CustomTextField(
-              controller: c.facilityIdController,
-              labelText: 'Facility',
-              hintText: 'Enter facility ID',
-            ),
+            const FacilityDropdown(),
 
             Obx(() => GestureDetector(
               onTap: () => c.pickDate(context),
@@ -154,28 +151,22 @@ class AddSurgeryScreen extends StatelessWidget {
 
             SizedBox(height: 24.h),
 
-            Obx(() => c.isSubmitting.value
-                ? Center(
-                    child: SpinKitThreeBounce(
-                      color: AppColors.primaryColor,
-                      size: 28.r,
+            Obx(() => CustomButton(
+                  title: isEdit ? 'Update Surgery' : 'Save Surgery',
+                  onpress: () => c.submitSurgery(context, surgeryId: surgeryId),
+                  loading: c.isSubmitting.value,
+                  titlecolor: AppColors.blackColor,
+                  fontWeight: FontWeight.w700,
+                  suffixIcon: SvgPicture.asset(
+                    'assets/icons/createjob.svg',
+                    width: 18.r,
+                    height: 18.r,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.blackColor,
+                      BlendMode.srcIn,
                     ),
-                  )
-                : CustomButton(
-                    title: isEdit ? 'Update Surgery' : 'Save Surgery',
-                    onpress: () => c.submitSurgery(context, surgeryId: surgeryId),
-                    titlecolor: AppColors.blackColor,
-                    fontWeight: FontWeight.w700,
-                    suffixIcon: SvgPicture.asset(
-                      'assets/icons/createjob.svg',
-                      width: 18.r,
-                      height: 18.r,
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.blackColor,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  )),
+                  ),
+                )),
 
             SizedBox(height: 12.h),
 

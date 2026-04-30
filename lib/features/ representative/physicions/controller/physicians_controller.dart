@@ -112,18 +112,10 @@ class PhysiciansController extends GetxController {
       final res = await _repo.delete(token, id);
       if (res['success'] == true) {
         physicians.removeWhere((p) => p.id == id);
-        ToastMessageHelper.showToastMessage(
-            'Physician deleted successfully.',
-            title: 'Success');
       }
     } on NoInternetException {
-      ToastMessageHelper.showToastMessage('No internet connection.',
-          title: 'Error');
-    } on ServerException catch (e) {
-      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } on ServerException catch (_) {
     } catch (_) {
-      ToastMessageHelper.showToastMessage('Failed to delete physician.',
-          title: 'Error');
     }
   }
 

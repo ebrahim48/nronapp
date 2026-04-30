@@ -12,6 +12,7 @@ import '../../../features/ representative/expenses/presentation/create_expense_s
 import '../../../features/ representative/expenses/presentation/expense_details_screen.dart';
 import '../../../features/ representative/expenses/presentation/expense_success_screen.dart';
 import '../../../features/ representative/expenses/presentation/expenses_screen.dart';
+import '../../../features/ representative/physicions/domain/model/physician_model.dart';
 import '../../../features/ representative/physicions/presentation/physicions_profile_screen.dart';
 import '../../../features/ representative/physicions/presentation/physicions_screen.dart';
 import '../../../features/ representative/purchaseorder/presentation/purchase_order_screen.dart';
@@ -426,6 +427,13 @@ static const activityLogScreen = '/activityLogScreen';
         path: physiciansScreen,
         name: physiciansScreen,
         builder: (context, state) => const PhysiciansScreen(),
+      ),
+      GoRoute(
+        path: physicianProfileScreen,
+        name: physicianProfileScreen,
+        builder: (context, state) => PhysicianProfileScreen(
+          physician: state.extra as PhysicianModel,
+        ),
       ),
       GoRoute(
         path: allSurgeriesScreen,

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/custom_widgets/custom_text.dart';
 import '../../../core/config/app-routes/app_routes.dart';
+import '../../../core/helpers/prefs_helper.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../global/custom_assets/assets.gen.dart';
 
@@ -17,8 +18,26 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) context.go(AppRoutes.onboardingScreen);
+    Future.delayed(const Duration(seconds: 3), () async {
+      if (!mounted) return;
+      final token = await PrefsHelper.getString('auth_token');
+      if (!mounted) return;
+      if (token.isNotEmpty) {
+        final role = await PrefsHelper.getString('user_role');
+        if (!mounted) return;
+        switch (role) {
+          case 'manager':
+            context.go(AppRoutes.managerBottomNavBar);
+            break;
+          case 'driver':
+            context.go(AppRoutes.driverBottomNavBar);
+            break;
+          default:
+            context.go(AppRoutes.repBottomNavBar);
+        }
+      } else {
+        context.go(AppRoutes.onboardingScreen);
+      }
     });
   }
 

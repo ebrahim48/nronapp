@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/helpers/pdf_helper.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../domain/model/physician_model.dart';
@@ -34,6 +35,16 @@ class PhysicianProfileScreen extends StatelessWidget {
         ),
         centerTitle: false,
         titleSpacing: 0,
+        actions: [
+          GestureDetector(
+            onTap: () => PdfHelper.sharePhysicianPdf(physician),
+            child: Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: Icon(Icons.download_outlined,
+                  color: AppColors.primaryColor, size: 22.r),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 40.h),
@@ -170,8 +181,32 @@ class PhysicianProfileScreen extends StatelessWidget {
             SizedBox(height: 20.h),
 
             // ── Notes ───────────────────────────────────────────────
-            if (physician.noteToSelf.isNotEmpty) ...[
-              SectionTitle(text: 'Notes'),
+            SectionTitle(text: 'Notes'),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16.r),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E2121),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: const Color(0xFF3A3A3A)),
+              ),
+              child: CustomText(
+                text: physician.noteToSelf.isNotEmpty
+                    ? physician.noteToSelf
+                    : 'No notes added.',
+                fontsize: 13.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.secondaryTextColor,
+                textAlign: TextAlign.start,
+                textHeight: 1.6,
+              ),
+            ),
+
+            SizedBox(height: 20.h),
+
+            // ── Documents ───────────────────────────────────────────
+            SectionTitle(text: 'Documents'),
+            if (physician.documents.isEmpty)
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(16.r),
@@ -181,20 +216,14 @@ class PhysicianProfileScreen extends StatelessWidget {
                   border: Border.all(color: const Color(0xFF3A3A3A)),
                 ),
                 child: CustomText(
-                  text: physician.noteToSelf,
+                  text: 'No documents attached.',
                   fontsize: 13.sp,
                   fontWeight: FontWeight.w400,
                   color: AppColors.secondaryTextColor,
                   textAlign: TextAlign.start,
-                  textHeight: 1.6,
                 ),
-              ),
-              SizedBox(height: 20.h),
-            ],
-
-            // ── Documents ───────────────────────────────────────────
-            if (physician.documents.isNotEmpty) ...[
-              SectionTitle(text: 'Documents'),
+              )
+            else
               ...physician.documents.asMap().entries.map((entry) => Padding(
                     padding: EdgeInsets.only(bottom: 10.h),
                     child: DocumentRow(
@@ -205,7 +234,6 @@ class PhysicianProfileScreen extends StatelessWidget {
                       url: entry.value,
                     ),
                   )),
-            ],
           ],
         ),
       ),

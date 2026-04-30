@@ -1,3 +1,27 @@
+// ── Facility (from /common/all-facilities) ────────────────────────────────────
+class FacilityModel {
+  final String id;
+  final String name;
+  final String phoneNumber;
+  final String email;
+
+  const FacilityModel({
+    this.id = '',
+    this.name = '',
+    this.phoneNumber = '',
+    this.email = '',
+  });
+
+  factory FacilityModel.fromJson(Map<String, dynamic> json) {
+    return FacilityModel(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? '',
+      email: json['email'] ?? '',
+    );
+  }
+}
+
 // ── Common physician (from /common/all-physicians) ───────────────────────────
 class CommonPhysicianModel {
   final String id;
