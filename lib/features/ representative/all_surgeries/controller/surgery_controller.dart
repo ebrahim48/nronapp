@@ -9,6 +9,8 @@ import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../physicions/data/repositories/physician_repository.dart';
+import '../../physicions/domain/model/physician_model.dart';
 import '../data/repositories/surgery_repository.dart';
 import '../model/surgery_model.dart';
 
@@ -17,6 +19,13 @@ class SurgeryController extends GetxController {
     connectivityService: ConnectivityService(),
     apiService: ApiService(),
   );
+
+  final _physicianRepo = PhysicianRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
+
+  final isLoadingPhysician = false.obs;
 
   // ── List ──────────────────────────────────────────────────────────────────
   final surgeries = <SurgeryModel>[].obs;
@@ -39,6 +48,12 @@ class SurgeryController extends GetxController {
   final selectedPhysicianId = ''.obs;
   final selectedPhysicianName = ''.obs;
 
+  // ── Common facilities for dropdown ────────────────────────────────────────
+  final facilities = <FacilityModel>[].obs;
+  final isLoadingFacilities = false.obs;
+  final selectedFacilityId = ''.obs;
+  final selectedFacilityName = ''.obs;
+
   // ── Add/Edit form ─────────────────────────────────────────────────────────
   final patientIdController = TextEditingController();
   final facilityIdController = TextEditingController();
@@ -55,11 +70,11 @@ class SurgeryController extends GetxController {
 
   // ── Radiology picked images ───────────────────────────────────────────────
   final radiologyPickedImages = <String, String?>{
-    'PATIENT STICKER': null,
-    'AP PRE': null,
     'AP POST': null,
-    'LATERAL PRE': null,
+    'AP PRE': null,
     'LATERAL POST': null,
+    'LATERAL PRE': null,
+    'PATIENT STICKER': null,
   }.obs;
 
   // ── Uploaded documents ────────────────────────────────────────────────────
@@ -72,6 +87,7 @@ class SurgeryController extends GetxController {
     super.onInit();
     fetchSurgeries();
     fetchCommonPhysicians();
+    fetchFacilities();
     scrollController.addListener(_onScroll);
   }
 
@@ -203,12 +219,37 @@ class SurgeryController extends GetxController {
     selectedPhysicianName.value = name;
   }
 
+  // ── Fetch facilities ──────────────────────────────────────────────────────
+  Future<void> fetchFacilities() async {
+    isLoadingFacilities.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getCommonFacilities(token);
+      if (res['success'] == true) {
+        final list = (res['data'] as List<dynamic>)
+            .map((e) => FacilityModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        facilities.assignAll(list);
+      }
+    } on NoInternetException {
+      ToastMessageHelper.showToastMessage('No internet connection.', title: 'Error');
+    } on ServerException catch (e) {
+      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } catch (_) {} finally {
+      isLoadingFacilities.value = false;
+    }
+  }
+
+  void selectFacility(String id, String name) {
+    selectedFacilityId.value = id;
+    selectedFacilityName.value = name;
+  }
+
   // ── Prefill form for edit ─────────────────────────────────────────────────
   void prefillForEdit(SurgeryDetailModel d) {
     selectPhysician(d.physicianId, d.physicianName);
     patientIdController.text = d.patientId;
-    facilityIdController.text = d.facilityId;
-    facilityNameController.text = d.facilityName;
+    selectFacility(d.facilityId, d.facilityName);
     surgeryTypeController.text = d.surgeryType;
     screwsController.text = d.screws;
     platesController.text = d.plates;
@@ -231,6 +272,8 @@ class SurgeryController extends GetxController {
     patientIdController.clear();
     facilityIdController.clear();
     facilityNameController.clear();
+    selectedFacilityId.value = '';
+    selectedFacilityName.value = '';
     surgeryTypeController.clear();
     screwsController.clear();
     platesController.clear();
@@ -247,21 +290,18 @@ class SurgeryController extends GetxController {
   Future<void> submitSurgery(BuildContext context, {String? surgeryId}) async {
     final physicianId = selectedPhysicianId.value;
     final patientId = patientIdController.text.trim();
-    final facilityId = facilityIdController.text.trim();
+    final facilityId = selectedFacilityId.value;
     final surgeryType = surgeryTypeController.text.trim();
     final dob = dateOfSurgery.value.trim();
 
     if (physicianId.isEmpty || patientId.isEmpty || facilityId.isEmpty || surgeryType.isEmpty || dob.isEmpty) {
-      ToastMessageHelper.showToastMessage(
-          'Physician, Patient ID, Facility, Surgery Type and Date are required.',
-          title: 'Warning');
       return;
     }
 
     String apiDate = dob;
     try {
       final dt = DateFormat('MM/dd/yyyy').parse(dob);
-      apiDate = dt.toIso8601String();
+      apiDate = dt.toUtc().toIso8601String();
     } catch (_) {}
 
     File? _file(String key) {
@@ -316,29 +356,76 @@ class SurgeryController extends GetxController {
         );
       }
       if (res['success'] == true) {
-        final msg = surgeryId == null ? 'Surgery created successfully.' : 'Surgery updated successfully.';
-        ToastMessageHelper.showToastMessage(msg, title: 'Success');
         clearForm();
         if (context.mounted) Navigator.pop(context, true);
       }
     } on NoInternetException {
-      ToastMessageHelper.showToastMessage('No internet connection.', title: 'Error');
-    } on ServerException catch (e) {
-      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } on ServerException catch (_) {
     } catch (_) {
-      ToastMessageHelper.showToastMessage('Failed to save surgery.', title: 'Error');
     } finally {
       isSubmitting.value = false;
     }
   }
 
   // ── Radiology image picker ────────────────────────────────────────────────
-  Future<void> pickRadiologyImage(String label) async {
-    final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
-    if (picked != null) {
-      radiologyPickedImages[label] = picked.path;
-      radiologyPickedImages.refresh();
+  final isDeleting = false.obs;
+
+  Future<bool> deleteSurgery(String id) async {
+    isDeleting.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.delete(token, id);
+      if (res['success'] == true) {
+        surgeries.removeWhere((s) => s.id == id);
+        return true;
+      }
+    } on NoInternetException {
+    } on ServerException catch (_) {
+    } catch (_) {
+    } finally {
+      isDeleting.value = false;
     }
+    return false;
+  }
+
+  final pickingRadiologyLabel = ''.obs;
+
+  Future<void> pickRadiologyImage(String label) async {
+    pickingRadiologyLabel.value = label;
+    try {
+      final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+      if (picked != null) {
+        radiologyPickedImages[label] = picked.path;
+        radiologyPickedImages.refresh();
+      }
+    } finally {
+      pickingRadiologyLabel.value = '';
+    }
+  }
+
+  // ── Fetch full physician by ID ────────────────────────────────────────────
+  Future<PhysicianModel?> fetchPhysicianById(String id) async {
+    if (id.isEmpty) return null;
+    isLoadingPhysician.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _physicianRepo.getSingle(token, id);
+      if (res['success'] == true) {
+        final data = res['data'];
+        if (data is Map<String, dynamic>) {
+          return PhysicianModel.fromJson(data);
+        }
+      }
+    } on NoInternetException {
+      ToastMessageHelper.showToastMessage('No internet connection.', title: 'Error');
+    } on ServerException catch (e) {
+      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } catch (_) {
+      ToastMessageHelper.showToastMessage('Failed to load physician.', title: 'Error');
+    } finally {
+      isLoadingPhysician.value = false;
+    }
+    return null;
   }
 
   // ── Document picker ───────────────────────────────────────────────────────

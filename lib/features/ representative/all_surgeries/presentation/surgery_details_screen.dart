@@ -11,9 +11,10 @@ import 'package:nron_app/features/%20representative/all_surgeries/presentation/w
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/surgery_attachment_tile.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/surgery_info_table.dart';
 import 'package:nron_app/features/%20representative/all_surgeries/presentation/widgets/surgery_material_list.dart';
-import '../../../../core/config/app-routes/app_routes.dart';
+import '../../../../core/helpers/pdf_helper.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../../physicions/presentation/physicions_profile_screen.dart';
 import '../controller/surgery_controller.dart';
 import '../model/surgery_model.dart';
 import 'add_surgery_screen.dart';
@@ -91,6 +92,71 @@ class SurgeryDetailScreen extends StatelessWidget {
           textAlign: TextAlign.start,
         ),
         centerTitle: false,
+        actions: [
+          Obx(() => GestureDetector(
+            onTap: c.isDeleting.value
+                ? null
+                : () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        backgroundColor: const Color(0xFF1E2427),
+                        title: Text(
+                          'Delete Surgery',
+                          style: TextStyle(
+                            color: AppColors.primaryTextColor,
+                            fontSize: 16.sp,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        content: Text(
+                          'Are you sure you want to delete this surgery?',
+                          style: TextStyle(
+                            color: AppColors.secondaryTextColor,
+                            fontSize: 13.sp,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text('Cancel',
+                                style: TextStyle(
+                                    color: AppColors.secondaryTextColor,
+                                    fontFamily: 'Poppins')),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text('Delete',
+                                style: TextStyle(
+                                    color: Colors.red,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true && context.mounted) {
+                      final id = c.detail.value?.id ?? '';
+                      final deleted = await c.deleteSurgery(id);
+                      if (deleted && context.mounted) Navigator.pop(context, true);
+                    }
+                  },
+            child: Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: c.isDeleting.value
+                  ? SizedBox(
+                      width: 20.r,
+                      height: 20.r,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.red),
+                    )
+                  : Icon(Icons.delete_outline,
+                      color: Colors.red, size: 22.r),
+            ),
+          )),
+        ],
       ),
       body: Obx(() {
         if (c.isLoadingDetail.value) {
@@ -182,7 +248,7 @@ class SurgeryDetailScreen extends StatelessWidget {
                   SizedBox(width: 10.w),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {},
+                      onTap: () => PdfHelper.shareSurgeryPdf(d),
                       child: Container(
                         height: 40.h,
                         decoration: BoxDecoration(
@@ -254,11 +320,32 @@ class SurgeryDetailScreen extends StatelessWidget {
                           Positioned(
                             right: 0,
                             top: 0,
-                            child: GestureDetector(
-                              onTap: () => context.push(AppRoutes.physicianProfileScreen),
-                              child: Icon(Icons.remove_red_eye_outlined,
-                                  color: AppColors.primaryColor, size: 18.r),
-                            ),
+                            child: Obx(() => GestureDetector(
+                              onTap: c.isLoadingPhysician.value
+                                  ? null
+                                  : () async {
+                                      final physician = await c.fetchPhysicianById(d.physicianId);
+                                      if (physician != null && context.mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => PhysicianProfileScreen(physician: physician),
+                                          ),
+                                        );
+                                      }
+                                    },
+                              child: c.isLoadingPhysician.value
+                                  ? SizedBox(
+                                      width: 18.r,
+                                      height: 18.r,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.primaryColor,
+                                      ),
+                                    )
+                                  : Icon(Icons.remove_red_eye_outlined,
+                                      color: AppColors.primaryColor, size: 18.r),
+                            )),
                           ),
                         ],
                       ),
@@ -293,28 +380,79 @@ class SurgeryDetailScreen extends StatelessWidget {
                     d.surgeryType.isNotEmpty ? d.surgeryType : '—'),
               ]),
 
-              if (attachments.isNotEmpty) ...[
-                SizedBox(height: 16.h),
-                Container(
-                  padding: EdgeInsets.all(14.r),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF242424),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: const Color(0xFF3A3A3A)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      DetailSectionHeader(
-                        iconPath: 'assets/icons/attachments.svg',
-                        title: 'Attachments',
-                      ),
+              SizedBox(height: 16.h),
+
+              // ── Notes ──────────────────────────────────────────────
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(14.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF242424),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFF3A3A3A)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DetailSectionHeader(
+                      iconPath: 'assets/icons/surgeryinfo.svg',
+                      title: 'Notes',
+                    ),
+                    SizedBox(height: 8.h),
+                    d.caseNotes.isNotEmpty
+                        ? CustomText(
+                            text: d.caseNotes,
+                            fontsize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.secondaryTextColor,
+                            textAlign: TextAlign.start,
+                            textHeight: 1.6,
+                          )
+                        : CustomText(
+                            text: 'No notes added.',
+                            fontsize: 13.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.secondaryTextColor,
+                            textAlign: TextAlign.start,
+                          ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              // ── Documents ──────────────────────────────────────────
+              Container(
+                padding: EdgeInsets.all(14.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF242424),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFF3A3A3A)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DetailSectionHeader(
+                      iconPath: 'assets/icons/attachments.svg',
+                      title: 'Documents',
+                    ),
+                    if (attachments.isEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.h),
+                        child: CustomText(
+                          text: 'No documents attached.',
+                          fontsize: 13.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.secondaryTextColor,
+                          textAlign: TextAlign.start,
+                        ),
+                      )
+                    else
                       ...attachments.map(
                           (att) => SurgeryAttachmentTile(attachment: att)),
-                    ],
-                  ),
+                  ],
                 ),
-              ],
+              ),
 
               if (materials.isNotEmpty) ...[
                 SizedBox(height: 16.h),
@@ -363,7 +501,9 @@ class SurgeryDetailScreen extends StatelessWidget {
               SizedBox(height: 16.h),
 
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+
+                },
                 child: Container(
                   width: double.infinity,
                   height: 48.h,

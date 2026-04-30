@@ -225,38 +225,24 @@ class _AddPhysicianScreenState extends State<AddPhysicianScreen> {
             padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
             child: Column(
               children: [
-                Obx(() => _c.isSubmitting.value
-                    ? Container(
-                        width: double.infinity,
-                        height: 48.h,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryColor,
-                          borderRadius: BorderRadius.circular(10.r),
+                Obx(() => CustomButton(
+                      title: isEdit ? 'Update Physician' : 'Save Physician',
+                      titlecolor: const Color(0xFF1E2121),
+                      loading: _c.isSubmitting.value,
+                      onpress: () => _c.submitPhysician(
+                        context,
+                        physicianId: widget.physician?.id,
+                      ),
+                      suffixIcon: SvgPicture.asset(
+                        'assets/icons/createjob.svg',
+                        width: 18.r,
+                        height: 18.r,
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFF1E2121),
+                          BlendMode.srcIn,
                         ),
-                        child: Center(
-                          child: SpinKitThreeBounce(
-                            color: const Color(0xFF1E2121),
-                            size: 20.r,
-                          ),
-                        ),
-                      )
-                    : CustomButton(
-                        title: isEdit ? 'Update Physician' : 'Save Physician',
-                        titlecolor: const Color(0xFF1E2121),
-                        onpress: () => _c.submitPhysician(
-                          context,
-                          physicianId: widget.physician?.id,
-                        ),
-                        suffixIcon: SvgPicture.asset(
-                          'assets/icons/createjob.svg',
-                          width: 18.r,
-                          height: 18.r,
-                          colorFilter: const ColorFilter.mode(
-                            Color(0xFF1E2121),
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      )),
+                      ),
+                    )),
 
                 SizedBox(height: 10.h),
 

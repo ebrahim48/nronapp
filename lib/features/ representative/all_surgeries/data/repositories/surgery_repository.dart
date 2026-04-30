@@ -24,6 +24,15 @@ class SurgeryRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> getCommonFacilities(String token) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.get(
+      ApiConstants.getCommonAllFacilities,
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> getAll(
     String token, {
     int page = 1,

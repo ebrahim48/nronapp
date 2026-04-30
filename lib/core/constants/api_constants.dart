@@ -41,6 +41,7 @@ class ApiConstants {
   static const String createSurgery = '/surgery/create';
   static String updateSurgery(String id) => '/surgery/update/$id';
   static String deleteSurgery(String id) => '/surgery/delete/$id';
+  static String getCommonAllFacilities = '/common/all-facilities';
 
 
 

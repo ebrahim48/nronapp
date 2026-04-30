@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../controller/surgery_controller.dart';
 
@@ -14,14 +15,11 @@ class RadiologyImageGrid extends StatelessWidget {
 
     return Obx(() {
       final keys = c.radiologyPickedImages.keys.toList();
-
-      // First 4 in 2x2, last one full width
       final gridItems = keys.take(4).toList();
       final fullWidthItem = keys.length > 4 ? keys[4] : null;
 
       return Column(
         children: [
-          // 2x2 grid
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -35,16 +33,17 @@ class RadiologyImageGrid extends StatelessWidget {
             itemBuilder: (context, i) => _RadioImageCell(
               label: gridItems[i],
               imagePath: c.radiologyPickedImages[gridItems[i]],
+              isLoading: c.pickingRadiologyLabel.value == gridItems[i],
               onTap: () => c.pickRadiologyImage(gridItems[i]),
             ),
           ),
 
-          // Full width last item
           if (fullWidthItem != null) ...[
             SizedBox(height: 10.h),
             _RadioImageCell(
               label: fullWidthItem,
               imagePath: c.radiologyPickedImages[fullWidthItem],
+              isLoading: c.pickingRadiologyLabel.value == fullWidthItem,
               onTap: () => c.pickRadiologyImage(fullWidthItem),
               fullWidth: true,
             ),
@@ -60,16 +59,32 @@ class _RadioImageCell extends StatelessWidget {
   final String? imagePath;
   final VoidCallback onTap;
   final bool fullWidth;
+  final bool isLoading;
 
   const _RadioImageCell({
     required this.label,
     required this.imagePath,
     required this.onTap,
     this.fullWidth = false,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Shimmer.fromColors(
+        baseColor: const Color(0xFF2A2E2E),
+        highlightColor: const Color(0xFF3A3E3E),
+        child: Container(
+          height: fullWidth ? 120.h : null,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2A2E2E),
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+        ),
+      );
+    }
+
     final hasImage = imagePath != null;
 
     return GestureDetector(
@@ -82,50 +97,48 @@ class _RadioImageCell extends StatelessWidget {
           border: Border.all(
             color: AppColors.primaryColor.withValues(alpha: 0.5),
             width: 1,
-            // Dashed effect via custom painter below
           ),
         ),
         child: hasImage
             ? ClipRRect(
-          borderRadius: BorderRadius.circular(10.r),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.file(
-                File(imagePath!),
-                fit: BoxFit.cover,
-              ),
-              // Label overlay at bottom
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(10.r),
-                      bottomRight: Radius.circular(10.r),
+                borderRadius: BorderRadius.circular(10.r),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.file(
+                      File(imagePath!),
+                      fit: BoxFit.cover,
                     ),
-                  ),
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 9.sp,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryColor,
-                      letterSpacing: 0.5,
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(10.r),
+                            bottomRight: Radius.circular(10.r),
+                          ),
+                        ),
+                        child: Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 9.sp,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryColor,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        )
+              )
             : _DottedCell(label: label),
       ),
     );
@@ -186,7 +199,7 @@ class _DottedBorderPainter extends CustomPainter {
       double distance = 0;
       while (distance < metric.length) {
         final extractPath =
-        metric.extractPath(distance, distance + dashWidth);
+            metric.extractPath(distance, distance + dashWidth);
         canvas.drawPath(extractPath, paint);
         distance += dashWidth + dashSpace;
       }
