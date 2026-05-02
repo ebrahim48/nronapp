@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -42,71 +43,153 @@ class AddRepresentativeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextField(
-              controller: repC.nameController,
-              labelText: 'Representative Name',
-              hintText: 'Alex Johnson',
-              prefixIcon: Icon(
-                Icons.person_outline,
-                color: AppColors.secondaryTextColor,
-                size: 18.r,
-              ),
+            // Representative dropdown
+            CustomText(
+              text: 'Representative',
+              fontsize: 13.sp,
+              color: AppColors.primaryTextColor,
+              textAlign: TextAlign.start,
+              bottom: 6.h,
+              left: 2.w,
             ),
-
-            Obx(() => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  text: 'Rep Role',
-                  fontsize: 13.sp,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.start,
-                  bottom: 6.h,
-                  left: 2.w,
-                ),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                  decoration: BoxDecoration(
-                    color: const Color(0x1A4A4A4A),
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                        color: AppColors.dotButtonInactiveColor,
-                        width: 0.8),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: repC.selectedRole.value,
-                      isExpanded: true,
-                      dropdownColor: const Color(0xFF2A2A2A),
-                      icon: Icon(Icons.keyboard_arrow_down,
-                          color: AppColors.secondaryTextColor,
-                          size: 20.r),
-                      items: repC.roles
-                          .map((r) => DropdownMenuItem(
-                        value: r,
-                        child: Text(
-                          r,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontFamily: 'Poppins',
-                            color: AppColors.primaryTextColor,
-                          ),
-                        ),
-                      ))
-                          .toList(),
-                      onChanged: (v) =>
-                      repC.selectedRole.value = v ?? 'Assist',
+            Obx(() {
+              if (saleC.isLoadingRepDropdown.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Container(
+                    height: 52.h,
+                    margin: EdgeInsets.only(bottom: 14.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                   ),
+                );
+              }
+              final ids = saleC.repDropdownList.map((r) => r.id).toList();
+              final names =
+                  saleC.repDropdownList.map((r) => r.name).toList();
+              final safeVal = ids.contains(repC.selectedRepId.value)
+                  ? repC.selectedRepId.value
+                  : null;
+              return Container(
+                margin: EdgeInsets.only(bottom: 14.h),
+                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                decoration: BoxDecoration(
+                  color: const Color(0x1A4A4A4A),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(
+                      color: AppColors.dotButtonInactiveColor, width: 0.8),
                 ),
-                SizedBox(height: 14.h),
-              ],
-            )),
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline,
+                        color: AppColors.secondaryTextColor, size: 18.r),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: safeVal,
+                          hint: Text(
+                            'Select Representative',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              color: AppColors.secondaryTextColor,
+                            ),
+                          ),
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF2A2A2A),
+                          icon: Icon(Icons.keyboard_arrow_down,
+                              color: AppColors.secondaryTextColor,
+                              size: 20.r),
+                          items: List.generate(
+                            ids.length,
+                            (i) => DropdownMenuItem(
+                              value: ids[i],
+                              child: Text(
+                                names[i],
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.primaryTextColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          onChanged: (id) {
+                            if (id != null) {
+                              repC.selectedRepId.value = id;
+                              final idx = ids.indexOf(id);
+                              repC.selectedRepName.value =
+                                  idx >= 0 ? names[idx] : '';
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
+            // Role dropdown
+            Obx(() => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(
+                      text: 'Rep Role',
+                      fontsize: 13.sp,
+                      color: AppColors.primaryTextColor,
+                      textAlign: TextAlign.start,
+                      bottom: 6.h,
+                      left: 2.w,
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 14.h),
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(horizontal: 14.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0x1A4A4A4A),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                            color: AppColors.dotButtonInactiveColor,
+                            width: 0.8),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: repC.selectedRole.value,
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF2A2A2A),
+                          icon: Icon(Icons.keyboard_arrow_down,
+                              color: AppColors.secondaryTextColor,
+                              size: 20.r),
+                          items: repC.roles
+                              .map((r) => DropdownMenuItem(
+                                    value: r,
+                                    child: Text(
+                                      r,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontFamily: 'Poppins',
+                                        color: AppColors.primaryTextColor,
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (v) =>
+                              repC.selectedRole.value = v ?? 'Assist',
+                        ),
+                      ),
+                    ),
+                  ],
+                )),
+
             CustomTextField(
               controller: repC.commissionController,
               labelText: 'Commission %',
-              hintText: '\$00.00',
+              hintText: '0',
               keyboardType: TextInputType.number,
             ),
 
@@ -115,6 +198,7 @@ class AddRepresentativeScreen extends StatelessWidget {
             CustomButton(
               title: 'Add Representative',
               onpress: () {
+                if (repC.selectedRepId.value.isEmpty) return;
                 saleC.addRepresentative(repC.build());
                 Navigator.pop(context);
               },

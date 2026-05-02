@@ -391,7 +391,8 @@ static const activityLogScreen = '/activityLogScreen';
       GoRoute(
         path: saleDetailScreen,
         name: saleDetailScreen,
-        builder: (context, state) => const SaleDetailScreen(),
+        builder: (context, state) =>
+            SaleDetailScreen(saleId: state.extra as String? ?? ''),
       ),
       GoRoute(
         path: addRepresentativeScreen,

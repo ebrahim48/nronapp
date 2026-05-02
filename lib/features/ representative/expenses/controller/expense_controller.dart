@@ -66,7 +66,10 @@ class ExpenseController extends GetxController {
   final lastCreatedId = ''.obs;
 
   // ── Static data ───────────────────────────────────────────────────────────
-  final years = ['2024', '2025', '2026', '2027'];
+  final years = List.generate(
+    DateTime.now().year - 2019 + 5,
+    (i) => (2020 + i).toString(),
+  );
   final months = [
     'January', 'February', 'March', 'April',
     'May', 'June', 'July', 'August',
