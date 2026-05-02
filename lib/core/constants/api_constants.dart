@@ -56,6 +56,17 @@ class ApiConstants {
   static const String getCommonAllRepresentative = '/common/all-representatives';
 
 
+  static const String getSalesOverview = '/sales/get-overview';
+  static const String getSales = '/sales/get-my';
+  static String getSalesDetails(String id) => '/sales/find/$id';
+  static const String createSales = '/sales/create';
+  static String updateSales(String id) => '/sales/update/$id';
+  static String convertSalesType(String id) => '/sales/convert-sales-type/$id';
+  static String deleteSales(String id) => '/sales/delete/$id';
+  static const String commonAllVendors = '/common/all-vendors';
+  static const String commonAllInventory = '/common/all-inventory';
+
+
 
 
 

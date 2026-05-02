@@ -1,124 +1,444 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:intl/intl.dart';
+import '../../../../core/exceptions/app_exceptions.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../data/repositories/sales_repository.dart';
 import '../model/sales_model.dart';
 
 class SaleController extends GetxController {
-  final implantSales = 4.obs;
-  final bioSales = 4.obs;
-  final totalRevenue = 4.obs;
-  final commission = 4.obs;
-
-  final recentSales = <SaleModel>[
-    SaleModel(
-      id: '1',
-      saleNumber: 'SL-90210',
-      facility: 'City Otho Clinic',
-      saleTypeLabel: 'Implant',
-      surgeon: 'Dr. Robert Chen',
-      totalBill: 12450.00,
-      status: SaleStatus.approved,
-    ),
-    SaleModel(
-      id: '2',
-      saleNumber: 'SL-90211',
-      facility: 'City Otho Clinic',
-      saleTypeLabel: 'Biological',
-      surgeon: 'Dr. Robert Chen',
-      totalBill: 12450.00,
-      status: SaleStatus.pending,
-    ),
-    SaleModel(
-      id: '3',
-      saleNumber: 'SL-90212',
-      facility: 'City Otho Clinic',
-      saleTypeLabel: 'Implant',
-      surgeon: 'Dr. Robert Chen',
-      totalBill: 12450.00,
-      status: SaleStatus.pending,
-    ),
-  ].obs;
-
-  final saleDetail = const SaleDetailModel(
-    saleNumber: 'Sale #SL-90210',
-    saleType: 'Consigned',
-    physician: 'Dr. Sarah Jenkins',
-    facility: 'Metropolitan General Hospital',
-    procedureDate: '03/12/2026',
-    serialNumbers: 'SN-002\nSN-001',
-    vendor: 'Med-Tech',
-    ppoNumber: '12345',
-    inventoryItems: [
-      InventoryItemModel(name: 'Tapered Stem - Size 4', serial: 'SN: 882918-A', tag: 'Implant'),
-      InventoryItemModel(name: 'Acetabular Cup - 52mm', serial: 'SN: 771822-B', tag: 'Trays'),
-    ],
-    classification: 'Mixed (Sold/Consigned)',
-    repSplits: [
-      RepSplitModel(name: 'Marcus Aurelius', splitPercent: 70),
-      RepSplitModel(name: 'Lucius Vorenus', splitPercent: 30),
-    ],
-    totalCommission: 1420.50,
-    attachments: [
-      AttachmentFileModel(fileName: 'PO_889_Final.pdf', size: '1.2 MB', date: 'FEB 15', isPdf: true),
-      AttachmentFileModel(fileName: 'Implant_Serial_Photo.jpg', size: '3.4 MB', date: 'FEB 15', isPdf: false),
-    ],
-    note: 'Highly preferred for complex spinal fusions. Efficient with surgical time and maintains excellent patient outcomes. Follows up personally within 24 hours post-op.',
-    auditTrail: [
-      AuditTrailModel(title: 'Commission Calculated', subtitle: 'System automated process', dateTime: 'Oct 24, 2023 • 10:15 AM', type: AuditType.success),
-      AuditTrailModel(title: 'Packing Slip Uploaded', subtitle: 'By David Miller', dateTime: 'Oct 24, 2023 • 09:45 AM', type: AuditType.info),
-      AuditTrailModel(title: 'Sale Record Created', subtitle: 'By System Import', dateTime: 'Oct 23, 2023 • 04:30 PM', type: AuditType.warning),
-    ],
+  final _repo = SalesRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
   );
 
-  // ── Create Sale form ─────────────────────────────────────────────────────
+  // ── Overview stats ──────────────────────────────────────────────────────────
+  final implantSales = 0.obs;
+  final bioSales = 0.obs;
+  final totalRevenue = 0.obs;
+  final commission = 0.obs;
+  final isLoadingOverview = false.obs;
+
+  // ── Sales list (home recent) ────────────────────────────────────────────────
+  final recentSales = <SaleModel>[].obs;
+  final isLoadingSales = false.obs;
+  final isLoadingMore = false.obs;
+  int _currentPage = 1;
+  int _totalPage = 1;
+  final scrollController = ScrollController();
+
+  // ── All sales list (View All screen) ────────────────────────────────────────
+  final allSalesList = <SaleModel>[].obs;
+  final isLoadingAllSales = false.obs;
+  final isLoadingMoreAllSales = false.obs;
+  final allSalesFilter = ''.obs; // '' = all, 'pending', 'approved', 'rejected'
+  int _allSalesPage = 1;
+  int _allSalesTotalPage = 1;
+  final allSalesScrollController = ScrollController();
+
+  // ── Detail ──────────────────────────────────────────────────────────────────
+  final detailObs = Rxn<SaleDetailModel>();
+  final isLoadingDetail = false.obs;
+
+  // ── Delete / Convert ────────────────────────────────────────────────────────
+  final isDeleting = false.obs;
+  final isConverting = false.obs;
+  final isSubmitting = false.obs;
+
+  // ── Dropdown data ────────────────────────────────────────────────────────────
+  final physicianList = <VendorModel>[].obs;
+  final facilityList = <FacilityDropdownModel>[].obs;
+  final vendorList = <VendorModel>[].obs;
+  final repDropdownList = <VendorModel>[].obs;
+
+  final isLoadingPhysicians = false.obs;
+  final isLoadingFacilities = false.obs;
+  final isLoadingVendors = false.obs;
+  final isLoadingRepDropdown = false.obs;
+  final isLoadingInventory = false.obs;
+
+  // ── Form ─────────────────────────────────────────────────────────────────────
   final selectedSaleType = SaleType.sold.obs;
-  final selectedPhysician = ''.obs;
-  final selectedFacility = ''.obs;
+  final selectedPhysician = ''.obs;       // stores physician ID
+  final selectedPhysicianName = ''.obs;
+  final selectedFacility = ''.obs;        // stores facility ID
+  final selectedFacilityName = ''.obs;
   final procedureDate = ''.obs;
-  final vendorController = TextEditingController();
+  final procedureDateController = TextEditingController();
+
+  final selectedVendorId = ''.obs;
+  final selectedVendorName = ''.obs;
+  final vendorController = TextEditingController(); // kept for compat
   final poNumberController = TextEditingController();
   final totalBillController = TextEditingController();
   final vendorPaymentController = TextEditingController();
   final additionalNotesController = TextEditingController();
   final generatePackingSlip = true.obs;
 
-  final physicians = ['Dr. Jane Smith', 'Dr. Sarah Jenkins', 'Dr. Robert Chen'];
-  final facilities = ['City Hospital', 'Metropolitan General Hospital', 'Advanced Care Clinic'];
+  // ── Representatives ──────────────────────────────────────────────────────────
+  final addedRepresentatives = <RepresentativeModel>[].obs;
 
-  final addedRepresentatives = <RepresentativeModel>[
-    RepresentativeModel(name: 'Jordan Dixon', role: 'Primary', commissionPercent: 10),
-    RepresentativeModel(name: 'Asd Dixon', role: 'Assist', commissionPercent: 30),
-  ].obs;
-
+  // ── Implants ─────────────────────────────────────────────────────────────────
   final selectedImplants = <ImplantItem>[].obs;
-
-  final uploadedAttachments = <AttachmentFileModel>[
-    AttachmentFileModel(fileName: 'Doctor_Sheet_v4_Signed.pdf', size: '2.4 MB', date: 'OCT 24, 2023', isPdf: true),
-    AttachmentFileModel(fileName: 'Surgical_Report_Jenkins.pdf', size: '1.1 MB', date: '', isPdf: true),
-    AttachmentFileModel(fileName: 'Facility_Auth_Letter.docx', size: '842 KB', date: '', isPdf: false),
-  ].obs;
-
-  // ── Implants list ────────────────────────────────────────────────────────
+  final allImplants = <ImplantItem>[].obs;
   final implantSearchQuery = ''.obs;
 
-  final allImplants = <ImplantItem>[
-    ImplantItem(name: 'Shoulder Implant', serial: '#SNO456', material: 'Polyethylene', location: 'Advanced Care Clinic', availability: ImplantAvailability.available, isSelected: true),
-    ImplantItem(name: 'Knee Replacement', serial: '#KNR789', material: 'Titanium Alloy', location: 'Ortho Solutions Center', availability: ImplantAvailability.inStock),
-    ImplantItem(name: 'Hip Prosthesis', serial: '#HPP321', material: 'Ceramic Composite', location: 'Joint Health Institute', availability: ImplantAvailability.backordered, isSelected: true),
-    ImplantItem(name: 'Elbow Joint Fixator', serial: '#EJF654', material: 'Stainless Steel', location: 'Precision Orthopedics', availability: ImplantAvailability.available),
-  ].obs;
+  // ── Attachments ──────────────────────────────────────────────────────────────
+  final uploadedAttachments = <AttachmentFileModel>[].obs;
+  final uploadedFiles = <File>[].obs;
+
+  // ── Packing slip ─────────────────────────────────────────────────────────────
+  final packingSlipItems = const <PackingSlipItem>[
+    PackingSlipItem(
+        product: 'Neural Link Hub V2', serial: 'NL-882-991-A', qty: 1, price: 1250.00),
+    PackingSlipItem(
+        product: 'Titanium Mounting Kit', serial: 'TM-KIT-002', qty: 2, price: 45.00),
+    PackingSlipItem(
+        product: 'Fiber Optic Cable (5m)', serial: 'FO-5M-X9', qty: 5, price: 12.50),
+  ];
+
+  // ── Derived ───────────────────────────────────────────────────────────────────
+  List<String> get physicians => physicianList.map((p) => p.name).toList();
+  List<String> get physicianIds => physicianList.map((p) => p.id).toList();
+  List<String> get facilities => facilityList.map((f) => f.name).toList();
+  List<String> get facilityIds => facilityList.map((f) => f.id).toList();
+  List<String> get vendorNames => vendorList.map((v) => v.name).toList();
+  List<String> get vendorIds => vendorList.map((v) => v.id).toList();
 
   List<ImplantItem> get filteredImplants {
     if (implantSearchQuery.value.isEmpty) return allImplants;
     final q = implantSearchQuery.value.toLowerCase();
-    return allImplants.where((i) =>
-    i.name.toLowerCase().contains(q) ||
-        i.serial.toLowerCase().contains(q)).toList();
+    return allImplants
+        .where((i) =>
+            i.name.toLowerCase().contains(q) ||
+            i.serial.toLowerCase().contains(q))
+        .toList();
   }
 
   int get selectedImplantCount =>
       allImplants.where((i) => i.isSelected).length;
 
+  int get totalCommissionPercent =>
+      addedRepresentatives.fold(0, (sum, r) => sum + r.commissionPercent);
+
+  double get packingSlipSubtotal =>
+      packingSlipItems.fold(0, (s, i) => s + i.price);
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchOverview();
+    fetchSales();
+    fetchDropdowns();
+    scrollController.addListener(_onScroll);
+    allSalesScrollController.addListener(_onAllSalesScroll);
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    allSalesScrollController.removeListener(_onAllSalesScroll);
+    allSalesScrollController.dispose();
+    procedureDateController.dispose();
+    vendorController.dispose();
+    poNumberController.dispose();
+    totalBillController.dispose();
+    vendorPaymentController.dispose();
+    additionalNotesController.dispose();
+    super.onClose();
+  }
+
+  void _onScroll() {
+    if (scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent - 200) {
+      _loadMore();
+    }
+  }
+
+  // ── Overview ──────────────────────────────────────────────────────────────
+  Future<void> fetchOverview() async {
+    isLoadingOverview.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getOverview(token);
+      if (res['success'] == true) {
+        final data = res['data'] as Map<String, dynamic>? ?? {};
+        implantSales.value = (data['implantSales'] as num?)?.toInt() ?? 0;
+        bioSales.value = (data['bioSales'] as num?)?.toInt() ?? 0;
+        totalRevenue.value = (data['totalRevenue'] as num?)?.toInt() ?? 0;
+        commission.value = (data['commission'] as num?)?.toInt() ?? 0;
+      }
+    } on NoInternetException {
+    } on ServerException catch (_) {
+    } catch (_) {
+    } finally {
+      isLoadingOverview.value = false;
+    }
+  }
+
+  // ── Sales list ────────────────────────────────────────────────────────────
+  Future<void> fetchSales({bool reset = true}) async {
+    if (reset) {
+      _currentPage = 1;
+      recentSales.clear();
+      isLoadingSales.value = true;
+    } else {
+      if (isLoadingMore.value) return;
+      isLoadingMore.value = true;
+    }
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res =
+          await _repo.getAll(token, page: _currentPage, limit: 10);
+      if (res['success'] == true) {
+        final data = res['data'] as Map<String, dynamic>;
+        final meta = data['meta'] as Map<String, dynamic>? ?? {};
+        _totalPage = (meta['totalPage'] as num?)?.toInt() ?? 1;
+        final results = (data['results'] as List<dynamic>)
+            .map((e) => SaleModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        recentSales.addAll(results);
+      }
+    } on NoInternetException {
+    } on ServerException catch (_) {
+    } catch (_) {
+    } finally {
+      isLoadingSales.value = false;
+      isLoadingMore.value = false;
+    }
+  }
+
+  void _loadMore() {
+    if (_currentPage >= _totalPage ||
+        isLoadingMore.value ||
+        isLoadingSales.value) return;
+    _currentPage++;
+    fetchSales(reset: false);
+  }
+
+  // ── All Sales (View All screen) ───────────────────────────────────────────
+  Future<void> fetchAllSales({bool reset = true, String? filter}) async {
+    if (reset) {
+      _allSalesPage = 1;
+      allSalesList.clear();
+      isLoadingAllSales.value = true;
+      if (filter != null) allSalesFilter.value = filter;
+    } else {
+      if (isLoadingMoreAllSales.value) return;
+      isLoadingMoreAllSales.value = true;
+    }
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final status = allSalesFilter.value.isEmpty ? null : allSalesFilter.value;
+      final res = await _repo.getAll(token,
+          page: _allSalesPage, limit: 15, status: status);
+      if (res['success'] == true) {
+        final data = res['data'] as Map<String, dynamic>;
+        final meta = data['meta'] as Map<String, dynamic>? ?? {};
+        _allSalesTotalPage = (meta['totalPage'] as num?)?.toInt() ?? 1;
+        final results = (data['results'] as List<dynamic>)
+            .map((e) => SaleModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        allSalesList.addAll(results);
+      }
+    } on NoInternetException {
+    } on ServerException catch (_) {
+    } catch (_) {
+    } finally {
+      isLoadingAllSales.value = false;
+      isLoadingMoreAllSales.value = false;
+    }
+  }
+
+  void _onAllSalesScroll() {
+    if (allSalesScrollController.position.pixels >=
+        allSalesScrollController.position.maxScrollExtent - 200) {
+      if (_allSalesPage < _allSalesTotalPage &&
+          !isLoadingMoreAllSales.value &&
+          !isLoadingAllSales.value) {
+        _allSalesPage++;
+        fetchAllSales(reset: false);
+      }
+    }
+  }
+
+  // ── Detail ────────────────────────────────────────────────────────────────
+  Future<void> fetchDetail(String id) async {
+    isLoadingDetail.value = true;
+    detailObs.value = null;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getDetail(token, id);
+      debugPrint('[SaleCtrl] fetchDetail res: $res');
+      if (res['success'] == true) {
+        final rawData = res['data'];
+        final data = rawData is Map<String, dynamic>
+            ? rawData
+            : Map<String, dynamic>.from(rawData as Map);
+        detailObs.value = SaleDetailModel.fromJson(data);
+      }
+    } on NoInternetException {
+    } on ServerException catch (e) {
+      debugPrint('[SaleCtrl] fetchDetail ServerException: ${e.message}');
+    } catch (e, st) {
+      debugPrint('[SaleCtrl] fetchDetail error: $e\n$st');
+    } finally {
+      isLoadingDetail.value = false;
+    }
+  }
+
+  // ── Delete ────────────────────────────────────────────────────────────────
+  Future<bool> deleteSale(String id) async {
+    isDeleting.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.delete(token, id);
+      if (res['success'] == true) {
+        recentSales.removeWhere((s) => s.id == id);
+        return true;
+      }
+    } on NoInternetException {
+      ToastMessageHelper.showToastMessage('No internet connection.',
+          title: 'Error');
+    } on ServerException catch (e) {
+      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } catch (_) {
+    } finally {
+      isDeleting.value = false;
+    }
+    return false;
+  }
+
+  // ── Convert type ──────────────────────────────────────────────────────────
+  Future<bool> convertSaleType(String id) async {
+    isConverting.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final currentType = detailObs.value?.salesTypeRaw ?? '';
+      final res = await _repo.convertType(token, id, currentType);
+      if (res['success'] == true) {
+        await fetchDetail(id);
+        return true;
+      }
+    } on NoInternetException {
+      ToastMessageHelper.showToastMessage('No internet connection.',
+          title: 'Error');
+    } on ServerException catch (e) {
+      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } catch (_) {
+    } finally {
+      isConverting.value = false;
+    }
+    return false;
+  }
+
+  // ── Dropdown loaders ──────────────────────────────────────────────────────
+  Future<void> fetchDropdowns() async {
+    await Future.wait([
+      fetchPhysicians(),
+      fetchFacilities(),
+      fetchVendors(),
+      fetchRepDropdown(),
+      fetchInventory(),
+    ]);
+  }
+
+  Future<void> fetchPhysicians() async {
+    isLoadingPhysicians.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getPhysicians(token);
+      if (res['success'] == true) {
+        physicianList.assignAll(_parseList(res['data'])
+            .map((e) => VendorModel.fromJson(e as Map<String, dynamic>))
+            .toList());
+      }
+    } catch (_) {
+    } finally {
+      isLoadingPhysicians.value = false;
+    }
+  }
+
+  Future<void> fetchFacilities() async {
+    isLoadingFacilities.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getFacilities(token);
+      if (res['success'] == true) {
+        facilityList.assignAll(_parseList(res['data'])
+            .map((e) =>
+                FacilityDropdownModel.fromJson(e as Map<String, dynamic>))
+            .toList());
+      }
+    } catch (_) {
+    } finally {
+      isLoadingFacilities.value = false;
+    }
+  }
+
+  Future<void> fetchVendors() async {
+    isLoadingVendors.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getVendors(token);
+      if (res['success'] == true) {
+        vendorList.assignAll(_parseList(res['data'])
+            .map((e) => VendorModel.fromJson(e as Map<String, dynamic>))
+            .toList());
+      }
+    } catch (_) {
+    } finally {
+      isLoadingVendors.value = false;
+    }
+  }
+
+  Future<void> fetchRepDropdown() async {
+    isLoadingRepDropdown.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getRepresentatives(token);
+      if (res['success'] == true) {
+        repDropdownList.assignAll(_parseList(res['data'])
+            .map((e) => VendorModel.fromJson(e as Map<String, dynamic>))
+            .toList());
+      }
+    } catch (_) {
+    } finally {
+      isLoadingRepDropdown.value = false;
+    }
+  }
+
+  Future<void> fetchInventory() async {
+    isLoadingInventory.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getInventory(token);
+      if (res['success'] == true) {
+        allImplants.assignAll(_parseList(res['data'])
+            .map((e) => ImplantItem.fromJson(e as Map<String, dynamic>))
+            .toList());
+      }
+    } catch (_) {
+    } finally {
+      isLoadingInventory.value = false;
+    }
+  }
+
+  List<dynamic> _parseList(dynamic data) {
+    if (data is List) return data;
+    if (data is Map) {
+      return (data['results'] ?? data['data'] ?? []) as List<dynamic>;
+    }
+    return [];
+  }
+
+  // ── Implants ──────────────────────────────────────────────────────────────
   void toggleImplant(int index) {
     allImplants[index].isSelected = !allImplants[index].isSelected;
     allImplants.refresh();
@@ -128,6 +448,7 @@ class SaleController extends GetxController {
     selectedImplants.assignAll(allImplants.where((i) => i.isSelected));
   }
 
+  // ── Representatives ───────────────────────────────────────────────────────
   void removeRepresentative(int index) {
     addedRepresentatives.removeAt(index);
   }
@@ -136,40 +457,245 @@ class SaleController extends GetxController {
     addedRepresentatives.add(rep);
   }
 
-  int get totalCommissionPercent =>
-      addedRepresentatives.fold(0, (sum, r) => sum + r.commissionPercent);
-
+  // ── Date picker ───────────────────────────────────────────────────────────
   void pickDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2030),
-      builder: (ctx, child) => Theme(data: ThemeData.dark(), child: child!),
+      builder: (ctx, child) => Theme(
+        data: ThemeData.dark().copyWith(
+          colorScheme: const ColorScheme.dark(
+            primary: Color(0xFF00C5DA),
+            onPrimary: Colors.white,
+            surface: Color(0xFF252525),
+            onSurface: Colors.white,
+          ),
+          dialogTheme:
+              const DialogThemeData(backgroundColor: Color(0xFF1E2427)),
+        ),
+        child: child!,
+      ),
     );
     if (picked != null) {
-      procedureDate.value =
-      '${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}';
+      final formatted =
+          '${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}/${picked.year}';
+      procedureDate.value = formatted;
+      procedureDateController.text = formatted;
     }
   }
 
-  // ── Packing slip ─────────────────────────────────────────────────────────
-  final packingSlipItems = const <PackingSlipItem>[
-    PackingSlipItem(product: 'Neural Link Hub V2', serial: 'NL-882-991-A', qty: 1, price: 1250.00),
-    PackingSlipItem(product: 'Titanium Mounting Kit', serial: 'TM-KIT-002', qty: 2, price: 45.00),
-    PackingSlipItem(product: 'Fiber Optic Cable (5m)', serial: 'FO-5M-X9', qty: 5, price: 12.50),
-  ];
+  // ── File picker ───────────────────────────────────────────────────────────
+  Future<void> attachFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+        allowMultiple: true,
+        withData: false,
+      );
+      if (result != null) {
+        for (final f in result.files) {
+          if (f.path != null) {
+            uploadedFiles.add(File(f.path!));
+            uploadedAttachments.add(AttachmentFileModel.fromUrl(f.path!));
+          }
+        }
+      }
+    } catch (_) {}
+  }
 
-  double get packingSlipSubtotal =>
-      packingSlipItems.fold(0, (s, i) => s + i.price);
+  void removeAttachment(int index) {
+    uploadedAttachments.removeAt(index);
+    if (index < uploadedFiles.length) uploadedFiles.removeAt(index);
+  }
 
-  @override
-  void onClose() {
-    vendorController.dispose();
-    poNumberController.dispose();
-    totalBillController.dispose();
-    vendorPaymentController.dispose();
-    additionalNotesController.dispose();
-    super.onClose();
+  // ── Prefill for edit ──────────────────────────────────────────────────────
+  void prefillForEdit(SaleDetailModel d) {
+    selectedSaleType.value = d.salesTypeRaw.toLowerCase() == 'consigned'
+        ? SaleType.consigned
+        : SaleType.sold;
+    selectedPhysician.value = d.physicianId;
+    selectedPhysicianName.value = d.physician;
+    selectedFacility.value = d.facilityId;
+    selectedFacilityName.value = d.facility;
+    final formattedDate = d.procedureDate;
+    procedureDate.value = formattedDate;
+    procedureDateController.text = formattedDate;
+    selectedVendorId.value = d.vendorId;
+    selectedVendorName.value = d.vendor;
+    poNumberController.text = d.ppoNumber;
+    totalBillController.text =
+        d.totalAmount > 0 ? d.totalAmount.toStringAsFixed(0) : '';
+    vendorPaymentController.text =
+        d.vendorPayment > 0 ? d.vendorPayment.toStringAsFixed(0) : '';
+    additionalNotesController.text = d.note;
+
+    addedRepresentatives.assignAll(d.repSplits.map((r) => RepresentativeModel(
+          id: r.id,
+          name: r.name,
+          role: r.role,
+          commissionPercent: r.splitPercent,
+        )));
+
+    for (final item in allImplants) {
+      item.isSelected = false;
+    }
+    allImplants.refresh();
+    selectedImplants.clear();
+    uploadedAttachments.clear();
+    uploadedFiles.clear();
+  }
+
+  // ── Clear form ────────────────────────────────────────────────────────────
+  void clearForm() {
+    selectedSaleType.value = SaleType.sold;
+    selectedPhysician.value = '';
+    selectedPhysicianName.value = '';
+    selectedFacility.value = '';
+    selectedFacilityName.value = '';
+    procedureDate.value = '';
+    procedureDateController.clear();
+    selectedVendorId.value = '';
+    selectedVendorName.value = '';
+    poNumberController.clear();
+    totalBillController.clear();
+    vendorPaymentController.clear();
+    additionalNotesController.clear();
+    generatePackingSlip.value = true;
+    addedRepresentatives.clear();
+    selectedImplants.clear();
+    uploadedAttachments.clear();
+    uploadedFiles.clear();
+    for (final item in allImplants) {
+      item.isSelected = false;
+    }
+    allImplants.refresh();
+  }
+
+  // ── Submit sale ───────────────────────────────────────────────────────────
+  Future<bool> submitSale(BuildContext context, {String? saleId}) async {
+    final physicianId = selectedPhysician.value;
+    final facilityId = selectedFacility.value;
+    final vendorId = selectedVendorId.value;
+    final dateStr = procedureDate.value;
+    final totalBill =
+        double.tryParse(totalBillController.text.trim()) ?? 0;
+    final vendorPay =
+        double.tryParse(vendorPaymentController.text.trim()) ?? 0;
+    final notes = additionalNotesController.text.trim();
+
+    if (physicianId.isEmpty) {
+      ToastMessageHelper.showToastMessage('Please select a physician.',
+          title: 'Required');
+      return false;
+    }
+    if (facilityId.isEmpty) {
+      ToastMessageHelper.showToastMessage('Please select a facility.',
+          title: 'Required');
+      return false;
+    }
+    if (dateStr.isEmpty) {
+      ToastMessageHelper.showToastMessage(
+          'Please select a procedure date.',
+          title: 'Required');
+      return false;
+    }
+    if (addedRepresentatives.isEmpty) {
+      ToastMessageHelper.showToastMessage(
+          'Please add at least one representative.',
+          title: 'Required');
+      return false;
+    }
+    if (totalCommissionPercent != 100) {
+      ToastMessageHelper.showToastMessage(
+          'Representative commission must total 100%.',
+          title: 'Invalid');
+      return false;
+    }
+
+    String apiDate = dateStr;
+    try {
+      final dt = DateFormat('MM/dd/yyyy').parse(dateStr);
+      apiDate = dt.toUtc().toIso8601String();
+    } catch (_) {}
+
+    final reps = addedRepresentatives
+        .map((r) => {
+              'representative': r.id,
+              'assignRole': r.role,
+              'commissionRate': r.commissionPercent,
+            })
+        .toList();
+
+    final inventory = selectedImplants
+        .map((item) => {
+              'product': item.id,
+              'productType': item.name,
+            })
+        .toList();
+
+    isSubmitting.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      Map<String, dynamic> res;
+      if (saleId == null) {
+        res = await _repo.create(
+          token,
+          salesType:
+              selectedSaleType.value == SaleType.sold ? 'sold' : 'consigned',
+          physicianId: physicianId,
+          facilityId: facilityId,
+          procedureDate: apiDate,
+          representatives: reps,
+          inventoryProducts: inventory,
+          vendorId: vendorId,
+          purchaseOrderNumber: poNumberController.text.trim(),
+          totalAmount: totalBill,
+          vendorPayment: vendorPay,
+          description: notes.isEmpty ? null : notes,
+          generatePackingSlip: generatePackingSlip.value,
+          attachments: uploadedFiles.isEmpty ? null : uploadedFiles.toList(),
+        );
+      } else {
+        res = await _repo.update(
+          token,
+          saleId,
+          salesType:
+              selectedSaleType.value == SaleType.sold ? 'sold' : 'consigned',
+          physicianId: physicianId,
+          facilityId: facilityId,
+          procedureDate: apiDate,
+          representatives: reps,
+          inventoryProducts: inventory,
+          vendorId: vendorId.isEmpty ? null : vendorId,
+          purchaseOrderNumber: poNumberController.text.trim(),
+          totalAmount: totalBill,
+          vendorPayment: vendorPay,
+          description: notes.isEmpty ? null : notes,
+          attachments: uploadedFiles.isEmpty ? null : uploadedFiles.toList(),
+        );
+      }
+      if (res['success'] == true) {
+        clearForm();
+        fetchSales();
+        fetchOverview();
+        return true;
+      } else {
+        final msg =
+            res['message']?.toString() ?? 'Failed to save sale';
+        ToastMessageHelper.showToastMessage(msg, title: 'Error');
+      }
+    } on NoInternetException {
+      ToastMessageHelper.showToastMessage('No internet connection.',
+          title: 'Error');
+    } on ServerException catch (e) {
+      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } catch (_) {
+    } finally {
+      isSubmitting.value = false;
+    }
+    return false;
   }
 }

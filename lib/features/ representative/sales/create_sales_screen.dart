@@ -2,22 +2,54 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
-import '../../../core/config/app-routes/app_routes.dart';
 import 'controller/sales_controller.dart';
 import 'model/sales_model.dart';
+import 'add_representative_screen.dart';
+import 'select_implants_screen.dart';
 
 
-class CreateSaleScreen extends StatelessWidget {
-  const CreateSaleScreen({super.key});
+class CreateSaleScreen extends StatefulWidget {
+  final String? saleId;
+  const CreateSaleScreen({super.key, this.saleId});
+
+  @override
+  State<CreateSaleScreen> createState() => _CreateSaleScreenState();
+}
+
+class _CreateSaleScreenState extends State<CreateSaleScreen> {
+  late final SaleController c;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.find<SaleController>();
+    if (widget.saleId != null) {
+      _prefillFromDetail();
+    } else {
+      c.clearForm();
+    }
+  }
+
+  Future<void> _prefillFromDetail() async {
+    if (c.detailObs.value?.id == widget.saleId) {
+      c.prefillForEdit(c.detailObs.value!);
+    } else {
+      await c.fetchDetail(widget.saleId!);
+      if (c.detailObs.value != null) {
+        c.prefillForEdit(c.detailObs.value!);
+      }
+    }
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<SaleController>();
+    final isEdit = widget.saleId != null;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -31,7 +63,7 @@ class CreateSaleScreen extends StatelessWidget {
               color: AppColors.primaryTextColor, size: 18.r),
         ),
         title: CustomText(
-          text: 'Create Sale',
+          text: isEdit ? 'Edit Sale' : 'Create Sale',
           fontsize: 18.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.primaryTextColor,
@@ -48,23 +80,23 @@ class CreateSaleScreen extends StatelessWidget {
             _SectionLabel(label: 'SALE TYPE'),
             SizedBox(height: 8.h),
             Obx(() => Row(
-              children: [
-                _SaleTypeTab(
-                  label: 'Sold',
-                  isSelected:
-                  c.selectedSaleType.value == SaleType.sold,
-                  onTap: () =>
-                  c.selectedSaleType.value = SaleType.sold,
-                ),
-                _SaleTypeTab(
-                  label: 'Consigned',
-                  isSelected:
-                  c.selectedSaleType.value == SaleType.consigned,
-                  onTap: () =>
-                  c.selectedSaleType.value = SaleType.consigned,
-                ),
-              ],
-            )),
+                  children: [
+                    _SaleTypeTab(
+                      label: 'Sold',
+                      isSelected:
+                          c.selectedSaleType.value == SaleType.sold,
+                      onTap: () =>
+                          c.selectedSaleType.value = SaleType.sold,
+                    ),
+                    _SaleTypeTab(
+                      label: 'Consigned',
+                      isSelected: c.selectedSaleType.value ==
+                          SaleType.consigned,
+                      onTap: () =>
+                          c.selectedSaleType.value = SaleType.consigned,
+                    ),
+                  ],
+                )),
 
             SizedBox(height: 20.h),
 
@@ -77,53 +109,77 @@ class CreateSaleScreen extends StatelessWidget {
             SizedBox(height: 12.h),
 
             // Physician dropdown
-            _DarkDropdownField(
-              label: 'Physician',
-              hint: 'Dr. Jane Smith',
-              value: c.selectedPhysician.value.isEmpty
-                  ? null
-                  : c.selectedPhysician.value,
-              items: c.physicians,
-              prefixIcon: Icon(Icons.person_outline,
-                  color: AppColors.secondaryTextColor, size: 18.r),
-              onChanged: (v) => c.selectedPhysician.value = v ?? '',
-            ),
+            Obx(() {
+              if (c.isLoadingPhysicians.value) return _ShimmerDropdown();
+              final safeVal =
+                  c.physicianIds.contains(c.selectedPhysician.value)
+                      ? c.selectedPhysician.value
+                      : null;
+              return _DarkDropdownField(
+                label: 'Physician',
+                hint: 'Select Physician',
+                value: safeVal,
+                items: c.physicians,
+                values: c.physicianIds,
+                prefixIcon: Icon(Icons.person_outline,
+                    color: AppColors.secondaryTextColor, size: 18.r),
+                onChanged: (id) {
+                  if (id != null) {
+                    c.selectedPhysician.value = id;
+                    final idx = c.physicianIds.indexOf(id);
+                    c.selectedPhysicianName.value =
+                        idx >= 0 ? c.physicians[idx] : '';
+                  }
+                },
+              );
+            }),
 
             // Facility dropdown
-            _DarkDropdownField(
-              label: 'Facility / Location',
-              hint: 'Search Facility (e.g., City Hospital)',
-              value: c.selectedFacility.value.isEmpty
-                  ? null
-                  : c.selectedFacility.value,
-              items: c.facilities,
-              prefixIcon: Icon(Icons.add_box_outlined,
-                  color: AppColors.secondaryTextColor, size: 18.r),
-              onChanged: (v) => c.selectedFacility.value = v ?? '',
-            ),
+            Obx(() {
+              if (c.isLoadingFacilities.value) return _ShimmerDropdown();
+              final safeVal =
+                  c.facilityIds.contains(c.selectedFacility.value)
+                      ? c.selectedFacility.value
+                      : null;
+              return _DarkDropdownField(
+                label: 'Facility / Location',
+                hint: 'Search Facility (e.g., City Hospital)',
+                value: safeVal,
+                items: c.facilities,
+                values: c.facilityIds,
+                prefixIcon: Icon(Icons.add_box_outlined,
+                    color: AppColors.secondaryTextColor, size: 18.r),
+                onChanged: (id) {
+                  if (id != null) {
+                    c.selectedFacility.value = id;
+                    final idx = c.facilityIds.indexOf(id);
+                    c.selectedFacilityName.value =
+                        idx >= 0 ? c.facilities[idx] : '';
+                  }
+                },
+              );
+            }),
 
             // Procedure Date
-            Obx(() => GestureDetector(
+            CustomTextField(
+              controller: c.procedureDateController,
+              labelText: 'Procedure Date (DOS)',
+              hintText: 'mm/dd/yyyy',
+              readOnly: true,
               onTap: () => c.pickDate(context),
-              child: AbsorbPointer(
-                child: CustomTextField(
-                  controller: TextEditingController(
-                      text: c.procedureDate.value),
-                  labelText: 'Procedure Date (DOS)',
-                  hintText: 'mm/dd/yyyy',
-                  readOnly: true,
-                  suffixIcon: Icon(Icons.calendar_today_outlined,
-                      color: AppColors.secondaryTextColor,
-                      size: 18.r),
-                ),
-              ),
-            )),
+              suffixIcon: Icon(Icons.calendar_today_outlined,
+                  color: AppColors.secondaryTextColor, size: 18.r),
+            ),
 
             SizedBox(height: 4.h),
 
             // Add Products from Inventory button
             GestureDetector(
-              onTap: () => context.pushNamed(AppRoutes.selectImplantsScreen),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const SelectImplantsScreen()),
+              ),
               child: Container(
                 width: double.infinity,
                 height: 50.h,
@@ -136,23 +192,25 @@ class CreateSaleScreen extends StatelessWidget {
                   ),
                 ),
                 child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add,
-                          color: AppColors.primaryColor, size: 18.r),
-                      SizedBox(width: 6.w),
-                      Text(
-                        'Add Products from Inventory',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: Obx(() => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add,
+                              color: AppColors.primaryColor, size: 18.r),
+                          SizedBox(width: 6.w),
+                          Text(
+                            c.selectedImplants.isEmpty
+                                ? 'Add Products from Inventory'
+                                : 'Products Selected (${c.selectedImplants.length})',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                        ],
+                      )),
                 ),
               ),
             ),
@@ -171,8 +229,12 @@ class CreateSaleScreen extends StatelessWidget {
                   textAlign: TextAlign.start,
                 ),
                 GestureDetector(
-                  onTap: () => context.pushNamed(
-                      AppRoutes.addRepresentativeScreen),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) =>
+                            const AddRepresentativeScreen()),
+                  ),
                   child: Row(
                     children: [
                       Icon(Icons.add_circle_outline,
@@ -193,24 +255,25 @@ class CreateSaleScreen extends StatelessWidget {
             SizedBox(height: 10.h),
 
             Obx(() => Column(
-              children: c.addedRepresentatives
-                  .asMap()
-                  .entries
-                  .map((e) => _RepCard(
-                rep: e.value,
-                index: e.key,
-                onRemove: () => c.removeRepresentative(e.key),
-              ))
-                  .toList(),
-            )),
+                  children: c.addedRepresentatives
+                      .asMap()
+                      .entries
+                      .map((e) => _RepCard(
+                            rep: e.value,
+                            index: e.key,
+                            onRemove: () =>
+                                c.removeRepresentative(e.key),
+                          ))
+                      .toList(),
+                )),
 
             // Total commission indicator
             Obx(() {
               final total = c.totalCommissionPercent;
               final isValid = total == 100;
               return Container(
-                padding:
-                EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 12.w, vertical: 8.h),
                 decoration: BoxDecoration(
                   color: isValid
                       ? AppColors.primaryColor.withValues(alpha: 0.08)
@@ -254,11 +317,29 @@ class CreateSaleScreen extends StatelessWidget {
 
             SizedBox(height: 12.h),
 
-            CustomTextField(
-              controller: c.vendorController,
-              labelText: 'Vendor',
-              hintText: 'name',
-            ),
+            // Vendor dropdown
+            Obx(() {
+              if (c.isLoadingVendors.value) return _ShimmerDropdown();
+              final safeVal =
+                  c.vendorIds.contains(c.selectedVendorId.value)
+                      ? c.selectedVendorId.value
+                      : null;
+              return _DarkDropdownField(
+                label: 'Vendor',
+                hint: 'Select Vendor',
+                value: safeVal,
+                items: c.vendorNames,
+                values: c.vendorIds,
+                onChanged: (id) {
+                  if (id != null) {
+                    c.selectedVendorId.value = id;
+                    final idx = c.vendorIds.indexOf(id);
+                    c.selectedVendorName.value =
+                        idx >= 0 ? c.vendorNames[idx] : '';
+                  }
+                },
+              );
+            }),
 
             Row(
               children: [
@@ -301,18 +382,21 @@ class CreateSaleScreen extends StatelessWidget {
                   color: AppColors.primaryTextColor,
                   textAlign: TextAlign.start,
                 ),
-                Row(
-                  children: [
-                    Icon(Icons.add_circle_outline,
-                        color: AppColors.primaryColor, size: 16.r),
-                    SizedBox(width: 4.w),
-                    CustomText(
-                      text: 'Add',
-                      fontsize: 13.sp,
-                      color: AppColors.primaryColor,
-                      textAlign: TextAlign.start,
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: () => c.attachFile(),
+                  child: Row(
+                    children: [
+                      Icon(Icons.add_circle_outline,
+                          color: AppColors.primaryColor, size: 16.r),
+                      SizedBox(width: 4.w),
+                      CustomText(
+                        text: 'Add',
+                        fontsize: 13.sp,
+                        color: AppColors.primaryColor,
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -320,12 +404,16 @@ class CreateSaleScreen extends StatelessWidget {
             SizedBox(height: 10.h),
 
             Obx(() => Column(
-              children: c.uploadedAttachments
-                  .asMap()
-                  .entries
-                  .map((e) => _AttachmentTile(file: e.value))
-                  .toList(),
-            )),
+                  children: c.uploadedAttachments
+                      .asMap()
+                      .entries
+                      .map((e) => _AttachmentTile(
+                            file: e.value,
+                            onRemove: () =>
+                                c.removeAttachment(e.key),
+                          ))
+                      .toList(),
+                )),
 
             SizedBox(height: 4.h),
 
@@ -357,76 +445,93 @@ class CreateSaleScreen extends StatelessWidget {
 
             SizedBox(height: 10.h),
 
-            GestureDetector(
-              onTap: () => context.pushNamed(AppRoutes.packingSlipScreen),
-              child: Container(
-                padding: EdgeInsets.all(14.r),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF242424),
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(color: const Color(0xFF3A3A3A)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.print_outlined,
-                        color: AppColors.primaryColor, size: 20.r),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CustomText(
-                            text: 'Generate Packing Slip',
-                            fontsize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryTextColor,
-                            textAlign: TextAlign.start,
-                          ),
-                          CustomText(
-                            text: 'PDF Preview generated',
-                            fontsize: 11.sp,
-                            color: AppColors.secondaryTextColor,
-                            textAlign: TextAlign.start,
-                          ),
-                        ],
-                      ),
+            Container(
+              padding: EdgeInsets.all(14.r),
+              decoration: BoxDecoration(
+                color: const Color(0xFF242424),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: const Color(0xFF3A3A3A)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.print_outlined,
+                      color: AppColors.primaryColor, size: 20.r),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CustomText(
+                          text: 'Generate Packing Slip',
+                          fontsize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryTextColor,
+                          textAlign: TextAlign.start,
+                        ),
+                        CustomText(
+                          text: 'PDF Preview generated',
+                          fontsize: 11.sp,
+                          color: AppColors.secondaryTextColor,
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
                     ),
-                    Obx(() => GestureDetector(
-                      onTap: () => c.generatePackingSlip.toggle(),
-                      child: Container(
-                        width: 22.r,
-                        height: 22.r,
-                        decoration: BoxDecoration(
-                          color: c.generatePackingSlip.value
-                              ? AppColors.primaryColor
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(4.r),
-                          border: Border.all(
+                  ),
+                  Obx(() => GestureDetector(
+                        onTap: () => c.generatePackingSlip.toggle(),
+                        child: Container(
+                          width: 22.r,
+                          height: 22.r,
+                          decoration: BoxDecoration(
                             color: c.generatePackingSlip.value
                                 ? AppColors.primaryColor
-                                : const Color(0xFF5A5A5A),
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(4.r),
+                            border: Border.all(
+                              color: c.generatePackingSlip.value
+                                  ? AppColors.primaryColor
+                                  : const Color(0xFF5A5A5A),
+                            ),
                           ),
+                          child: c.generatePackingSlip.value
+                              ? Icon(Icons.check,
+                                  color: AppColors.blackColor,
+                                  size: 14.r)
+                              : null,
                         ),
-                        child: c.generatePackingSlip.value
-                            ? Icon(Icons.check,
-                            color: AppColors.blackColor,
-                            size: 14.r)
-                            : null,
-                      ),
-                    )),
-                  ],
-                ),
+                      )),
+                ],
               ),
             ),
 
             SizedBox(height: 24.h),
 
-            // ── Create Sale Record ─────────────────────────────────
+            // ── Submit ─────────────────────────────────────────────
+            Obx(() => CustomButton(
+                  title: isEdit ? 'Update Sale Record' : 'Create Sale Record',
+                  loading: c.isSubmitting.value,
+                  onpress: () async {
+                    final ok = await c.submitSale(
+                      context,
+                      saleId: widget.saleId,
+                    );
+                    if (ok && context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  titlecolor: AppColors.blackColor,
+                  fontWeight: FontWeight.w700,
+                )),
+
+            SizedBox(height: 12.h),
+
             CustomButton(
-              title: 'Create Sale Record',
-              onpress: () => context.pushNamed(AppRoutes.saleDetailScreen),
-              titlecolor: AppColors.blackColor,
-              fontWeight: FontWeight.w700,
+              title: 'Cancel',
+              onpress: () => Navigator.pop(context),
+              color: Colors.transparent,
+              borderColor: const Color(0xFF3A3A3A),
+              titlecolor: AppColors.secondaryTextColor,
+              fontWeight: FontWeight.w500,
             ),
 
             SizedBox(height: 30.h),
@@ -437,7 +542,7 @@ class CreateSaleScreen extends StatelessWidget {
   }
 }
 
-// ── Internal Widgets ─────────────────────────────────────────────────────────
+// ── Internal Widgets ──────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
   final String label;
@@ -510,7 +615,9 @@ class _SaleTypeTab extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1A6EFF) : const Color(0xFF2A2A2A),
+          color: isSelected
+              ? const Color(0xFF1A6EFF)
+              : const Color(0xFF2A2A2A),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Text(
@@ -532,6 +639,7 @@ class _DarkDropdownField extends StatelessWidget {
   final String hint;
   final String? value;
   final List<String> items;
+  final List<String>? values;
   final Widget? prefixIcon;
   final void Function(String?) onChanged;
 
@@ -541,6 +649,7 @@ class _DarkDropdownField extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.values,
     this.prefixIcon,
   });
 
@@ -589,20 +698,25 @@ class _DarkDropdownField extends StatelessWidget {
                       isExpanded: true,
                       dropdownColor: const Color(0xFF2A2A2A),
                       icon: Icon(Icons.keyboard_arrow_down,
-                          color: AppColors.secondaryTextColor, size: 20.r),
-                      items: items
-                          .map((i) => DropdownMenuItem(
-                        value: i,
-                        child: Text(
-                          i,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontFamily: 'Poppins',
-                            color: AppColors.primaryTextColor,
+                          color: AppColors.secondaryTextColor,
+                          size: 20.r),
+                      items: List.generate(items.length, (i) {
+                        final itemValue =
+                            values != null && i < values!.length
+                                ? values![i]
+                                : items[i];
+                        return DropdownMenuItem(
+                          value: itemValue,
+                          child: Text(
+                            items[i],
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: 'Poppins',
+                              color: AppColors.primaryTextColor,
+                            ),
                           ),
-                        ),
-                      ))
-                          .toList(),
+                        );
+                      }),
                       onChanged: onChanged,
                     ),
                   ),
@@ -631,6 +745,9 @@ class _RepCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = [const Color(0xFF3A7BD5), const Color(0xFF6C5CE7)];
     final bg = colors[index % colors.length];
+    final initials = rep.name.length >= 2
+        ? rep.name.substring(0, 2).toUpperCase()
+        : rep.name.toUpperCase();
 
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
@@ -648,7 +765,7 @@ class _RepCard extends StatelessWidget {
                 radius: 18.r,
                 backgroundColor: bg,
                 child: Text(
-                  rep.name.substring(0, 2).toUpperCase(),
+                  initials,
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontFamily: 'Poppins',
@@ -673,7 +790,8 @@ class _RepCard extends StatelessWidget {
                       padding: EdgeInsets.symmetric(
                           horizontal: 8.w, vertical: 2.h),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor.withValues(alpha: 0.1),
+                        color:
+                            AppColors.primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
@@ -703,7 +821,8 @@ class _RepCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFF2A2A2A),
                       borderRadius: BorderRadius.circular(6.r),
-                      border: Border.all(color: const Color(0xFF3A3A3A)),
+                      border:
+                          Border.all(color: const Color(0xFF3A3A3A)),
                     ),
                     child: Text(
                       '${rep.commissionPercent} %',
@@ -741,7 +860,8 @@ class _RepCard extends StatelessWidget {
 
 class _AttachmentTile extends StatelessWidget {
   final AttachmentFileModel file;
-  const _AttachmentTile({required this.file});
+  final VoidCallback? onRemove;
+  const _AttachmentTile({required this.file, this.onRemove});
 
   @override
   Widget build(BuildContext context) {
@@ -776,36 +896,42 @@ class _AttachmentTile extends StatelessWidget {
           ),
           SizedBox(width: 10.w),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  text: file.fileName,
-                  fontsize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.start,
-                ),
-                if (file.date.isNotEmpty)
-                  CustomText(
-                    text: '${file.size} • ${file.date}',
-                    fontsize: 10.sp,
-                    color: AppColors.secondaryTextColor,
-                    textAlign: TextAlign.start,
-                  )
-                else
-                  CustomText(
-                    text: file.size,
-                    fontsize: 10.sp,
-                    color: AppColors.secondaryTextColor,
-                    textAlign: TextAlign.start,
-                  ),
-              ],
+            child: CustomText(
+              text: file.fileName,
+              fontsize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.primaryTextColor,
+              textAlign: TextAlign.start,
             ),
           ),
-          Icon(Icons.download_outlined,
-              color: AppColors.secondaryTextColor, size: 18.r),
+          if (onRemove != null)
+            GestureDetector(
+              onTap: onRemove,
+              child: Icon(Icons.close,
+                  color: AppColors.redColorFF1D1D, size: 18.r),
+            )
+          else
+            Icon(Icons.download_outlined,
+                color: AppColors.secondaryTextColor, size: 18.r),
         ],
+      ),
+    );
+  }
+}
+
+class _ShimmerDropdown extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: Container(
+        height: 52.h,
+        margin: EdgeInsets.only(bottom: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
       ),
     );
   }

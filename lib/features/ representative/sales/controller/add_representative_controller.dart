@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import '../model/sales_model.dart';
 
 class AddRepresentativeController extends GetxController {
-  final nameController = TextEditingController(text: 'Alex Johnson');
+  final selectedRepId = ''.obs;
+  final selectedRepName = ''.obs;
   final commissionController = TextEditingController();
   final selectedRole = 'Assist'.obs;
 
@@ -12,18 +13,18 @@ class AddRepresentativeController extends GetxController {
 
   RepresentativeModel build() {
     return RepresentativeModel(
-      name: nameController.text,
+      id: selectedRepId.value,
+      name: selectedRepName.value,
       role: selectedRole.value,
       commissionPercent: int.tryParse(
-        commissionController.text.replaceAll(RegExp(r'[^\d]'), ''),
-      ) ??
+            commissionController.text.replaceAll(RegExp(r'[^\d]'), ''),
+          ) ??
           0,
     );
   }
 
   @override
   void onClose() {
-    nameController.dispose();
     commissionController.dispose();
     super.onClose();
   }
