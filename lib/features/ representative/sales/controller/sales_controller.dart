@@ -608,13 +608,6 @@ class SaleController extends GetxController {
           title: 'Required');
       return false;
     }
-    if (totalCommissionPercent != 100) {
-      ToastMessageHelper.showToastMessage(
-          'Representative commission must total 100%.',
-          title: 'Invalid');
-      return false;
-    }
-
     String apiDate = dateStr;
     try {
       final dt = DateFormat('MM/dd/yyyy').parse(dateStr);
@@ -624,7 +617,7 @@ class SaleController extends GetxController {
     final reps = addedRepresentatives
         .map((r) => {
               'representative': r.id,
-              'assignRole': r.role,
+              'assignRole': r.role.toLowerCase(),
               'commissionRate': r.commissionPercent,
             })
         .toList();
@@ -632,7 +625,7 @@ class SaleController extends GetxController {
     final inventory = selectedImplants
         .map((item) => {
               'product': item.id,
-              'productType': item.name,
+              'productType': item.productType,
             })
         .toList();
 
@@ -655,7 +648,7 @@ class SaleController extends GetxController {
           totalAmount: totalBill,
           vendorPayment: vendorPay,
           description: notes.isEmpty ? null : notes,
-          generatePackingSlip: generatePackingSlip.value,
+          isPackingSlipGenerated: generatePackingSlip.value,
           attachments: uploadedFiles.isEmpty ? null : uploadedFiles.toList(),
         );
       } else {

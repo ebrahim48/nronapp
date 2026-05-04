@@ -421,6 +421,7 @@ class SaleDetailModel {
 class ImplantItem {
   final String id;
   final String name;
+  final String productType;
   final String serial;
   final String material;
   final String location;
@@ -430,6 +431,7 @@ class ImplantItem {
   ImplantItem({
     this.id = '',
     required this.name,
+    this.productType = '',
     required this.serial,
     required this.material,
     required this.location,
@@ -457,6 +459,10 @@ class ImplantItem {
       name: json['itemName']?.toString() ??
           json['title']?.toString() ??
           json['name']?.toString() ??
+          '',
+      productType: json['productType']?.toString() ??
+          json['itemType']?.toString() ??
+          json['type']?.toString() ??
           '',
       serial: json['serialNumber']?.toString() ??
           json['lotNumber']?.toString() ??
