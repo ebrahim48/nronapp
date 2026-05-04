@@ -18,9 +18,9 @@ import '../../../features/ representative/physicions/presentation/physicions_scr
 import '../../../features/ representative/purchaseorder/presentation/purchase_order_screen.dart';
 import '../../../features/ representative/rep_bottomnavbar/presentation/rep_bottomNavbar_screen.dart';
 import '../../../features/ representative/rep_home/create_purchase_order_screen.dart';
-import '../../../features/ representative/rep_home/presentation/add_products_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
+import '../../../features/ representative/rep_home/presentation/review_send_po_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/add_bio_inventory_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/add_implant_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/create_implant_sale_screen.dart';
@@ -106,6 +106,7 @@ import '../../../features/manager/managershipment/presentation/shipments_screen.
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
+import '../../../features/ representative/rep_home/presentation/all_activities_screen.dart';
 import '../../../features/ representative/rep_home/presentation/representative_home_screen.dart';
 
 class AppRoutes {
@@ -155,6 +156,7 @@ static const allSurgeriesScreen = '/all-surgeries';
 static const addSurgeryScreen = '/add-surgery';
 static const surgeryDetailScreen = '/surgery-detail';
 static const activityLogScreen = '/activityLogScreen';
+static const allActivitiesScreen = '/all-activities';
 
   static const settingProfileScreen = '/setting-profile';
   static const profileScreen = '/profile';
@@ -224,6 +226,7 @@ static const activityLogScreen = '/activityLogScreen';
   static const carPicturesScreen = '/carPicturesScreen';
   static const addCardScreen = '/addCardScreen';
   static const paymentMethodsScreen = '/paymentMethodsScreen';
+  static const reviewSendPoScreen = '/reviewSendPoScreen';
 
 
 
@@ -303,11 +306,7 @@ static const activityLogScreen = '/activityLogScreen';
         name: bulkPurchaseScreen,
         builder: (context, state) => const BulkPurchaseScreen(),
       ),
-      GoRoute(
-        path: addProductScreen,
-        name: addProductScreen,
-        builder: (context, state) => const AddProductScreen(),
-      ),
+
       GoRoute(
         path: purchaseOrderScreen,
         name: purchaseOrderScreen,
@@ -357,6 +356,11 @@ static const activityLogScreen = '/activityLogScreen';
         path: reportSuccessScreen,
         name: reportSuccessScreen,
         builder: (context, state) => const ReportSuccessScreen(),
+      ),
+      GoRoute(
+        path: allActivitiesScreen,
+        name: allActivitiesScreen,
+        builder: (context, state) => const AllActivitiesScreen(),
       ),
       GoRoute(
         path: createExpenseScreen,
@@ -754,6 +758,11 @@ static const activityLogScreen = '/activityLogScreen';
         path: paymentMethodsScreen,
         name: paymentMethodsScreen,
         builder: (context, state) => const PaymentMethodsScreen(),
+      ),
+      GoRoute(
+        path: reviewSendPoScreen,
+        name: reviewSendPoScreen,
+        builder: (context, state) => const ReviewSendPoScreen(),
       ),
 
 

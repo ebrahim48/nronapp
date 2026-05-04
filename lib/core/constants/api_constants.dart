@@ -67,6 +67,15 @@ class ApiConstants {
   static const String commonAllInventory = '/common/all-inventory';
 
 
+  static const String home = '/purchase-order/my-overview';
+  static const String getPurchaseMyOrder = '/purchase-order/get-my';
+  static String getPurchaseDetailsOrder(String id) => '/purchase-order/find/$id';
+  static const String createPurchaseOrder = '/purchase-order/create';
+  static String updatePurchaseOrder(String id) => '/purchase-order/update/$id';
+  static String deletePurchaseOrder(String id) => '/purchase-order/delete/$id';
+  static const String commonAllSurgeries = '/common/all-surgeries';
+
+
 
 
 

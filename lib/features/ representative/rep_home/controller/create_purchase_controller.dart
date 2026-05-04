@@ -104,8 +104,9 @@ class CreatePurchaseController extends GetxController {
     }
   }
 
-  void submitOrder() {
-    // Submit logic here
+  void submitOrder(BuildContext, context) {
+
+
   }
 
   @override

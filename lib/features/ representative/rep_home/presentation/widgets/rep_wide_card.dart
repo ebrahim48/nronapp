@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
+import '../../../../../core/config/app-routes/app_routes.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 import '../../controller/rep_home_controller.dart';
+import '../../data/model/rep_home_model.dart';
 
 class RepWideCard extends StatelessWidget {
   const RepWideCard({super.key});
@@ -14,53 +18,96 @@ class RepWideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.find<RepHomeController>();
 
-    return Obx(() => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ── Section header ────────────────────────────────────────
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            CustomText(
-              text: 'Recent Activity',
-              fontsize: 15.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryTextColor,
-              textAlign: TextAlign.start,
-            ),
-            GestureDetector(
-              onTap: () {},
-              child: CustomText(
-                text: 'View All',
-                fontsize: 13.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.primaryColor,
+    return Obx(() {
+      if (c.isLoading.value) return const _ActivityShimmer();
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              CustomText(
+                text: 'Recent Activity',
+                fontsize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryTextColor,
                 textAlign: TextAlign.start,
               ),
+              GestureDetector(
+                onTap: () => context.push(AppRoutes.allActivitiesScreen),
+                child: CustomText(
+                  text: 'View All',
+                  fontsize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.primaryColor,
+                  textAlign: TextAlign.start,
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 12.h),
+
+          c.activities.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    child: CustomText(
+                      text: 'No recent activity',
+                      fontsize: 13.sp,
+                      color: AppColors.secondaryTextColor,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+              : Column(
+                  children: c.activities
+                      .map((item) => Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: _ActivityItem(activity: item),
+                          ))
+                      .toList(),
+                ),
+        ],
+      );
+    });
+  }
+}
+
+class _ActivityShimmer extends StatelessWidget {
+  const _ActivityShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: Column(
+        children: List.generate(
+          2,
+          (_) => Container(
+            margin: EdgeInsets.only(bottom: 12.h),
+            height: 72.h,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12.r),
             ),
-          ],
+          ),
         ),
-
-        SizedBox(height: 12.h),
-
-        // ── Activity items ────────────────────────────────────────
-        ...c.activities.map((item) => Padding(
-          padding: EdgeInsets.only(bottom: 12.h),
-          child: _ActivityItem(item: item),
-        )),
-      ],
-    ));
+      ),
+    );
   }
 }
 
 class _ActivityItem extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final RecentActivity activity;
 
-  const _ActivityItem({required this.item});
+  const _ActivityItem({required this.activity});
 
   @override
   Widget build(BuildContext context) {
-    final isSuccess = item['status'] == 'Success';
+    final isCreate = activity.action.toUpperCase() == 'CREATE';
 
     return Container(
       width: double.infinity,
@@ -79,7 +126,6 @@ class _ActivityItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // ── Icon box ───────────────────────────────────────────────
           Container(
             width: 44.r,
             height: 44.r,
@@ -89,9 +135,7 @@ class _ActivityItem extends StatelessWidget {
             ),
             child: Center(
               child: SvgPicture.asset(
-                item['iconType'] == 'check'
-                    ? 'assets/icons/click.svg'
-                    : 'assets/icons/dots.svg',
+                isCreate ? 'assets/icons/click.svg' : 'assets/icons/dots.svg',
                 width: 20.r,
                 height: 20.r,
                 colorFilter: ColorFilter.mode(
@@ -104,13 +148,12 @@ class _ActivityItem extends StatelessWidget {
 
           SizedBox(width: 12.w),
 
-          // ── Title + subtitle ──────────────────────────────────────
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomText(
-                  text: item['title'],
+                  text: activity.title,
                   fontsize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primaryTextColor,
@@ -118,7 +161,7 @@ class _ActivityItem extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 CustomText(
-                  text: item['subtitle'],
+                  text: activity.description,
                   fontsize: 11.sp,
                   fontWeight: FontWeight.w400,
                   color: AppColors.secondaryTextColor,
@@ -132,12 +175,11 @@ class _ActivityItem extends StatelessWidget {
 
           SizedBox(width: 8.w),
 
-          // ── Time + status badge ────────────────────────────────────
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               CustomText(
-                text: item['time'],
+                text: activity.timeAgo,
                 fontsize: 11.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.secondaryTextColor,
@@ -146,16 +188,15 @@ class _ActivityItem extends StatelessWidget {
               SizedBox(height: 6.h),
               Container(
                 padding:
-                EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
+                    EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  // Success: #00D500 at 60% opacity | Pending: amber
-                  color: isSuccess
+                  color: isCreate
                       ? const Color(0x9900D500)
                       : const Color(0xFFE6A817).withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: CustomText(
-                  text: item['status'],
+                  text: activity.action,
                   fontsize: 10.sp,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
