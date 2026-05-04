@@ -7,7 +7,15 @@
       "Bash(\"/c/Users/ebu/fvm/versions/3.32.5/bin/flutter.bat\" analyze:*)",
       "PowerShell(Get-Command *)",
       "Bash(xargs grep *)",
-      "Bash(flutter pub *)"
+      "Bash(flutter pub *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\" -Recurse -Filter \"*home*\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\" -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName | Where-Object { $_ -match \"home\" })",
+      "PowerShell(head *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\\\\purchaseorder\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\" -Directory | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\" -Directory | ForEach-Object { $_.Name })"
     ]
   }
 }

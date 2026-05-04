@@ -96,37 +96,77 @@ class BulkPoStepHeader extends StatelessWidget {
   }
 }
 
-// ── Bulk BIO Order card — header with "+ Add Products" button ─────────────────
-class BulkBioOrderCard extends StatelessWidget {
-  final VoidCallback onAddProducts;
 
-  const BulkBioOrderCard({super.key, required this.onAddProducts});
+
+
+class BulkBoxItem {
+  final String id;
+  final String name;
+  final String subtitle;
+  final int itemCount;
+  final bool isExpanded;
+
+  const BulkBoxItem({
+    required this.id,
+    required this.name,
+    required this.subtitle,
+    required this.itemCount,
+    this.isExpanded = false,
+  });
+
+  BulkBoxItem copyWith({bool? isExpanded}) => BulkBoxItem(
+    id: id,
+    name: name,
+    subtitle: subtitle,
+    itemCount: itemCount,
+    isExpanded: isExpanded ?? this.isExpanded,
+  );
+}
+
+
+
+class BulkBioColors {
+  static const Color accent = Color(0xFF00C5DA);
+  static const Color accentBg = Color(0x1A137FEC);
+  static const Color accentBtnBg = Color(0x4D00C5DA);
+  static const Color cardBg = Color(0x1A4A4A4A);
+  static const Color cardBorder = Color(0xFF3A3A3A);
+  static const Color badgeBg = Color(0xFF2A2A2A);
+  static const Color badgeBorder = Color(0xFF3A3A3A);
+  static const Color badgeText = Color(0xFFC0C0C0);
+  static const Color divider = Color(0xFF3A3A3A);
+}
+
+
+class BulkBioOrderCard extends StatelessWidget {
+  final VoidCallback onScanItem;
+
+  const BulkBioOrderCard({super.key, required this.onScanItem});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 345.w,
-      height: 74.h,
-      padding: EdgeInsets.all(16.r),
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: const Color(0x1A137FEC), // #137FEC at 10%
+        color: BulkBioColors.accentBg,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFF3A3A3A)),
+        border: Border.all(color: BulkBioColors.cardBorder),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Left — title + subtitle
+          // Left: title + subtitle
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               CustomText(
                 text: 'Bulk BIO Order',
                 fontsize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF00C5DA),
+                color: BulkBioColors.accent,
                 textAlign: TextAlign.start,
               ),
               SizedBox(height: 2.h),
@@ -134,34 +174,37 @@ class BulkBioOrderCard extends StatelessWidget {
                 text: 'Specific products required',
                 fontsize: 11.sp,
                 fontWeight: FontWeight.w400,
-                color: AppColors.secondaryTextColor,
+                color: AppColors.textColor7E7F7E,
                 textAlign: TextAlign.start,
               ),
             ],
           ),
 
-          // Right — "+ Add Products" button
+          // Right: Scan Item button
           GestureDetector(
-            onTap: onAddProducts,
+            onTap: onScanItem,
             child: Container(
-              width: 153.w,
-              height: 40.h,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              padding:
+              EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: const Color(0x4D00C5DA),
+                color: BulkBioColors.accentBtnBg,
                 borderRadius: BorderRadius.circular(8.r),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.add, color: const Color(0xFF00C5DA), size: 14.r),
-                  SizedBox(width: 8.w),
+                  Icon(
+                    Icons.qr_code_2_rounded,
+                    color: BulkBioColors.accent,
+                    size: 26.sp,
+                  ),
+                  SizedBox(height: 3.h),
                   CustomText(
-                    text: 'Add Products',
-                    fontsize: 12.sp,
+                    text: 'Scan Item',
+                    fontsize: 11.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF00C5DA),
-                    textAlign: TextAlign.start,
+                    color: BulkBioColors.accent,
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -173,30 +216,140 @@ class BulkBioOrderCard extends StatelessWidget {
   }
 }
 
-class BulkProductRow extends StatelessWidget {
-  final BulkProductItem item;
-  final VoidCallback onRemove;
 
-  const BulkProductRow({
+
+class BulkBoxCard extends StatelessWidget {
+  final BulkBoxItem item;
+  final VoidCallback onToggle;
+  final Widget? expandedContent;
+
+  const BulkBoxCard({
     super.key,
     required this.item,
+    required this.onToggle,
+    this.expandedContent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: BulkBioColors.cardBg,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(
+            color: BulkBioColors.cardBorder, width: 0.8),
+      ),
+      child: Column(
+        children: [
+          // Header row
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: 14.w, vertical: 12.h),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        text: item.name,
+                        fontsize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFFF0F0F0),
+                        textAlign: TextAlign.start,
+                      ),
+                      SizedBox(height: 4.h),
+                      CustomText(
+                        text: item.subtitle,
+                        fontsize: 11.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textColor7E7F7E,
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
+                  ),
+                ),
+                // Item count badge
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: BulkBioColors.badgeBg,
+                    borderRadius: BorderRadius.circular(6.r),
+                    border:
+                    Border.all(color: BulkBioColors.badgeBorder, width: 0.5),
+                  ),
+                  child: CustomText(
+                    text: '${item.itemCount} ITEMS',
+                    fontsize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                    color: BulkBioColors.badgeText,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Expanded content
+          if (item.isExpanded && expandedContent != null) ...[
+            Divider(height: 1, color: BulkBioColors.divider),
+            expandedContent!,
+          ],
+
+          // Divider + Chevron
+          Divider(height: 1, color: BulkBioColors.divider),
+          GestureDetector(
+            onTap: onToggle,
+            behavior: HitTestBehavior.translucent,
+            child: SizedBox(
+              width: double.infinity,
+              height: 34.h,
+              child: Center(
+                child: AnimatedRotation(
+                  turns: item.isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.textColor7E7F7E,
+                    size: 22.sp,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class BulkProductRowWidget extends StatelessWidget {
+  final String iconPath;
+  final String name;
+  final String detail;
+  final String price;
+  final VoidCallback onRemove;
+
+  const BulkProductRowWidget({
+    super.key,
+    required this.iconPath,
+    required this.name,
+    required this.detail,
+    required this.price,
     required this.onRemove,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 345.w,
+      width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      margin: EdgeInsets.only(bottom: 10.h),
-      decoration: BoxDecoration(
-        color: const Color(0x1A4A4A4A),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: const Color(0xFF3A3A3A), width: 0.8),
-      ),
       child: Row(
         children: [
-
+          // Icon box
           Container(
             width: 40.r,
             height: 40.r,
@@ -206,17 +359,16 @@ class BulkProductRow extends StatelessWidget {
             ),
             child: Center(
               child: SvgPicture.asset(
-                item.iconPath,
+                iconPath,
                 width: 22.r,
                 height: 22.r,
                 colorFilter: const ColorFilter.mode(
-                  AppColors.primaryColor,
+                  BulkBioColors.accent,
                   BlendMode.srcIn,
                 ),
               ),
             ),
           ),
-
           SizedBox(width: 12.w),
 
           // Name + detail
@@ -225,18 +377,18 @@ class BulkProductRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomText(
-                  text: item.name,
+                  text: name,
                   fontsize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primaryTextColor,
+                  color: const Color(0xFFF0F0F0),
                   textAlign: TextAlign.start,
                 ),
                 SizedBox(height: 2.h),
                 CustomText(
-                  text: item.detail,
+                  text: detail,
                   fontsize: 11.sp,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.secondaryTextColor,
+                  color: AppColors.textColor7E7F7E,
                   textAlign: TextAlign.start,
                 ),
               ],
@@ -248,10 +400,10 @@ class BulkProductRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               CustomText(
-                text: item.price,
+                text: price,
                 fontsize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primaryTextColor,
+                color: const Color(0xFFF0F0F0),
                 textAlign: TextAlign.end,
               ),
               SizedBox(height: 2.h),
@@ -269,6 +421,42 @@ class BulkProductRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+
+class BulkBioOrderSection extends StatelessWidget {
+  final VoidCallback onScanItem;
+  final List<BulkBoxItem> items;
+  final void Function(String id) onToggle;
+  final void Function(String boxId, int productIndex) onRemoveProduct;
+
+  const BulkBioOrderSection({
+    super.key,
+    required this.onScanItem,
+    required this.items,
+    required this.onToggle,
+    required this.onRemoveProduct,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        BulkBioOrderCard(onScanItem: onScanItem),
+        SizedBox(height: 10.h),
+        ...items.map(
+              (item) => Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: BulkBoxCard(
+              item: item,
+              onToggle: () => onToggle(item.id),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

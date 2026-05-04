@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nron_app/core/config/app-routes/app_routes.dart';
+import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/bulk_po_widgets.dart';
 import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/po_form_fields.dart';
 import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/po_scan_item_card.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import 'controller/bulk_purchase_controller.dart';
 import 'controller/create_purchase_controller.dart';
 
 
@@ -16,6 +20,7 @@ class CreatePurchaseScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(CreatePurchaseController());
+    final bulk = Get.put(BulkPurchaseController());
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -54,12 +59,10 @@ class CreatePurchaseScreen extends StatelessWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                  Obx(() => PoScannedItemCard(
-                    imagePath: 'assets/images/order.jpg',
-                    itemName: c.itemName.value,
-                    serialNo: c.itemSN.value,
-                    price: c.itemPrice.value,
-                  )),
+                Obx(() => BulkPoStepHeader(
+                  currentStep: bulk.currentStep.value,
+                  totalSteps: bulk.totalSteps.value,
+                )),
 
                   SizedBox(height: 24.h),
 
@@ -209,11 +212,14 @@ class CreatePurchaseScreen extends StatelessWidget {
                     isLoading: c.isPickingFile.value,
                   )),
 
+
                   SizedBox(height: 24.h),
 
                   CustomButton(
-                    title: 'Submit Purchase Order',
-                    onpress: c.submitOrder,
+                    title: 'Continue',
+                    onpress: (){
+                      context.pushNamed(AppRoutes.reviewSendPoScreen);
+                    },
                     titlecolor: const Color(0xFF1E2121),
                     suffixIcon: SvgPicture.asset(
                       'assets/icons/next.svg',

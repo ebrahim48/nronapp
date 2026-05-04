@@ -186,7 +186,7 @@ class SalesRepository {
       for (final f in attachments) {
         fileList.add(await MultipartFile.fromFile(f.path));
       }
-      fields['attachments'] = fileList;
+      fields['docs'] = fileList;
     }
 
     final res = await _api.patch(

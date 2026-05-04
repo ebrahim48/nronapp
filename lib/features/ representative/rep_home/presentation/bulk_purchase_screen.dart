@@ -196,21 +196,21 @@ class BulkPurchaseScreen extends StatelessWidget {
                     ),
 
                     SizedBox(height: 16.h),
-
-                    BulkBioOrderCard(onAddProducts: () => c.addProduct(context)),
-
-                    SizedBox(height: 10.h),
-
-                    Obx(() => Column(
-                      children: c.bulkProducts
-                          .asMap()
-                          .entries
-                          .map((e) => BulkProductRow(
-                        item: e.value,
-                        onRemove: () => c.removeProduct(e.key),
-                      ))
-                          .toList(),
-                    )),
+                    //
+                    // BulkBioOrderCard(),
+                    //
+                    // SizedBox(height: 10.h),
+                    //
+                    // Obx(() => Column(
+                    //   children: c.bulkProducts
+                    //       .asMap()
+                    //       .entries
+                    //       .map((e) => BulkProductRowWidget(
+                    //     item: e.value,
+                    //     onRemove: () => c.removeProduct(e.key),
+                    //   ))
+                    //       .toList(),
+                    // )),
 
                     SizedBox(height: 16.h),
 
