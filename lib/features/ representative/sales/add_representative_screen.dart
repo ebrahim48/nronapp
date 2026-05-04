@@ -10,14 +10,30 @@ import 'controller/add_representative_controller.dart';
 import 'controller/sales_controller.dart';
 
 
-class AddRepresentativeScreen extends StatelessWidget {
+class AddRepresentativeScreen extends StatefulWidget {
   const AddRepresentativeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final repC = Get.put(AddRepresentativeController());
-    final saleC = Get.find<SaleController>();
+  State<AddRepresentativeScreen> createState() =>
+      _AddRepresentativeScreenState();
+}
 
+class _AddRepresentativeScreenState extends State<AddRepresentativeScreen> {
+  late final AddRepresentativeController repC;
+  late final SaleController saleC;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Get.isRegistered<AddRepresentativeController>()) {
+      Get.delete<AddRepresentativeController>();
+    }
+    repC = Get.put(AddRepresentativeController());
+    saleC = Get.find<SaleController>();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(

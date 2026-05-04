@@ -68,7 +68,7 @@ class SalesRepository {
     required double totalAmount,
     required double vendorPayment,
     String? description,
-    bool generatePackingSlip = false,
+    bool isPackingSlipGenerated = false,
     List<File>? attachments,
   }) async {
     await _connectivity.checkConnectivity();
@@ -77,7 +77,7 @@ class SalesRepository {
       'physician': physicianId,
       'facility': facilityId,
       'procedureDate': procedureDate,
-      'generatePackingSlip': generatePackingSlip.toString(),
+      'isPackingSlipGenerated': isPackingSlipGenerated.toString(),
     };
     if (description != null && description.isNotEmpty) {
       fields['description'] = description;
@@ -91,7 +91,7 @@ class SalesRepository {
           rep['commissionRate'].toString();
     }
 
-    fields['billing[vendor]'] = vendorId;
+    if (vendorId.isNotEmpty) fields['billing[vendor]'] = vendorId;
     fields['billing[purchaseOrderNumber]'] = purchaseOrderNumber;
     fields['billing[totalAmount]'] = totalAmount.toStringAsFixed(2);
     fields['billing[vendorPayment]'] = vendorPayment.toStringAsFixed(2);
@@ -107,7 +107,7 @@ class SalesRepository {
       for (final f in attachments) {
         fileList.add(await MultipartFile.fromFile(f.path));
       }
-      fields['attachments'] = fileList;
+      fields['docs'] = fileList;
     }
 
     final res = await _api.post(
