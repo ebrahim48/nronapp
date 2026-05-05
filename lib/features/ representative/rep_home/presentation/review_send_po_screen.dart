@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/po_detail_card.dart';
 import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/po_document_file.dart';
 import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/po_handwritten_preview.dart';
-import 'package:nron_app/features/%20representative/rep_home/presentation/widgets/po_step_header.dart';
+import '../../../../../core/config/app-routes/app_routes.dart';
 import '../controller/review_send_po_controller.dart';
 
 
@@ -28,7 +29,7 @@ class ReviewSendPoScreen extends StatelessWidget {
         backgroundColor: _bg,
         elevation: 0,
         leading: GestureDetector(
-          onTap: () => Get.back(),
+          onTap: () => context.goNamed(AppRoutes.purchaseOrderScreen),
           child: Icon(Icons.arrow_back, color: _textPrimary, size: 22.sp),
         ),
         title: Text(
@@ -40,25 +41,39 @@ class ReviewSendPoScreen extends StatelessWidget {
           ),
         ),
         centerTitle: false,
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 16.w),
+            child: Obx(() => RichText(
+              text: TextSpan(
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 14.sp),
+                children: [
+                  TextSpan(
+                    text: '${controller.currentStep.value}',
+                    style: const TextStyle(
+                      color: Color(0xFF137FEC),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  TextSpan(
+                    text: '/${controller.totalSteps.value}',
+                    style: TextStyle(
+                      color: _textSecondary,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            )),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Step header
-            Obx(() => PoStepHeader(
-              currentStep: controller.currentStep.value,
-              totalSteps: controller.totalSteps.value,
-              stepLabel: 'Select Order Type',
-              progress: controller.currentStep.value /
-                  controller.totalSteps.value,
-              accentColor: _accent,
-              textSecondary: _textSecondary,
-              textPrimary: _textPrimary,
-            )),
-
             // Hero image
-            Obx(() => _heroImage(controller)),
+            _heroImage(controller),
 
             // PO Detail Card
             Obx(() => Padding(
@@ -165,10 +180,8 @@ class ReviewSendPoScreen extends StatelessWidget {
       bottomNavigationBar: Container(
         padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 28.h),
         color: _bg,
-        child: Obx(() => GestureDetector(
-          onTap: controller.isLoading.value
-              ? null
-              : controller.saveAndSend,
+        child: GestureDetector(
+          onTap: () => context.goNamed(AppRoutes.purchaseOrderScreen),
           child: Container(
             height: 54.h,
             decoration: BoxDecoration(
@@ -178,29 +191,21 @@ class ReviewSendPoScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (controller.isLoading.value)
-                  SizedBox(
-                    width: 20.w,
-                    height: 20.h,
-                    child: const CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2),
-                  )
-                else ...[
-                  Icon(Icons.send, color: Colors.white, size: 18.sp),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Save and send to vendor',
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                Icon(Icons.arrow_back_ios_rounded,
+                    color: Colors.white, size: 16.sp),
+                SizedBox(width: 8.w),
+                Text(
+                  'Back to Purchase order',
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
-                ],
+                ),
               ],
             ),
           ),
-        )),
+        ),
       ),
     );
   }
@@ -217,7 +222,7 @@ class ReviewSendPoScreen extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12.r),
         child: Image.asset(
-          'assets/images/booth.png',
+          'assets/images/review.png',
           fit: BoxFit.cover,
         ),
       ),

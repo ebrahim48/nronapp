@@ -181,6 +181,7 @@ class PoDropdownTextField extends StatefulWidget {
   final String hintText;
   final String? iconPath;
   final List<String> options;
+  final void Function(int index, String value)? onSelected;
 
   const PoDropdownTextField({
     super.key,
@@ -188,6 +189,7 @@ class PoDropdownTextField extends StatefulWidget {
     required this.hintText,
     this.iconPath,
     required this.options,
+    this.onSelected,
   });
 
   @override
@@ -281,6 +283,7 @@ class _PoDropdownTextFieldState extends State<PoDropdownTextField> {
                   return GestureDetector(
                     onTap: () {
                       widget.controller.text = entry.value;
+                      widget.onSelected?.call(entry.key, entry.value);
                       setState(() => _open = false);
                     },
                     child: Container(
@@ -413,40 +416,43 @@ class _HalfField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48.h,
-      decoration: BoxDecoration(
-        color: const Color(0x1A4A4A4A),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0xFFD4D4D4), width: 0.8),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 14.w),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextFormField(
-              controller: controller,
-              readOnly: readOnly,
-              onTap: onTap,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 13.sp,
-                color: AppColors.primaryTextColor,
-              ),
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: TextStyle(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 48.h,
+        decoration: BoxDecoration(
+          color: const Color(0x1A4A4A4A),
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: const Color(0xFFD4D4D4), width: 0.8),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 14.w),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: controller,
+                readOnly: readOnly,
+                onTap: onTap,
+                style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 13.sp,
-                  color: AppColors.secondaryTextColor,
+                  color: AppColors.primaryTextColor,
                 ),
-                border: InputBorder.none,
-                isDense: true,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13.sp,
+                    color: AppColors.secondaryTextColor,
+                  ),
+                  border: InputBorder.none,
+                  isDense: true,
+                ),
               ),
             ),
-          ),
-          if (suffixIcon != null) suffixIcon!,
-        ],
+            if (suffixIcon != null) suffixIcon!,
+          ],
+        ),
       ),
     );
   }

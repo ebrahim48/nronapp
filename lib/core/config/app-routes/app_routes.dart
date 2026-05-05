@@ -15,11 +15,13 @@ import '../../../features/ representative/expenses/presentation/expenses_screen.
 import '../../../features/ representative/physicions/domain/model/physician_model.dart';
 import '../../../features/ representative/physicions/presentation/physicions_profile_screen.dart';
 import '../../../features/ representative/physicions/presentation/physicions_screen.dart';
+import '../../../features/ representative/purchaseorder/presentation/purchase_order_detail_screen.dart';
 import '../../../features/ representative/purchaseorder/presentation/purchase_order_screen.dart';
 import '../../../features/ representative/rep_bottomnavbar/presentation/rep_bottomNavbar_screen.dart';
 import '../../../features/ representative/rep_home/create_purchase_order_screen.dart';
 import '../../../features/ representative/rep_home/presentation/bulk_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/new_po_screen.dart';
+import '../../../features/ representative/rep_home/presentation/update_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/review_send_po_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/add_bio_inventory_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/add_implant_screen.dart';
@@ -175,6 +177,7 @@ static const allActivitiesScreen = '/all-activities';
 
   static const String receivingSessionScreen = '/receiving-session';
   static const String receivingSessionCompleteScreen = '/receiving-complete';
+  static const String purchaseOrderDetailScreen = '/purchase-order-detail';
 
 
   /// ================================================> Manager ==========================================>
@@ -227,6 +230,7 @@ static const allActivitiesScreen = '/all-activities';
   static const addCardScreen = '/addCardScreen';
   static const paymentMethodsScreen = '/paymentMethodsScreen';
   static const reviewSendPoScreen = '/reviewSendPoScreen';
+  static const String updatePurchaseOrderScreen = '/updatePurchaseOrderScreen';
 
 
 
@@ -543,6 +547,13 @@ static const allActivitiesScreen = '/all-activities';
         name: receivingSessionCompleteScreen,
         builder: (context, state) => const ReceivingSessionCompleteScreen(),
       ),
+      GoRoute(
+        path: purchaseOrderDetailScreen,
+        name: purchaseOrderDetailScreen,
+        builder: (context, state) => PurchaseOrderDetailScreen(
+          orderId: state.extra as String? ?? '',
+        ),
+      ),
 
 
 
@@ -763,6 +774,13 @@ static const allActivitiesScreen = '/all-activities';
         path: reviewSendPoScreen,
         name: reviewSendPoScreen,
         builder: (context, state) => const ReviewSendPoScreen(),
+      ),
+      GoRoute(
+        path: updatePurchaseOrderScreen,
+        name: updatePurchaseOrderScreen,
+        builder: (context, state) => UpdatePurchaseScreen(
+          orderId: state.extra as String? ?? '',
+        ),
       ),
 
 

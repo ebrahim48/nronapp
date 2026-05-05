@@ -182,6 +182,24 @@ class PurchaseOrderRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> delete(String token, String id) async {
+    await _connectivity.checkConnectivity();
+    try {
+      final res = await _api.dio.delete(
+        '/purchase-order/delete/$id',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return res.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      String message = 'Failed to delete purchase order';
+      if (data is Map && data['message'] != null) {
+        message = data['message'].toString();
+      }
+      throw ServerException(message, e.response?.statusCode, e.message);
+    }
+  }
+
   Future<Map<String, dynamic>> getSurgeries(String token) async {
     await _connectivity.checkConnectivity();
     try {

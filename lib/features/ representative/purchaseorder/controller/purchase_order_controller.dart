@@ -7,6 +7,8 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../data/repositories/purchase_order_repository.dart';
 import '../model/purchase_order_model.dart';
+// ignore: unused_import
+import 'package:flutter/foundation.dart';
 
 class PurchaseOrderController extends GetxController {
   final _repo = PurchaseOrderRepository(
@@ -28,7 +30,7 @@ class PurchaseOrderController extends GetxController {
 
   // ── Detail ────────────────────────────────────────────────────────────────
   final isLoadingDetail = false.obs;
-  final detailObs = Rxn<Map<String, dynamic>>();
+  final detailObs = Rxn<PurchaseOrderDetailModel>();
 
   // ── Delete ────────────────────────────────────────────────────────────────
   final isDeleting = false.obs;
@@ -37,20 +39,20 @@ class PurchaseOrderController extends GetxController {
   void onInit() {
     super.onInit();
     fetchOrders();
-    scrollController.addListener(_onScroll);
   }
 
   @override
   void onClose() {
-    scrollController.removeListener(_onScroll);
     scrollController.dispose();
     super.onClose();
   }
 
-  void _onScroll() {
-    if (scrollController.position.pixels >=
-        scrollController.position.maxScrollExtent - 200) {
-      _loadMore();
+  void onScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification) {
+      if (notification.metrics.pixels >=
+          notification.metrics.maxScrollExtent - 200) {
+        _loadMore();
+      }
     }
   }
 
@@ -132,11 +134,17 @@ class PurchaseOrderController extends GetxController {
       final token = await PrefsHelper.getString('auth_token');
       final res = await _repo.getDetail(token, id);
       if (res['success'] == true) {
-        detailObs.value = res['data'] as Map<String, dynamic>;
+        final raw = res['data'];
+        final data = raw is Map<String, dynamic>
+            ? raw
+            : Map<String, dynamic>.from(raw as Map);
+        detailObs.value = PurchaseOrderDetailModel.fromJson(data);
       }
     } on NoInternetException {
-    } on ServerException catch (_) {
-    } catch (_) {
+    } on ServerException catch (e) {
+      debugPrint('[POCtrl] fetchDetail error: ${e.message}');
+    } catch (e, st) {
+      debugPrint('[POCtrl] fetchDetail unknown: $e\n$st');
     } finally {
       isLoadingDetail.value = false;
     }
@@ -146,7 +154,7 @@ class PurchaseOrderController extends GetxController {
     isDeleting.value = true;
     try {
       final token = await PrefsHelper.getString('auth_token');
-      final res = await _repo.getDetail(token, id);
+      final res = await _repo.delete(token, id);
       if (res['success'] == true) {
         allOrders.removeWhere((o) => o.id == id);
         return true;
