@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../rep_inventory/controller/receiving_session_controller.dart';
-import '../controller/receiving_controller.dart' hide ReceivingSessionController;
+import '../../rep_inventory/model/implant_model.dart';
 
 
 class ReceivingSessionScreen extends StatefulWidget {
@@ -54,7 +54,6 @@ class _ReceivingSessionScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Stats row ────────────────────────────────────────
                 Row(
                   children: [
                     Expanded(
@@ -88,11 +87,10 @@ class _ReceivingSessionScreenState
                 ),
                 SizedBox(height: 16.h),
 
-                // ── Scan Item button ─────────────────────────────────
+
                 _ScanItemButton(onTap: _ctrl.scanItem),
                 SizedBox(height: 20.h),
 
-                // ── Last Receiving Group header ──────────────────────
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -119,13 +117,12 @@ class _ReceivingSessionScreenState
                 ),
                 SizedBox(height: 12.h),
 
-                // // ── Box cards ────────────────────────────────────────
-                // ..._ctrl.boxes.asMap().entries.map(
-                //       (e) => _ReceivingBoxCard(
-                //     box: e.value,
-                //     onToggle: () => _ctrl.toggleBox(e.key),
-                //   ),
-                // ),
+                ..._ctrl.boxes.asMap().entries.map(
+                      (e) => _ReceivingBoxCard(
+                    box: e.value,
+                    onToggle: () => _ctrl.toggleBox(e.key),
+                  ),
+                ),
               ],
             ),
           );
@@ -135,7 +132,7 @@ class _ReceivingSessionScreenState
   }
 }
 
-// ── Stat Card ─────────────────────────────────────────────────────────────────
+
 
 class _StatCard extends StatelessWidget {
   final String label;
@@ -180,7 +177,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ── Scan Item Button ──────────────────────────────────────────────────────────
 
 class _ScanItemButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -237,10 +233,9 @@ class _ScanItemButton extends StatelessWidget {
   }
 }
 
-// ── Receiving Box Card ────────────────────────────────────────────────────────
 
 class _ReceivingBoxCard extends StatelessWidget {
-  final ReceivingBoxItem box;
+  final ReceivingBoxModel box;
   final VoidCallback onToggle;
 
   const _ReceivingBoxCard({
@@ -302,66 +297,66 @@ class _ReceivingBoxCard extends StatelessWidget {
             ),
           ),
 
-          // // Toggle bar
-          // GestureDetector(
-          //   onTap: onToggle,
-          //   child: Container(
-          //     width: double.infinity,
-          //     padding: EdgeInsets.symmetric(vertical: 8.h),
-          //     decoration: BoxDecoration(
-          //       color: const Color(0xFF1E2427),
-          //       borderRadius: !box.isExpanded
-          //           ? BorderRadius.only(
-          //         bottomLeft: Radius.circular(12.r),
-          //         bottomRight: Radius.circular(12.r),
-          //       )
-          //           : BorderRadius.zero,
-          //     ),
-          //     child: Icon(
-          //       box.isExpanded
-          //           ? Icons.keyboard_arrow_up
-          //           : Icons.keyboard_arrow_down,
-          //       color: AppColors.secondaryTextColor,
-          //       size: 20.r,
-          //     ),
-          //   ),
-          // ),
-          //
-          // // Serial rows
-          // if (box.isExpanded)
-          //   Container(
-          //     decoration: BoxDecoration(
-          //       color: const Color(0xFF1E2427),
-          //       borderRadius: BorderRadius.only(
-          //         bottomLeft: Radius.circular(12.r),
-          //         bottomRight: Radius.circular(12.r),
-          //       ),
-          //     ),
-          //     child: Column(
-          //       children: box.serialRanges
-          //           .map(
-          //             (sr) => Padding(
-          //           padding: EdgeInsets.symmetric(
-          //               horizontal: 14.w, vertical: 8.h),
-          //           child: Row(
-          //             children: [
-          //               Icon(Icons.drag_indicator,
-          //                   color: AppColors.secondaryTextColor,
-          //                   size: 14.r),
-          //               SizedBox(width: 8.w),
-          //               CustomText(
-          //                 text: sr,
-          //                 fontsize: 12.sp,
-          //                 color: AppColors.secondaryTextColor,
-          //                 textAlign: TextAlign.start,
-          //               ),
-          //             ],
-          //           ),
-          //         ),
-          //       )
-          //           .toList(),
-          //     ),
-          //   ),
+          // Toggle bar
+          GestureDetector(
+            onTap: onToggle,
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 8.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E2427),
+                borderRadius: !box.isExpanded
+                    ? BorderRadius.only(
+                  bottomLeft: Radius.circular(12.r),
+                  bottomRight: Radius.circular(12.r),
+                )
+                    : BorderRadius.zero,
+              ),
+              child: Icon(
+                box.isExpanded
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                color: AppColors.secondaryTextColor,
+                size: 20.r,
+              ),
+            ),
+          ),
+
+          // Serial rows
+          if (box.isExpanded)
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E2427),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12.r),
+                  bottomRight: Radius.circular(12.r),
+                ),
+              ),
+              child: Column(
+                children: box.serialRanges
+                    .map(
+                      (sr) => Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 14.w, vertical: 8.h),
+                    child: Row(
+                      children: [
+                        Icon(Icons.drag_indicator,
+                            color: AppColors.secondaryTextColor,
+                            size: 14.r),
+                        SizedBox(width: 8.w),
+                        CustomText(
+                          text: sr,
+                          fontsize: 12.sp,
+                          color: AppColors.secondaryTextColor,
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                    .toList(),
+              ),
+            ),
         ],
       ),
     );

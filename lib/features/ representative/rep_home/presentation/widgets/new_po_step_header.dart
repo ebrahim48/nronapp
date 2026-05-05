@@ -16,7 +16,7 @@ class NewPoStepHeader extends StatelessWidget {
         children: [
           // Step label
           CustomText(
-            text: 'Step 01 of 03',
+            text: 'Step 01 of 02',
             fontsize: 13.sp,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF94A3B8),
@@ -48,7 +48,7 @@ class NewPoStepHeader extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: '/3',
+                      text: '/2',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 18.sp,
@@ -71,7 +71,7 @@ class NewPoStepHeader extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(9999),
               child: LinearProgressIndicator(
-                value: 1 / 3,
+                value: 1 / 2,
                 backgroundColor: const Color(0xFF332F2F),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   AppColors.primaryColor,

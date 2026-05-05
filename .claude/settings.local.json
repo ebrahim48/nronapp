@@ -15,7 +15,9 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\\\\purchaseorder\" -Recurse -File)",
       "Bash(Select-Object FullName)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\" -Directory | ForEach-Object { $_.Name })",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\" -Directory | ForEach-Object { $_.Name })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\" -Directory | ForEach-Object { $_.Name })",
+      "Bash(dart analyze *)",
+      "Bash(dir C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\assets\\\\images *)"
     ]
   }
 }

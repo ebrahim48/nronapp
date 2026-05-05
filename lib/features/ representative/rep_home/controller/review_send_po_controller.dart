@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 
 class ReviewSendPoController extends GetxController {
   // Step info
-  final RxInt currentStep = 1.obs;
-  final RxInt totalSteps = 3.obs;
+  final RxInt currentStep = 2.obs;
+  final RxInt totalSteps = 2.obs;
 
   // PO details
   final RxString poNumber = 'PO #88234'.obs;
@@ -24,7 +24,7 @@ class ReviewSendPoController extends GetxController {
   final RxDouble totalAmount = 4250.00.obs;
 
   // Handwritten PO image
-  final RxString handwrittenPoImage = 'assets/images/booth.png'.obs;
+  final RxString handwrittenPoImage = 'assets/images/review.png'.obs;
   final RxString handwrittenPoFileName = 'PO_scan_88234.jpg'.obs;
 
   // Documents

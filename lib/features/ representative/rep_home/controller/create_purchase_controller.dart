@@ -4,18 +4,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../core/config/app-routes/app_routes.dart';
+import '../../../../core/exceptions/app_exceptions.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../../purchaseorder/data/repositories/purchase_order_repository.dart';
+import '../../purchaseorder/model/purchase_order_model.dart';
 
 class CreatePurchaseController extends GetxController {
-  // Scanned item
+  final _repo = PurchaseOrderRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
+
+  // Step indicator
+  final currentStep = 2.obs;
+  final totalSteps = 2.obs;
+
+  // Scanned item (from scan flow)
   final itemName = 'Knee Prosthesis'.obs;
   final itemSN = 'SN: XYZ14324'.obs;
   final itemPrice = '\$4,200'.obs;
 
   // Form fields
-  final selectedStatus = 'Op'.obs;
+  final selectedStatus = 'open'.obs;
   final patientIdController = TextEditingController();
   final surgeonNameController = TextEditingController();
   final facilityController = TextEditingController();
@@ -31,10 +49,96 @@ class CreatePurchaseController extends GetxController {
 
   // Attached documents
   final attachedDocs = <File>[].obs;
-
   final isPickingFile = false.obs;
+  final isSubmitting = false.obs;
 
-  final statusOptions = ['Op', 'Lost', 'Complete'];
+  // Dropdowns
+  final surgeryList = <PoDropdownItem>[].obs;
+  final facilityList = <PoDropdownItem>[].obs;
+  final vendorList = <PoDropdownItem>[].obs;
+  final isLoadingDropdowns = false.obs;
+
+  String _selectedSurgeryId = '';
+  String _selectedFacilityId = '';
+  String _selectedVendorId = '';
+
+  final statusOptions = ['open', 'lost', 'complete'];
+
+  @override
+  void onInit() {
+    super.onInit();
+    _fetchDropdowns();
+  }
+
+  Future<void> _fetchDropdowns() async {
+    isLoadingDropdowns.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final results = await Future.wait([
+        _repo.getSurgeries(token),
+        _repo.getFacilities(token),
+        _repo.getVendors(token),
+      ]);
+
+      if (results[0]['success'] == true) {
+        surgeryList.value = _parseList(results[0]['data'])
+            .map((e) {
+              final info = (e as Map<String, dynamic>)['info'];
+              final name = info is Map
+                  ? info['fullName']?.toString() ?? ''
+                  : e['fullName']?.toString() ?? '';
+              return PoDropdownItem(id: e['_id']?.toString() ?? '', name: name);
+            })
+            .where((d) => d.name.isNotEmpty)
+            .toList();
+      }
+
+      if (results[1]['success'] == true) {
+        facilityList.value = _parseList(results[1]['data'])
+            .map((e) => PoDropdownItem(
+                  id: (e as Map<String, dynamic>)['_id']?.toString() ?? '',
+                  name: e['facilityName']?.toString() ??
+                      e['name']?.toString() ??
+                      '',
+                ))
+            .where((d) => d.name.isNotEmpty)
+            .toList();
+      }
+
+      if (results[2]['success'] == true) {
+        vendorList.value = _parseList(results[2]['data'])
+            .map((e) => PoDropdownItem(
+                  id: (e as Map<String, dynamic>)['_id']?.toString() ?? '',
+                  name: e['name']?.toString() ?? '',
+                ))
+            .where((d) => d.name.isNotEmpty)
+            .toList();
+      }
+    } catch (_) {
+    } finally {
+      isLoadingDropdowns.value = false;
+    }
+  }
+
+  List<dynamic> _parseList(dynamic data) {
+    if (data is List) return data;
+    if (data is Map) {
+      return (data['results'] ?? data['data'] ?? []) as List<dynamic>;
+    }
+    return [];
+  }
+
+  void onSurgerySelected(int index, String value) {
+    if (index < surgeryList.length) _selectedSurgeryId = surgeryList[index].id;
+  }
+
+  void onFacilitySelected(int index, String value) {
+    if (index < facilityList.length) _selectedFacilityId = facilityList[index].id;
+  }
+
+  void onVendorSelected(int index, String value) {
+    if (index < vendorList.length) _selectedVendorId = vendorList[index].id;
+  }
 
   void toggleVendorEmail(bool val) => sendVendorEmail.value = val;
 
@@ -64,7 +168,7 @@ class CreatePurchaseController extends GetxController {
         allowedExtensions: ['pdf', 'doc', 'docx'],
         allowMultiple: true,
       );
-      if (result != null && result.files.isNotEmpty) {
+      if (result != null) {
         for (final f in result.files) {
           if (f.path != null) attachedDocs.add(File(f.path!));
         }
@@ -77,10 +181,8 @@ class CreatePurchaseController extends GetxController {
   Future<void> _pickFromCamera() async {
     isPickingFile.value = true;
     try {
-      final picked = await ImagePicker().pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-      );
+      final picked = await ImagePicker()
+          .pickImage(source: ImageSource.camera, imageQuality: 85);
       if (picked != null) attachedDocs.add(File(picked.path));
     } finally {
       isPickingFile.value = false;
@@ -90,11 +192,9 @@ class CreatePurchaseController extends GetxController {
   Future<void> _pickFromGallery() async {
     isPickingFile.value = true;
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: true,
-      );
-      if (result != null && result.files.isNotEmpty) {
+      final result = await FilePicker.platform
+          .pickFiles(type: FileType.image, allowMultiple: true);
+      if (result != null) {
         for (final f in result.files) {
           if (f.path != null) attachedDocs.add(File(f.path!));
         }
@@ -104,9 +204,61 @@ class CreatePurchaseController extends GetxController {
     }
   }
 
-  void submitOrder(BuildContext, context) {
+  Future<void> submitOrder(BuildContext context) async {
+    if (!_validate()) return;
+    isSubmitting.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.create(
+        token,
+        orderType: 'standardPO',
+        status: selectedStatus.value,
+        patientId: patientIdController.text.trim(),
+        surgeryId: _selectedSurgeryId,
+        facilityId: _selectedFacilityId,
+        procedureDate: procedureDateController.text.trim(),
+        purchaseOrderNumber: poNumberController.text.trim(),
+        totalAmount: 0,
+        vendorId: _selectedVendorId.isNotEmpty ? _selectedVendorId : null,
+        notes: additionalNotesController.text.trim(),
+        docs: attachedDocs.isNotEmpty ? attachedDocs : null,
+      );
+      if (res['success'] == true && context.mounted) {
+        context.pushNamed(AppRoutes.reviewSendPoScreen);
+      }
+    } on NoInternetException {
+      ToastMessageHelper.showToastMessage('No internet connection.',
+          title: 'Error');
+    } on ServerException catch (e) {
+      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } catch (_) {
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
 
-
+  bool _validate() {
+    if (patientIdController.text.trim().isEmpty) {
+      ToastMessageHelper.showToastMessage('Patient ID is required.',
+          title: 'Validation');
+      return false;
+    }
+    if (_selectedSurgeryId.isEmpty) {
+      ToastMessageHelper.showToastMessage('Please select a surgeon.',
+          title: 'Validation');
+      return false;
+    }
+    if (_selectedFacilityId.isEmpty) {
+      ToastMessageHelper.showToastMessage('Please select a facility.',
+          title: 'Validation');
+      return false;
+    }
+    if (procedureDateController.text.trim().isEmpty) {
+      ToastMessageHelper.showToastMessage('Procedure date is required.',
+          title: 'Validation');
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -175,21 +327,30 @@ class _AttachOptionsSheet extends StatelessWidget {
             iconPath: 'assets/icons/document.svg',
             title: 'Browse Files',
             subtitle: 'Upload PDF or Word document',
-            onTap: () { Navigator.pop(context); onPickPdf(); },
+            onTap: () {
+              Navigator.pop(context);
+              onPickPdf();
+            },
           ),
           SizedBox(height: 12.h),
           _OptionTile(
             iconPath: 'assets/icons/camera.svg',
             title: 'Camera',
             subtitle: 'Take a photo of your document',
-            onTap: () { Navigator.pop(context); onPickCamera(); },
+            onTap: () {
+              Navigator.pop(context);
+              onPickCamera();
+            },
           ),
           SizedBox(height: 12.h),
           _OptionTile(
             iconPath: 'assets/icons/scanitem.svg',
             title: 'Gallery',
             subtitle: 'Choose from your photo gallery',
-            onTap: () { Navigator.pop(context); onPickGallery(); },
+            onTap: () {
+              Navigator.pop(context);
+              onPickGallery();
+            },
           ),
           SizedBox(height: 8.h),
         ],

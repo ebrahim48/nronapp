@@ -139,9 +139,9 @@ class BulkBioColors {
 
 
 class BulkBioOrderCard extends StatelessWidget {
-  final VoidCallback onScanItem;
+  final VoidCallback? onScanItem;
 
-  const BulkBioOrderCard({super.key, required this.onScanItem});
+  const BulkBioOrderCard({super.key, this.onScanItem});
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +182,7 @@ class BulkBioOrderCard extends StatelessWidget {
 
           // Right: Scan Item button
           GestureDetector(
-            onTap: onScanItem,
+            onTap: onScanItem ?? () {},
             child: Container(
               padding:
               EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
@@ -327,18 +327,12 @@ class BulkBoxCard extends StatelessWidget {
 
 
 class BulkProductRowWidget extends StatelessWidget {
-  final String iconPath;
-  final String name;
-  final String detail;
-  final String price;
+  final BulkProductItem item;
   final VoidCallback onRemove;
 
   const BulkProductRowWidget({
     super.key,
-    required this.iconPath,
-    required this.name,
-    required this.detail,
-    required this.price,
+    required this.item,
     required this.onRemove,
   });
 
@@ -359,7 +353,7 @@ class BulkProductRowWidget extends StatelessWidget {
             ),
             child: Center(
               child: SvgPicture.asset(
-                iconPath,
+                item.iconPath,
                 width: 22.r,
                 height: 22.r,
                 colorFilter: const ColorFilter.mode(
@@ -377,7 +371,7 @@ class BulkProductRowWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomText(
-                  text: name,
+                  text: item.productName,
                   fontsize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFFF0F0F0),
@@ -385,7 +379,7 @@ class BulkProductRowWidget extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 CustomText(
-                  text: detail,
+                  text: item.detail,
                   fontsize: 11.sp,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textColor7E7F7E,
@@ -400,7 +394,7 @@ class BulkProductRowWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               CustomText(
-                text: price,
+                text: item.price,
                 fontsize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFFF0F0F0),

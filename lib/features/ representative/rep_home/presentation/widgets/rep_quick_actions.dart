@@ -38,7 +38,7 @@ class RepQuickActions extends StatelessWidget {
               iconPath: 'assets/icons/expense.svg',
               label: 'Expenses',
               onTap: () {
-                context.pushNamed(AppRoutes.newPoScreen);
+                context.pushNamed(AppRoutes.expensesScreen);
               },
             ),
           ],
