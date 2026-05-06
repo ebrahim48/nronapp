@@ -31,6 +31,8 @@ import '../../../features/ representative/rep_inventory/presentation/details_bio
 import '../../../features/ representative/rep_inventory/presentation/implants_details_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/implants_details_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/missing_instrument_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/missing_instruments_details_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/missing_instruments_history_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/receive_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/receiving_session_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/report_success_screen.dart';
@@ -231,6 +233,8 @@ static const allActivitiesScreen = '/all-activities';
   static const paymentMethodsScreen = '/paymentMethodsScreen';
   static const reviewSendPoScreen = '/reviewSendPoScreen';
   static const String updatePurchaseOrderScreen = '/updatePurchaseOrderScreen';
+  static const String missingInstrumentDetailScreen = '/missingInstrumentDetailScreen';
+  static const String missingInstrumentHistoryScreen = '/missingInstrumentHistoryScreen';
 
 
 
@@ -329,7 +333,9 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: trayDetailsScreen,
         name: trayDetailsScreen,
-        builder: (context, state) => const TrayDetailsScreen(),
+        builder: (context, state) => TrayDetailsScreen(
+          id: state.extra as String? ?? '',
+        ),
       ),
       GoRoute(
         path: sendTrayScreen,
@@ -354,7 +360,9 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: detailsBioInventoryScreen,
         name: detailsBioInventoryScreen,
-        builder: (context, state) => const DetailsBioInventoryScreen(),
+        builder: (context, state) => DetailsBioInventoryScreen(
+          id: state.extra as String? ?? '',
+        ),
       ),
       GoRoute(
         path: reportSuccessScreen,
@@ -508,7 +516,7 @@ static const allActivitiesScreen = '/all-activities';
         path: implantDetailsScreen,
         name: implantDetailsScreen,
         builder: (context, state) => ImplantDetailsScreen(
-          implant: state.extra as ImplantModel,
+          id: state.extra as String? ?? '',
         ),
       ),
       GoRoute(
@@ -774,6 +782,18 @@ static const allActivitiesScreen = '/all-activities';
         path: reviewSendPoScreen,
         name: reviewSendPoScreen,
         builder: (context, state) => const ReviewSendPoScreen(),
+      ),
+      GoRoute(
+        path: missingInstrumentDetailScreen,
+        name: missingInstrumentDetailScreen,
+        builder: (context, state) => MissingInstrumentDetailScreen(
+          id: state.extra as String? ?? '',
+        ),
+      ),
+      GoRoute(
+        path: missingInstrumentHistoryScreen,
+        name: missingInstrumentHistoryScreen,
+        builder: (context, state) => const MissingInstrumentHistoryScreen(),
       ),
       GoRoute(
         path: updatePurchaseOrderScreen,

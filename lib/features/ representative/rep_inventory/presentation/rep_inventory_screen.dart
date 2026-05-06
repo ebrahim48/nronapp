@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../appdrawer/app_drawer.dart';
 import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/inventory_widgets.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
@@ -64,6 +65,8 @@ class InventoryScreen extends StatelessWidget {
             context.pushNamed(AppRoutes.newTrayScreen);
           } else if (c.tabs[activeTabIndex] == 'Bio') {
             context.pushNamed(AppRoutes.addBioInventoryScreen);
+          } else if (c.tabs[activeTabIndex] == 'Implants') {
+            context.pushNamed(AppRoutes.addImplantScreen);
           }
         },
         child: Container(
@@ -76,8 +79,8 @@ class InventoryScreen extends StatelessWidget {
           child: Center(
             child: SvgPicture.asset(
               'assets/icons/tapbutton.svg',
-              width: 24.r,
-              height: 24.r,
+              width: 32.r,
+              height: 32.r,
             ),
           ),
         ),
@@ -89,46 +92,102 @@ class InventoryScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Obx(() => Column(
-              children: [
-                Row(
-                  children: [
-                    InventoryStatCard(
-                      iconPath: 'assets/icons/implantsinventory.svg',
-                      label: 'Serialized Implants',
-                      value: c.serializedImplants.value.toString(),
-                      onTap: () => context.pushNamed(AppRoutes.serializedImplantsScreen),
-                    ),
-                    SizedBox(width: 12.w),
-                    InventoryStatCard(
-                      iconPath: 'assets/icons/implantsinventory.svg',
-                      label: 'Total Trays',
-                      value: c.totalTrays.value.toString(),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-                Row(
-                  children: [
-                    InventoryStatCard(
-                      iconPath: 'assets/icons/implantsinventory.svg',
-                      label: 'Bio Inventory',
-                      value: c.bioInventory.value.toString(),
-                    ),
-                    SizedBox(width: 12.w),
-                    InventoryStatCard(
-                      iconPath: 'assets/icons/implantsinventory.svg',
-                      label: 'Low Stock Alart',
-                      value: c.lowStockAlert.value.toString(),
-                    ),
-                  ],
-                ),
-              ],
-            )),
+            Obx(() {
+              if (c.isLoadingStats.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: Container(height: 80.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14.r)))),
+                          SizedBox(width: 12.w),
+                          Expanded(child: Container(height: 80.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14.r)))),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(child: Container(height: 80.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14.r)))),
+                          SizedBox(width: 12.w),
+                          Expanded(child: Container(height: 80.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14.r)))),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return Column(
+                children: [
+                  Row(
+                    children: [
+                      InventoryStatCard(
+                        iconPath: 'assets/icons/implantsinventory.svg',
+                        label: 'Serialized Implants',
+                        value: c.serializedImplants.value.toString(),
+                        onTap: () => context.pushNamed(AppRoutes.serializedImplantsScreen),
+                      ),
+                      SizedBox(width: 12.w),
+                      InventoryStatCard(
+                        iconPath: 'assets/icons/implantsinventory.svg',
+                        label: 'Total Trays',
+                        value: c.totalTrays.value.toString(),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Row(
+                    children: [
+                      InventoryStatCard(
+                        iconPath: 'assets/icons/implantsinventory.svg',
+                        label: 'Bio Inventory',
+                        value: c.bioInventory.value.toString(),
+                      ),
+                      SizedBox(width: 12.w),
+                      InventoryStatCard(
+                        iconPath: 'assets/icons/implantsinventory.svg',
+                        label: 'Low Stock Alert',
+                        value: c.lowStockAlert.value.toString(),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            }),
 
             SizedBox(height: 24.h),
 
             StartReceivingButton(onTap: () => context.pushNamed(AppRoutes.receivingSessionScreen)),
+
+            SizedBox(height: 12.h),
+
+            GestureDetector(
+              onTap: () => context.pushNamed(AppRoutes.missingInstrumentHistoryScreen),
+              child: Container(
+                width: double.infinity,
+                height: 52.h,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E2121),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: const Color(0xFF3A3A3A)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.history, color: AppColors.primaryColor, size: 18.r),
+                    SizedBox(width: 8.w),
+                    CustomText(
+                      text: 'Missing Instrument History',
+                      fontsize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryTextColor,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
             SizedBox(height: 24.h),
 
@@ -147,27 +206,53 @@ class InventoryScreen extends StatelessWidget {
 
             SizedBox(height: 24.h),
 
-            Obx(() => c.isEmpty
-                ? Column(
-              children: [
-                SizedBox(height: 16.h),
-                const Center(child: InventoryEmptyState()),
-                SizedBox(height: 32.h),
-                Center(child: ViewFullListButton(onTap: c.viewFullList)),
-              ],
-            )
-                : Column(
-              children: c.inventoryItems.map((item) {
-                final tabName = c.tabs[c.activeTab.value];
-                if (tabName == 'Trays') {
-                  return _TrayListItem(item: item);
-                }
-                if (tabName == 'Bio') {
-                  return _BioListItem(item: item);
-                }
-                return _InventoryListItem(item: item);
-              }).toList(),
-            )),
+            Obx(() {
+              if (c.isLoadingList.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Column(
+                    children: List.generate(
+                      5,
+                      (_) => Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        height: 110.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              if (c.isEmpty) {
+                return Column(
+                  children: [
+                    SizedBox(height: 16.h),
+                    const Center(child: InventoryEmptyState()),
+                    SizedBox(height: 32.h),
+                    Center(child: ViewFullListButton(onTap: c.viewFullList)),
+                  ],
+                );
+              }
+              return Column(
+                children: c.inventoryItems.map((item) {
+                  final tabName = c.tabs[c.activeTab.value];
+                  if (tabName == 'Trays') {
+                    return _TrayListItem(item: item);
+                  }
+                  if (tabName == 'Bio') {
+                    return _BioListItem(item: item);
+                  }
+                  return _InventoryListItem(
+                    item: item,
+                    onDelete: () => _showDeleteDialog(context, c, item['id']?.toString() ?? ''),
+                    onEdit: () => context.pushNamed(AppRoutes.addImplantScreen, extra: item['id']?.toString() ?? ''),
+                  );
+                }).toList(),
+              );
+            }),
           ],
         ),
       ),
@@ -195,8 +280,9 @@ class _TrayListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imageUrl = item['image']?.toString() ?? '';
     return GestureDetector(
-      onTap: () => context.pushNamed(AppRoutes.trayDetailsScreen),
+      onTap: () => context.pushNamed(AppRoutes.trayDetailsScreen, extra: item['id']?.toString() ?? ''),
       child: Container(
       width: double.infinity,
       margin: EdgeInsets.only(bottom: 12.h),
@@ -218,12 +304,15 @@ class _TrayListItem extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10.r),
-            child: Image.asset(
-              'assets/images/tray.jpg',
-              width: 72.r,
-              height: 72.r,
-              fit: BoxFit.cover,
-            ),
+            child: imageUrl.isNotEmpty
+              ? Image.network(
+                  imageUrl,
+                  width: 72.r,
+                  height: 72.r,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _TrayPlaceholder(size: 72.r),
+                )
+              : _TrayPlaceholder(size: 72.r),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -305,8 +394,10 @@ class _TrayListItem extends StatelessWidget {
 
 class _InventoryListItem extends StatefulWidget {
   final Map<String, dynamic> item;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
 
-  const _InventoryListItem({required this.item});
+  const _InventoryListItem({required this.item, required this.onDelete, required this.onEdit});
 
   @override
   State<_InventoryListItem> createState() => _InventoryListItemState();
@@ -359,7 +450,7 @@ class _InventoryListItemState extends State<_InventoryListItem> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     GestureDetector(
-                      onTap: () {},
+                      onTap: widget.onDelete,
                       child: Container(
                         width: _actionWidth / 2,
                         color: const Color(0xFFFD9499),
@@ -374,7 +465,7 @@ class _InventoryListItemState extends State<_InventoryListItem> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: widget.onEdit,
                       child: Container(
                         width: _actionWidth / 2,
                         decoration: BoxDecoration(
@@ -405,6 +496,7 @@ class _InventoryListItemState extends State<_InventoryListItem> {
                 bottom: 0,
                 child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
+                onTap: () => context.pushNamed(AppRoutes.implantDetailsScreen, extra: item['id']?.toString() ?? ''),
                 onHorizontalDragUpdate: _onDragUpdate,
                 onHorizontalDragEnd: _onDragEnd,
                 child: Container(
@@ -516,7 +608,10 @@ class _InventoryListItemState extends State<_InventoryListItem> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () => context.pushNamed(
+                                AppRoutes.implantDetailsScreen,
+                                extra: item['id']?.toString() ?? '',
+                              ),
                               child: Row(
                                 children: [
                                   CustomText(
@@ -549,6 +644,24 @@ class _InventoryListItemState extends State<_InventoryListItem> {
   }
 }
 
+class _TrayPlaceholder extends StatelessWidget {
+  final double size;
+  const _TrayPlaceholder({required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Icon(Icons.medical_services_outlined, color: Colors.white24, size: size * 0.4),
+    );
+  }
+}
+
 class _BioListItem extends StatelessWidget {
   final Map<String, dynamic> item;
 
@@ -570,7 +683,7 @@ class _BioListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.pushNamed(AppRoutes.detailsBioInventoryScreen),
+      onTap: () => context.pushNamed(AppRoutes.detailsBioInventoryScreen, extra: item['id']?.toString() ?? ''),
       child: Container(
       width: double.infinity,
       margin: EdgeInsets.only(bottom: 12.h),

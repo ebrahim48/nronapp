@@ -10,10 +10,23 @@ import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/new_tray_controller.dart';
 
 
-class NewTrayScreen extends StatelessWidget {
+class NewTrayScreen extends StatefulWidget {
   const NewTrayScreen({super.key});
 
-  void _showPhotoOptions(BuildContext context, NewTrayController c) {
+  @override
+  State<NewTrayScreen> createState() => _NewTrayScreenState();
+}
+
+class _NewTrayScreenState extends State<NewTrayScreen> {
+  late final NewTrayController c;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.put(NewTrayController());
+  }
+
+  void _showPhotoOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E2121),
@@ -64,6 +77,7 @@ class NewTrayScreen extends StatelessWidget {
                 },
               ),
               if (c.selectedPhoto.value != null) ...[
+
                 SizedBox(height: 12.h),
                 _PhotoOptionTile(
                   icon: Icons.delete_outline,
@@ -85,8 +99,6 @@ class NewTrayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(NewTrayController());
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -122,7 +134,7 @@ class NewTrayScreen extends StatelessWidget {
               const TrayFieldLabel(text: 'Initial Tray Photo'),
               Obx(() => TrayPhotoSection(
                 selectedPhoto: c.selectedPhoto.value,
-                onAddPhoto: () => _showPhotoOptions(context, c),
+                onAddPhoto: () => _showPhotoOptions(context),
               )),
 
               SizedBox(height: 20.h),

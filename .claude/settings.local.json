@@ -17,7 +17,13 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\" -Directory | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\" -Directory | ForEach-Object { $_.Name })",
       "Bash(dart analyze *)",
-      "Bash(dir C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\assets\\\\images *)"
+      "Bash(dir C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\assets\\\\images *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\\\\lib\\\\features\\\\representative\\\\rep_inventory\\\\controller\" -Filter \"*.dart\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(cd \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\"; & \"C:\\\\Users\\\\ebu\\\\fvm\\\\versions\\\\stable\\\\bin\\\\flutter.bat\" analyze --no-pub 2>&1 | Where-Object { $_ -match \"error\" } | Select-Object -First 30)",
+      "PowerShell(cd \"C:\\\\Users\\\\ebu\\\\Desktop\\\\office_work\\\\nron-app\"; & \"C:\\\\Users\\\\ebu\\\\fvm\\\\versions\\\\stable\\\\bin\\\\flutter.bat\" analyze --no-pub 2>&1 | ForEach-Object { if \\($_ -match \"^\\\\s+error\"\\) { $_ } })",
+      "PowerShell(Out-File *)"
     ]
   }
 }

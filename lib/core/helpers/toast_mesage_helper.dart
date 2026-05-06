@@ -4,6 +4,12 @@ import 'package:toastification/toastification.dart';
 import '../utils/app_colors.dart';
 
 class ToastMessageHelper {
+  static void showSuccessMessage(String message) =>
+      showToastMessage(message, title: 'Success');
+
+  static void showErrorMessage(String message) =>
+      showToastMessage(message, title: 'Error');
+
   static void showToastMessage(String message, {String title = 'Success'}) {
     // Determine toast type and icon based on title
     ToastificationType type = ToastificationType.success;

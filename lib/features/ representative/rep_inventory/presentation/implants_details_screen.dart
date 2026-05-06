@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/attachment_tile.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../controller/implant_details_controller.dart';
 import '../model/implant_model.dart';
 
-
 class ImplantDetailsScreen extends StatelessWidget {
-  final ImplantModel implant;
+  final String id;
 
-  const ImplantDetailsScreen({super.key, required this.implant});
+  const ImplantDetailsScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.put(ImplantDetailsController());
+    WidgetsBinding.instance.addPostFrameCallback((_) => c.loadDetail(id));
+
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
@@ -36,217 +40,266 @@ class ImplantDetailsScreen extends StatelessWidget {
           textAlign: TextAlign.start,
         ),
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 160.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12.r),
-                  child: Container(
-                    width: double.infinity,
-                    height: 200.h,
-                    color: const Color(0xFF252525),
-                    child: implant.imageAsset != null
-                        ? Image.asset(implant.imageAsset!, fit: BoxFit.cover)
-                        : Image.asset(
-                      'assets/images/implants.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-
-                _SectionHeader(
-                  title: 'General Information',
-                  badge: _StatusBadge(status: implant.status),
-                ),
-                SizedBox(height: 10.h),
-                _InfoCard(rows: [
-                  _InfoRow(
-                    icon: Icons.grid_view,
-                    label: 'Serial Number',
-                    value: implant.serialNumber,
-                  ),
-                  _InfoRow(
-                    icon: Icons.tune,
-                    label: 'System Type',
-                    value: implant.systemType,
-                  ),
-                  _InfoRow(
-                    icon: Icons.business_outlined,
-                    label: 'Vendor',
-                    value: implant.vendor,
-                  ),
-                  _InfoRow(
-                    icon: Icons.info_outline,
-                    label: 'Status',
-                    value: 'Available',
-                    valueColor: const Color(0xFF00D500),
-                    valueDot: true,
-                  ),
-                ]),
-                SizedBox(height: 16.h),
-
-                _SectionHeader(title: 'Location & Logistics'),
-                SizedBox(height: 10.h),
-                _InfoCard(rows: [
-                  _InfoRow(
-                    icon: Icons.location_on_outlined,
-                    label: 'Facility',
-                    value: implant.facility,
-                  ),
-                  _InfoRow(
-                    icon: Icons.info_outline,
-                    label: 'Recipient Email',
-                    value: implant.recipientEmail,
-                  ),
-                ]),
-                SizedBox(height: 16.h),
-                _SectionHeader(title: 'Additional Note'),
-                SizedBox(height: 10.h),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(14.r),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF252525),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: CustomText(
-                    text: implant.additionalNote ??
-                        'No additional notes available.',
-                    fontsize: 12.sp,
-                    color: AppColors.secondaryTextColor,
-                    textAlign: TextAlign.start,
-                    textHeight: 1.5,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-
-                _SectionHeader(title: 'Uploaded Files'),
-                SizedBox(height: 10.h),
-                ...() {
-                  final inbound = implant.uploadedFiles
-                      .where((f) => f.category == 'inbound_image')
-                      .toList();
-                  final broken = implant.uploadedFiles
-                      .where((f) => f.category == 'broken_instruments')
-                      .toList();
-
-                  return [
-                    if (inbound.isNotEmpty) ...[
-                      CustomText(
-                        text: 'Inbound Image',
-                        fontsize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.secondaryTextColor,
-                        textAlign: TextAlign.start,
-                        bottom: 6.h,
-                      ),
-                      ...inbound.map((f) => AttachmentTile(
-                        fileName: f.fileName,
-                        meta: '${f.size} • ${f.date}',
-                        type: AttachmentType.pdf,
-                        onDownload: () {},
-                        onPreview: () {},
-                      )),
-                    ],
-                    if (broken.isNotEmpty) ...[
-                      SizedBox(height: 6.h),
-                      CustomText(
-                        text: 'Broken Instruments',
-                        fontsize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.secondaryTextColor,
-                        textAlign: TextAlign.start,
-                        bottom: 6.h,
-                      ),
-                      ...broken.map((f) => AttachmentTile(
-                        fileName: f.fileName,
-                        meta: '${f.size} • ${f.date}',
-                        type: AttachmentType.pdf,
-                        onDownload: () {},
-                      )),
-                    ],
-                    if (implant.uploadedFiles.isEmpty)
-                      CustomText(
-                        text: 'No files uploaded.',
-                        fontsize: 12.sp,
-                        color: AppColors.secondaryTextColor,
-                        textAlign: TextAlign.start,
-                      ),
-                  ];
-                }(),
-              ],
-            ),
-          ),
-
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              color: AppColors.backgroundColor,
-              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+      body: Obx(() {
+        if (c.isLoading.value) {
+          return Shimmer.fromColors(
+            baseColor: const Color(0xFF2A2A2A),
+            highlightColor: const Color(0xFF3A3A3A),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 160.h),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Create Implant Sale
-                  CustomButton(
-                    title: 'Create Implant Sale',
-                    prefixIcon: Icon(Icons.person_add_alt_1_outlined,
-                        color: AppColors.primaryTextColor, size: 18.r),
-                    onpress: () => context.pushNamed(
-                      AppRoutes.createImplantSaleScreen,
-                      extra: implant,
+                children: List.generate(
+                  4,
+                  (_) => Container(
+                    margin: EdgeInsets.only(bottom: 16.h),
+                    height: 100.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 160.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: Container(
+                      width: double.infinity,
+                      height: 200.h,
+                      color: const Color(0xFF252525),
+                      child: c.imageUrl.value.startsWith('http')
+                          ? Image.network(c.imageUrl.value, fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _ImgPlaceholder())
+                          : _ImgPlaceholder(),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+
+                  _SectionHeader(
+                    title: 'General Information',
+                    badge: c.status.value.isNotEmpty
+                        ? _StatusBadge(status: c.status.value)
+                        : null,
                   ),
                   SizedBox(height: 10.h),
-                  Row(
-                    children: [
-                      // Ship
-                      Expanded(
-                        child: CustomButton(
-                          title: 'Ship',
-                          color: const Color(0xFF252525),
-                          borderColor: AppColors.dotButtonInactiveColor,
-                          prefixIcon: Icon(Icons.local_shipping_outlined,
-                              color: AppColors.primaryTextColor, size: 16.r),
-                          onpress: () => context.pushNamed(
-                            AppRoutes.createShipmentFromImplantScreen,
-                            extra: implant,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      // Transfer
-                      Expanded(
-                        child: CustomButton(
-                          title: 'Transfer',
-                          color: const Color(0xFF252525),
-                          borderColor: AppColors.dotButtonInactiveColor,
-                          prefixIcon: Icon(Icons.swap_horiz,
-                              color: AppColors.primaryTextColor, size: 16.r),
-                          onpress: () => context.pushNamed(
-                            AppRoutes.transferImplantScreen,
-                            extra: implant,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _InfoCard(rows: [
+                    _InfoRow(icon: Icons.grid_view, label: 'Serial Number', value: c.serialNumber.value),
+                    _InfoRow(icon: Icons.tune, label: 'System Type', value: c.systemType.value),
+                    _InfoRow(icon: Icons.business_outlined, label: 'Vendor', value: c.vendor.value),
+                    _InfoRow(icon: Icons.info_outline, label: 'Status', value: c.status.value),
+                  ]),
+                  SizedBox(height: 16.h),
+
+                  _SectionHeader(title: 'Location & Logistics'),
+                  SizedBox(height: 10.h),
+                  _InfoCard(rows: [
+                    _InfoRow(icon: Icons.location_on_outlined, label: 'Facility Address', value: c.facilityAddress.value),
+                    _InfoRow(icon: Icons.email_outlined, label: 'Recipient Email', value: c.recipientEmail.value),
+                  ]),
+                  SizedBox(height: 16.h),
+
+                  _SectionHeader(title: 'Additional Notes'),
+                  SizedBox(height: 10.h),
+                  _NoteCard(text: c.additionalNote.value.isNotEmpty ? c.additionalNote.value : 'No additional notes.'),
+
+                  if (c.brokenNote.value.isNotEmpty) ...[
+                    SizedBox(height: 12.h),
+                    _SectionHeader(title: 'Broken Instrument Notes'),
+                    SizedBox(height: 10.h),
+                    _NoteCard(text: c.brokenNote.value),
+                  ],
+
+                  SizedBox(height: 16.h),
+                  _SectionHeader(title: 'Uploaded Files'),
+                  SizedBox(height: 10.h),
+
+                  if (c.inboundFiles.isNotEmpty) ...[
+                    CustomText(
+                      text: 'Inbound Images',
+                      fontsize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.secondaryTextColor,
+                      textAlign: TextAlign.start,
+                      bottom: 8.h,
+                    ),
+                    _ImageGrid(urls: c.inboundFiles),
+                    SizedBox(height: 12.h),
+                  ],
+
+                  if (c.brokenFiles.isNotEmpty) ...[
+                    CustomText(
+                      text: 'Broken Instrument Images',
+                      fontsize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.secondaryTextColor,
+                      textAlign: TextAlign.start,
+                      bottom: 8.h,
+                    ),
+                    _ImageGrid(urls: c.brokenFiles),
+                    SizedBox(height: 12.h),
+                  ],
+
+                  if (c.inboundFiles.isEmpty && c.brokenFiles.isEmpty)
+                    CustomText(
+                      text: 'No files uploaded.',
+                      fontsize: 12.sp,
+                      color: AppColors.secondaryTextColor,
+                      textAlign: TextAlign.start,
+                    ),
                 ],
               ),
             ),
-          ),
-        ],
+
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                color: AppColors.backgroundColor,
+                padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CustomButton(
+                      title: 'Create Implant Sale',
+                      prefixIcon: Icon(Icons.person_add_alt_1_outlined,
+                          color: AppColors.primaryTextColor, size: 18.r),
+                      onpress: () => context.pushNamed(
+                        AppRoutes.createImplantSaleScreen,
+                        extra: _buildModel(c),
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomButton(
+                            title: 'Ship',
+                            color: const Color(0xFF252525),
+                            borderColor: AppColors.dotButtonInactiveColor,
+                            prefixIcon: Icon(Icons.local_shipping_outlined,
+                                color: AppColors.primaryTextColor, size: 16.r),
+                            onpress: () => context.pushNamed(
+                              AppRoutes.createShipmentFromImplantScreen,
+                              extra: _buildModel(c),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10.w),
+                        Expanded(
+                          child: CustomButton(
+                            title: 'Transfer',
+                            color: const Color(0xFF252525),
+                            borderColor: AppColors.dotButtonInactiveColor,
+                            prefixIcon: Icon(Icons.swap_horiz,
+                                color: AppColors.primaryTextColor, size: 16.r),
+                            onpress: () => context.pushNamed(
+                              AppRoutes.transferImplantScreen,
+                              extra: _buildModel(c),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  ImplantModel _buildModel(ImplantDetailsController c) => ImplantModel(
+        id: id,
+        serialNumber: c.serialNumber.value,
+        name: c.systemType.value,
+        lotNumber: '',
+        material: '',
+        systemType: c.systemType.value,
+        vendor: c.vendor.value,
+        status: c.status.value,
+        facility: c.facilityAddress.value,
+        recipientEmail: c.recipientEmail.value,
+        imageAsset: null,
+        additionalNote: c.additionalNote.value,
+      );
+}
+
+class _ImgPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFF252525),
+      child: Center(
+        child: Icon(Icons.medical_services_outlined, color: Colors.white24, size: 48.r),
       ),
     );
   }
 }
 
+class _NoteCard extends StatelessWidget {
+  final String text;
+  const _NoteCard({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(14.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFF252525),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: CustomText(
+        text: text,
+        fontsize: 12.sp,
+        color: AppColors.secondaryTextColor,
+        textAlign: TextAlign.start,
+        textHeight: 1.5,
+      ),
+    );
+  }
+}
+
+class _ImageGrid extends StatelessWidget {
+  final List<String> urls;
+  const _ImageGrid({required this.urls});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8.w,
+      runSpacing: 8.h,
+      children: urls.map((url) => ClipRRect(
+        borderRadius: BorderRadius.circular(8.r),
+        child: Image.network(
+          url,
+          width: 80.r,
+          height: 80.r,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Container(
+            width: 80.r,
+            height: 80.r,
+            color: const Color(0xFF2A2A2A),
+            child: Icon(Icons.broken_image_outlined, color: Colors.white24, size: 24.r),
+          ),
+        ),
+      )).toList(),
+    );
+  }
+}
 
 class _SectionHeader extends StatelessWidget {
   final String title;
@@ -272,8 +325,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ── Info card ─────────────────────────────────────────────────────────────────
-
 class _InfoCard extends StatelessWidget {
   final List<_InfoRow> rows;
   const _InfoCard({required this.rows});
@@ -286,18 +337,13 @@ class _InfoCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
-        children: rows
-            .map((r) => Column(
+        children: rows.asMap().entries.map((entry) => Column(
           children: [
-            r,
-            if (rows.indexOf(r) < rows.length - 1)
-              Divider(
-                  color: const Color(0xFF3A3A3A),
-                  height: 1,
-                  thickness: 0.5),
+            entry.value,
+            if (entry.key < rows.length - 1)
+              const Divider(color: Color(0xFF3A3A3A), height: 1, thickness: 0.5),
           ],
-        ))
-            .toList(),
+        )).toList(),
       ),
     );
   }
@@ -307,16 +353,8 @@ class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color? valueColor;
-  final bool valueDot;
 
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.valueColor,
-    this.valueDot = false,
-  });
+  const _InfoRow({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -333,22 +371,14 @@ class _InfoRow extends StatelessWidget {
             textAlign: TextAlign.start,
           ),
           const Spacer(),
-          if (valueDot)
-            Container(
-              width: 7.r,
-              height: 7.r,
-              margin: EdgeInsets.only(right: 5.w),
-              decoration: BoxDecoration(
-                color: valueColor ?? const Color(0xFF00D500),
-                shape: BoxShape.circle,
-              ),
+          Flexible(
+            child: CustomText(
+              text: value.isEmpty ? '—' : value,
+              fontsize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryTextColor,
+              textAlign: TextAlign.end,
             ),
-          CustomText(
-            text: value,
-            fontsize: 12.sp,
-            fontWeight: FontWeight.w600,
-            color: valueColor ?? AppColors.primaryTextColor,
-            textAlign: TextAlign.end,
           ),
         ],
       ),
@@ -356,35 +386,34 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-// ── Status Badge ──────────────────────────────────────────────────────────────
-
 class _StatusBadge extends StatelessWidget {
   final String status;
   const _StatusBadge({required this.status});
 
+  Color get _color {
+    switch (status.toLowerCase()) {
+      case 'available': return const Color(0xFF4CAF50);
+      case 'in stock':
+      case 'in_stock': return AppColors.primaryColor;
+      case 'shipped': return const Color(0xFFFF9800);
+      default: return AppColors.secondaryTextColor;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bg = status == 'in_stock' || status == 'available'
-        ? AppColors.primaryColor
-        : AppColors.secondaryTextColor;
-    final label = status == 'in_stock'
-        ? 'In Stock'
-        : status == 'available'
-        ? 'In Stock'
-        : status;
-
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: bg.withValues(alpha: 0.15),
-        border: Border.all(color: bg, width: 0.8),
+        color: _color.withValues(alpha: 0.15),
+        border: Border.all(color: _color, width: 0.8),
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: CustomText(
-        text: label,
+        text: status,
         fontsize: 11.sp,
         fontWeight: FontWeight.w600,
-        color: bg,
+        color: _color,
       ),
     );
   }

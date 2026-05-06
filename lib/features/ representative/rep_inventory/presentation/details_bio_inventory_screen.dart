@@ -3,145 +3,179 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/app_colors.dart';
-import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/details_bio_inventory_controller.dart';
 
 class DetailsBioInventoryScreen extends StatelessWidget {
-  const DetailsBioInventoryScreen({super.key});
+  final String id;
+  const DetailsBioInventoryScreen({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
     final c = Get.put(DetailsBioInventoryController());
+    WidgetsBinding.instance.addPostFrameCallback((_) => c.loadDetail(id));
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // AppBar
-              SizedBox(height: 12.h),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Icon(Icons.arrow_back_ios,
-                        color: AppColors.primaryTextColor, size: 18.r),
+        child: Obx(() {
+          if (c.isLoading.value) {
+            return Shimmer.fromColors(
+              baseColor: const Color(0xFF2A2A2A),
+              highlightColor: const Color(0xFF3A3A3A),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
+                child: Column(
+                  children: List.generate(
+                    4,
+                    (_) => Container(
+                      margin: EdgeInsets.only(bottom: 16.h),
+                      height: 100.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 8.w),
-                  CustomText(
-                    text: 'Biological Details',
-                    fontsize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.h),
-
-              // Item Image
-              Container(
-                width: double.infinity,
-                height: 180.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E2121),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: const Color(0xFF3A3A3A)),
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  'assets/images/biological.png',
+              ),
+            );
+          }
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: Icon(Icons.arrow_back_ios,
+                          color: AppColors.primaryTextColor, size: 18.r),
+                    ),
+                    SizedBox(width: 8.w),
+                    CustomText(
+                      text: 'Biological Details',
+                      fontsize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryTextColor,
+                      textAlign: TextAlign.start,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
+
+                Container(
                   width: double.infinity,
                   height: 180.h,
-                  fit: BoxFit.cover,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E2121),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: const Color(0xFF3A3A3A)),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: c.imageUrl.value.startsWith('http')
+                      ? Image.network(
+                          c.imageUrl.value,
+                          width: double.infinity,
+                          height: 180.h,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _ImagePlaceholder(),
+                        )
+                      : _ImagePlaceholder(),
                 ),
-              ),
 
-              SizedBox(height: 20.h),
+                SizedBox(height: 20.h),
 
-              // General Information Card
-              _SectionCard(
-                title: 'General Information',
-                badge: 'In Stock',
-                children: [
-                  _InfoRow(
-                    iconPath: 'assets/icons/itemhome.svg',
-                    label: 'Item Name',
-                    value: c.item['name'],
-                  ),
-                  SizedBox(height: 12.h),
-                  _InfoRow(
-                    iconPath: 'assets/icons/lotnumber.svg',
-                    label: 'Lot Number',
-                    value: c.item['lotNumber'],
-                  ),
-                  SizedBox(height: 12.h),
-                  _InfoRow(
-                    iconPath: 'assets/icons/quantity.svg',
-                    label: 'Quantity',
-                    value: c.item['quantity'],
-                  ),
-                  SizedBox(height: 12.h),
-                  _InfoRow(
-                    iconPath: 'assets/icons/calendar.svg',
-                    label: 'Expiry Date',
-                    value: c.item['expiryDate'],
-                  ),
-                ],
-              ),
+                _SectionCard(
+                  title: 'General Information',
+                  badge: c.status.value.isEmpty ? null : c.status.value,
+                  children: [
+                    _InfoRow(
+                      iconPath: 'assets/icons/itemhome.svg',
+                      label: 'Item Name',
+                      value: c.name.value,
+                    ),
+                    SizedBox(height: 12.h),
+                    _InfoRow(
+                      iconPath: 'assets/icons/lotnumber.svg',
+                      label: 'Lot Number',
+                      value: c.lotNumber.value,
+                    ),
+                    SizedBox(height: 12.h),
+                    _InfoRow(
+                      iconPath: 'assets/icons/quantity.svg',
+                      label: 'Quantity',
+                      value: c.quantity.value,
+                    ),
+                    SizedBox(height: 12.h),
+                    _InfoRow(
+                      iconPath: 'assets/icons/calendar.svg',
+                      label: 'Expiry Date',
+                      value: c.expiryDate.value,
+                    ),
+                  ],
+                ),
 
-              SizedBox(height: 16.h),
+                SizedBox(height: 16.h),
 
-              // Location & Logistics Card
-              _SectionCard(
-                title: 'Location & Logistics',
-                children: [
-                  _InfoRow(
-                    iconPath: 'assets/icons/vendor.svg',
-                    label: 'Vendor',
-                    value: c.item['vendor'],
-                  ),
-                  SizedBox(height: 12.h),
-                  _InfoRow(
-                    iconPath: 'assets/icons/map.svg',
-                    label: 'Location',
-                    value: c.item['location'],
-                  ),
-                ],
-              ),
+                _SectionCard(
+                  title: 'Location & Logistics',
+                  children: [
+                    _InfoRow(
+                      iconPath: 'assets/icons/vendor.svg',
+                      label: 'Vendor',
+                      value: c.vendor.value,
+                    ),
+                    SizedBox(height: 12.h),
+                    _InfoRow(
+                      iconPath: 'assets/icons/map.svg',
+                      label: 'Location',
+                      value: c.location.value,
+                    ),
+                  ],
+                ),
 
-              SizedBox(height: 20.h),
+                SizedBox(height: 20.h),
 
-              // Additional Notes
-              _SectionCard(
-                title: 'Additional Notes',
-                children: [
-                  CustomText(
-                    text: c.item['notes'],
-                    fontsize: 13.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                    textHeight: 1.5,
-                  ),
-                ],
-              ),
+                _SectionCard(
+                  title: 'Additional Notes',
+                  children: [
+                    CustomText(
+                      text: c.notes.value.isEmpty ? '—' : c.notes.value,
+                      fontsize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.primaryTextColor,
+                      textAlign: TextAlign.start,
+                      textHeight: 1.5,
+                    ),
+                  ],
+                ),
 
-              SizedBox(height: 16.h),
-            ],
-          ),
-        ),
+                SizedBox(height: 16.h),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
 }
 
+class _ImagePlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Icon(Icons.biotech_outlined,
+          size: 48.r, color: const Color(0xFF3A3A3A)),
+    );
+  }
+}
 
 class _SectionCard extends StatelessWidget {
   final String title;
@@ -247,7 +281,7 @@ class _InfoRow extends StatelessWidget {
           ),
           const Spacer(),
           CustomText(
-            text: value,
+            text: value.isEmpty ? '—' : value,
             fontsize: 13.sp,
             fontWeight: FontWeight.w500,
             color: AppColors.primaryTextColor,

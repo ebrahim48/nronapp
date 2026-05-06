@@ -77,6 +77,36 @@ class ApiConstants {
 
 
 
+  static const String getInventory = '/meta/inventory/my-overview';
+  static const String getInventoryAll = '/meta/inventory/get-all'; // Category: Tray,Implant,Bio
+  static const String getSummaryCount = '/missing-instrument/my-overview';
+  static const String getMissingHistory = '/missing-instrument/history';
+  static const String getImplant = '/implant/get-all';
+  static String getSingleImplant(String id) => '/implant/find/$id';
+  static const String createImplant = '/implant/create';
+  static String updateImplantById(String id) => '/implant/update/$id';
+  static String deleteImplantById(String id) => '/implant/delete/$id';
+  static String sendTransferRequest(String id) => '/implant/send-transfer-request/$id';
+
+  static const String approveCommission = '/sales/status-update/69d0d1da3c027fd6339e1724'; // id  patch
+  static const String getBio = '/bio/get-all';
+  static String getSingleBio(String id) => '/bio/find/$id';
+  static const String createBio = '/bio/create';
+  static String updateBioById(String id) => '/bio/update/$id';
+  static String deleteBioById(String id) => '/bio/delete/$id';
+
+  static const String getTray = '/tray/get-all';
+  static String getTrayById(String id) => '/tray/find/$id';
+  static const String createTray = '/tray/create';
+  static String updateTrayById(String id) => '/tray/update/$id';
+  static String deleteTrayById(String id) => '/tray/delete/$id';
+  static String sendTrayById(String id) => '/tray/send/$id';
+  static String receiveTrayById(String id) => '/tray/receive/$id';
+
+  static String findMissingInstrument(String id) => '/missing-instrument/find/$id';
+  static String sendMissingVendorMail(String id) => '/missing-instrument/send-vendor/$id';
+
+
 
 
 

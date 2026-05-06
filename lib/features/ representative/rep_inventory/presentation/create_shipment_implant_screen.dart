@@ -49,7 +49,6 @@ class _CreateShipmentFromImplantScreenState
     );
   }
 
-  // ── Section header ────────────────────────────────────────────────────────
   Widget _sectionHeader(String title, String iconAsset) {
     return Row(
       children: [
