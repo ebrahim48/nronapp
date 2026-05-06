@@ -145,6 +145,10 @@ class AddBioInventoryController extends GetxController {
       ToastMessageHelper.showErrorMessage('Please fill in all required fields');
       return false;
     }
+    if (selectedPhoto.value == null) {
+      ToastMessageHelper.showErrorMessage('Please add an initial photo');
+      return false;
+    }
     try {
       isSaving.value = true;
       final token = await PrefsHelper.getString('auth_token');
@@ -161,7 +165,7 @@ class AddBioInventoryController extends GetxController {
             : null,
         photo: selectedPhoto.value,
       );
-      ToastMessageHelper.showSuccessMessage('Bio inventory saved');
+      _clear();
       return true;
     } catch (_) {
       ToastMessageHelper.showErrorMessage('Failed to save bio inventory');
@@ -169,6 +173,18 @@ class AddBioInventoryController extends GetxController {
     } finally {
       isSaving.value = false;
     }
+  }
+
+  void _clear() {
+    itemNameController.clear();
+    lotNumberController.clear();
+    quantityController.clear();
+    locationController.clear();
+    additionalNotesController.clear();
+    selectedVendorId.value = null;
+    selectedVendorName.value = null;
+    expiryDate.value = null;
+    selectedPhoto.value = null;
   }
 
   @override

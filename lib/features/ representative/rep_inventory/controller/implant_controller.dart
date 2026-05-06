@@ -54,6 +54,12 @@ class ImplantsController extends GetxController {
   ImplantModel _fromJson(Map<String, dynamic> e) {
     final facilityMap = e['facility'] is Map ? e['facility'] as Map<String, dynamic> : <String, dynamic>{};
     final vendorMap = e['vendor'] is Map ? e['vendor'] as Map<String, dynamic> : <String, dynamic>{};
+
+    List<String> _toStringList(dynamic v) {
+      if (v is List) return v.map((x) => x.toString()).toList();
+      return [];
+    }
+
     return ImplantModel(
       id: e['_id']?.toString() ?? '',
       serialNumber: e['serialNumber']?.toString() ?? '',
@@ -65,6 +71,12 @@ class ImplantsController extends GetxController {
       status: _normalizeStatus(e['productStatus']?.toString() ?? e['status']?.toString()),
       facility: facilityMap['facilityName']?.toString() ?? facilityMap['name']?.toString() ?? '',
       recipientEmail: e['recipientEmail']?.toString() ?? '',
+      facilityId: facilityMap['_id']?.toString() ?? (e['facility'] is String ? e['facility'].toString() : null),
+      vendorId: vendorMap['_id']?.toString() ?? (e['vendor'] is String ? e['vendor'].toString() : null),
+      inboundNotes: e['inboundNotes']?.toString(),
+      brokenNotes: e['brokenInstrumentsNotes']?.toString(),
+      inboundFileUrls: _toStringList(e['inboundFiles']),
+      brokenFileUrls: _toStringList(e['brokenFiles']),
     );
   }
 

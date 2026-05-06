@@ -1,11 +1,12 @@
-enum MissingInstrumentStatus { missing, damaged, resolved }
+enum MissingInstrumentStatus { missing, damaged, resolved, other }
 
 class MissingInstrumentModel {
   final String id;
   final String trayId;
   final String facility;
+  final String instrumentName;
   final String reportedBy;
-  final String reporterAvatar; // asset path
+  final String reporterAvatarUrl;
   final DateTime date;
   final MissingInstrumentStatus status;
 
@@ -13,8 +14,9 @@ class MissingInstrumentModel {
     required this.id,
     required this.trayId,
     required this.facility,
+    required this.instrumentName,
     required this.reportedBy,
-    required this.reporterAvatar,
+    required this.reporterAvatarUrl,
     required this.date,
     required this.status,
   });
@@ -27,30 +29,8 @@ class MissingInstrumentModel {
         return 'Damaged';
       case MissingInstrumentStatus.resolved:
         return 'Resolved';
+      case MissingInstrumentStatus.other:
+        return 'Other';
     }
   }
-}
-
-class MissingInstrumentDetailModel {
-  final String trayId;
-  final String facility;
-  final String location;
-  final String instrumentName;
-  final String notes;
-  final String evidenceImagePath;
-  final DateTime capturedAt;
-  final bool vendorNotified;
-  final String vendorNotifiedMessage;
-
-  const MissingInstrumentDetailModel({
-    required this.trayId,
-    required this.facility,
-    required this.location,
-    required this.instrumentName,
-    required this.notes,
-    required this.evidenceImagePath,
-    required this.capturedAt,
-    required this.vendorNotified,
-    required this.vendorNotifiedMessage,
-  });
 }

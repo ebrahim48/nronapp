@@ -27,7 +27,6 @@ class NewTrayController extends GetxController {
   final trayIdController = TextEditingController();
   final returnDateController = TextEditingController();
   final additionalNotesController = TextEditingController();
-  final vendorController = TextEditingController();
 
   final selectedFacilityId = ''.obs;
   final selectedFacilityName = ''.obs;
@@ -44,8 +43,12 @@ class NewTrayController extends GetxController {
   final vendors = <DropdownOption>[].obs;
   final systemTypeOptions = ['Type A', 'Type B', 'Type C'];
 
-  static const _inventoryModels = ['Loaner', 'Consignment'];
-  static const _statusOptions = ['Down Rack', 'Wrapped', 'Warehouse'];
+  static const _inventoryModels = ['loaner', 'consignment'];
+  static const _statusOptions = ['downRack', 'wrapped', 'Warehouse'];
+
+  // Display labels shown in the UI toggles/selectors
+  static const inventoryModelLabels = ['Loaner', 'Consignment'];
+  static const statusLabels = ['Down Rack', 'Wrapped', 'Warehouse'];
 
   @override
   void onInit() {
@@ -130,10 +133,24 @@ class NewTrayController extends GetxController {
     selectedFacilityName.value = name;
   }
 
+  List<String> get vendorOptions => vendors.map((v) => v.name).toList();
+
+  void selectVendorByName(String? name) {
+    if (name == null || name.isEmpty) {
+      selectedVendorId.value = '';
+      selectedVendorName.value = '';
+      return;
+    }
+    final matches = vendors.where((v) => v.name == name);
+    if (matches.isNotEmpty) {
+      selectedVendorId.value = matches.first.id;
+      selectedVendorName.value = matches.first.name;
+    }
+  }
+
   void selectVendor(String id, String name) {
     selectedVendorId.value = id;
     selectedVendorName.value = name;
-    vendorController.text = name;
   }
 
   void selectSystemType(String val) => selectedSystemType.value = val;
@@ -199,7 +216,6 @@ class NewTrayController extends GetxController {
     trayIdController.dispose();
     returnDateController.dispose();
     additionalNotesController.dispose();
-    vendorController.dispose();
     super.onClose();
   }
 }

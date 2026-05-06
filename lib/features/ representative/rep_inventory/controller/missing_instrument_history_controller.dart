@@ -29,7 +29,8 @@ class MissingInstrumentHistoryController extends GetxController {
     return _allItems
         .where((e) =>
             e.trayId.toLowerCase().contains(q) ||
-            e.facility.toLowerCase().contains(q))
+            e.facility.toLowerCase().contains(q) ||
+            e.instrumentName.toLowerCase().contains(q))
         .toList();
   }
 
@@ -51,9 +52,7 @@ class MissingInstrumentHistoryController extends GetxController {
       final data = res['data'] as Map<String, dynamic>? ?? {};
       totalCount.value = (data['total'] as num?)?.toInt() ?? 0;
       missingCount.value = (data['missing'] as num?)?.toInt() ?? 0;
-    } catch (_) {
-      // silently fail
-    }
+    } catch (_) {}
   }
 
   Future<void> _fetchHistory() async {
@@ -81,35 +80,35 @@ class MissingInstrumentHistoryController extends GetxController {
   }
 
   MissingInstrumentModel _fromJson(Map<String, dynamic> e) {
-    final trayMap = e['tray'] is Map ? e['tray'] as Map<String, dynamic> : <String, dynamic>{};
-    final facilityMap = e['facility'] is Map ? e['facility'] as Map<String, dynamic> : <String, dynamic>{};
-    final reporterMap = e['reportedBy'] is Map ? e['reportedBy'] as Map<String, dynamic> : <String, dynamic>{};
-
     MissingInstrumentStatus status;
-    switch (e['status']?.toString().toLowerCase()) {
-      case 'damaged':
+    switch (e['issueType']?.toString().toLowerCase()) {
+      case 'damage':
         status = MissingInstrumentStatus.damaged;
+        break;
+      case 'missing':
+        status = MissingInstrumentStatus.missing;
         break;
       case 'resolved':
         status = MissingInstrumentStatus.resolved;
         break;
       default:
-        status = MissingInstrumentStatus.missing;
+        status = MissingInstrumentStatus.other;
     }
 
     DateTime date;
     try {
-      date = DateTime.parse(e['createdAt']?.toString() ?? '');
+      date = DateTime.parse(e['date']?.toString() ?? '');
     } catch (_) {
       date = DateTime.now();
     }
 
     return MissingInstrumentModel(
       id: e['_id']?.toString() ?? '',
-      trayId: trayMap['trayId']?.toString() ?? '',
-      facility: facilityMap['facilityName']?.toString() ?? facilityMap['name']?.toString() ?? '',
-      reportedBy: reporterMap['fullName']?.toString() ?? reporterMap['name']?.toString() ?? '',
-      reporterAvatar: 'assets/images/avatar.png',
+      trayId: e['trayTitle']?.toString() ?? '',
+      facility: e['facilityName']?.toString() ?? '',
+      instrumentName: e['instrumentName']?.toString() ?? '',
+      reportedBy: e['userName']?.toString() ?? '',
+      reporterAvatarUrl: e['profileUrl']?.toString() ?? '',
       date: date,
       status: status,
     );

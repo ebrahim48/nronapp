@@ -6,12 +6,20 @@ class ImplantModel {
   final String material;
   final String systemType;
   final String vendor;
-  final String status; 
+  final String status;
   final String facility;
   final String recipientEmail;
   final String? imageAsset;
   final String? additionalNote;
   final List<ImplantFile> uploadedFiles;
+
+  // Edit-mode extras
+  final String? facilityId;
+  final String? vendorId;
+  final String? inboundNotes;
+  final String? brokenNotes;
+  final List<String> inboundFileUrls;
+  final List<String> brokenFileUrls;
 
   const ImplantModel({
     required this.id,
@@ -27,6 +35,12 @@ class ImplantModel {
     this.imageAsset,
     this.additionalNote,
     this.uploadedFiles = const [],
+    this.facilityId,
+    this.vendorId,
+    this.inboundNotes,
+    this.brokenNotes,
+    this.inboundFileUrls = const [],
+    this.brokenFileUrls = const [],
   });
 }
 

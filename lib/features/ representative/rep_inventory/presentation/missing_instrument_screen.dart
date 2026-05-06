@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/config/app-routes/app_routes.dart';
-import 'package:nron_app/features/%20representative/rep_inventory/presentation/report_success_screen.dart';
 
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -13,13 +12,97 @@ import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/missing_instrument_controller.dart';
 
+class _VendorDropdown extends StatelessWidget {
+  final String? value;
+  final List<String> options;
+  final ValueChanged<String?> onChanged;
 
-class MissingInstrumentScreen extends StatelessWidget {
-  const MissingInstrumentScreen({super.key});
+  const _VendorDropdown({required this.value, required this.options, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(MissingInstrumentController());
+    final safeValue = (value != null && options.contains(value)) ? value : null;
+    return Container(
+      height: 48.h,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E2121),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: const Color(0xFF3A3A3A)),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 14.w),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: safeValue,
+          hint: CustomText(text: 'Select Vendor (optional)', fontsize: 13.sp, color: AppColors.secondaryTextColor),
+          isExpanded: true,
+          dropdownColor: const Color(0xFF1E2121),
+          icon: Icon(Icons.keyboard_arrow_down, color: AppColors.secondaryTextColor, size: 20.r),
+          items: options.map((o) => DropdownMenuItem(
+            value: o,
+            child: CustomText(text: o, fontsize: 13.sp, color: AppColors.primaryTextColor),
+          )).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class _IssueTypeSelector extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onSelect;
+
+  const _IssueTypeSelector({required this.selected, required this.onSelect});
+
+  static const _options = [
+    ('missing', 'Missing'),
+    ('damage', 'Damage'),
+    ('other', 'Other'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: _options.map((opt) {
+        final isSelected = selected == opt.$1;
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onSelect(opt.$1),
+            child: Container(
+              margin: EdgeInsets.only(right: opt.$1 != 'other' ? 8.w : 0),
+              height: 44.h,
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primaryColor.withValues(alpha: 0.15) : const Color(0xFF1E2121),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(
+                  color: isSelected ? AppColors.primaryColor : const Color(0xFF3A3A3A),
+                ),
+              ),
+              child: Center(
+                child: CustomText(
+                  text: opt.$2,
+                  fontsize: 13.sp,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? AppColors.primaryColor : AppColors.secondaryTextColor,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+
+class MissingInstrumentScreen extends StatelessWidget {
+  final String trayId;
+  const MissingInstrumentScreen({super.key, required this.trayId});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.put(MissingInstrumentController())..trayId = trayId;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -51,7 +134,7 @@ class MissingInstrumentScreen extends StatelessWidget {
               SizedBox(height: 20.h),
 
               // Tray Mini Card
-              _TrayMiniCard(),
+              _TrayMiniCard(trayId: trayId),
 
               SizedBox(height: 20.h),
 
@@ -77,28 +160,27 @@ class MissingInstrumentScreen extends StatelessWidget {
               _FieldLabel(text: 'Instrument Name'),
               CustomTextField(
                 controller: c.instrumentNameController,
-                hintText: 'e.g. Gibson Les Paul Custom',
+                hintText: 'e.g. Retractor, Scalpel',
               ),
 
               SizedBox(height: 12.h),
 
-              // Vendor Email
-              _FieldLabel(text: 'Vendor email'),
-              CustomTextField(
-                controller: c.vendorEmailController,
-                hintText: '',
-                keyboardType: TextInputType.emailAddress,
-                isEmail: true,
-              ),
+              // Vendor
+              _FieldLabel(text: 'Vendor'),
+              Obx(() => _VendorDropdown(
+                value: c.selectedVendorName.value,
+                options: c.vendorOptions,
+                onChanged: c.selectVendor,
+              )),
 
               SizedBox(height: 12.h),
 
-              // Serial Number
-              _FieldLabel(text: 'Serial Number'),
-              CustomTextField(
-                controller: c.serialNumberController,
-                hintText: 'Enter unique ID or manufacturer serial',
-              ),
+              // Issue Type
+              _FieldLabel(text: 'Issue Type'),
+              Obx(() => _IssueTypeSelector(
+                selected: c.issueType.value,
+                onSelect: c.setIssueType,
+              )),
 
               SizedBox(height: 12.h),
 
@@ -173,17 +255,22 @@ class MissingInstrumentScreen extends StatelessWidget {
               SizedBox(height: 24.h),
 
               // Submit Button
-              CustomButton(
+              Obx(() => CustomButton(
                 title: 'Submit Report',
-                onpress: () {
-                  context.pushNamed(AppRoutes.reportSuccessScreen);
+                loading: c.isSubmitting.value,
+                onpress: () async {
+                  final ok = await c.submitReport();
+                  if (ok && context.mounted) {
+                    Get.delete<MissingInstrumentController>(force: true);
+                    context.pushNamed(AppRoutes.reportSuccessScreen);
+                  }
                 },
                 prefixIcon: Icon(
                   Icons.info_outline,
                   color: Colors.black,
                   size: 18.r,
                 ),
-              ),
+              )),
 
               SizedBox(height: 12.h),
 
@@ -280,6 +367,9 @@ class _ImageUploadPreview extends StatelessWidget {
 }
 
 class _TrayMiniCard extends StatelessWidget {
+  final String trayId;
+  const _TrayMiniCard({required this.trayId});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -295,55 +385,45 @@ class _TrayMiniCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: Image.asset(
-              'assets/images/tray.jpg',
-              width: 72.w,
-              height: 58.h,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 72.w,
-                height: 58.h,
-                color: const Color(0xFF2A3A3A),
-              ),
+          Container(
+            width: 72.w,
+            height: 58.h,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A3A3A),
+              borderRadius: BorderRadius.circular(10.r),
             ),
+            child: Icon(Icons.medical_services_outlined,
+                color: AppColors.primaryColor, size: 28.r),
           ),
           SizedBox(width: 14.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomText(
-                text: 'TRAY-8829',
-                fontsize: 15.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.primaryTextColor,
-                textAlign: TextAlign.start,
-              ),
-              SizedBox(height: 2.h),
-              CustomText(
-                text: 'Ortho-Major Set B',
-                fontsize: 12.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.secondaryTextColor,
-                textAlign: TextAlign.start,
-              ),
-              SizedBox(height: 4.h),
-              Row(
-                children: [
-                  Icon(Icons.access_time_rounded,
-                      color: AppColors.secondaryTextColor, size: 11.r),
-                  SizedBox(width: 4.w),
-                  CustomText(
-                    text: 'Updated 10 mins ago',
-                    fontsize: 11.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.secondaryTextColor,
-                    textAlign: TextAlign.start,
-                  ),
-                ],
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: trayId.isNotEmpty ? trayId : 'Unknown Tray',
+                  fontsize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTextColor,
+                  textAlign: TextAlign.start,
+                ),
+                SizedBox(height: 4.h),
+                Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        color: const Color(0xFFEC5B13), size: 11.r),
+                    SizedBox(width: 4.w),
+                    CustomText(
+                      text: 'Reporting missing instrument',
+                      fontsize: 11.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.secondaryTextColor,
+                      textAlign: TextAlign.start,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

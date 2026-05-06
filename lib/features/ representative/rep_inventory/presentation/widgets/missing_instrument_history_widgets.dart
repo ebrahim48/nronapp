@@ -227,11 +227,13 @@ class MissingReportCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 14.r,
-                  backgroundImage: AssetImage(item.reporterAvatar),
                   backgroundColor: const Color(0xFF3A3A3A),
-                  onBackgroundImageError: (_, __) {},
-                  child: Icon(Icons.person,
-                      size: 14.r, color: AppColors.secondaryTextColor),
+                  backgroundImage: item.reporterAvatarUrl.startsWith('http')
+                      ? NetworkImage(item.reporterAvatarUrl)
+                      : null,
+                  child: item.reporterAvatarUrl.startsWith('http')
+                      ? null
+                      : Icon(Icons.person, size: 14.r, color: AppColors.secondaryTextColor),
                 ),
                 SizedBox(width: 8.w),
                 CustomText(
@@ -293,6 +295,8 @@ class _StatusBadge extends StatelessWidget {
         return const Color(0xFF3A2A00);
       case MissingInstrumentStatus.resolved:
         return const Color(0xFF0D2E1A);
+      case MissingInstrumentStatus.other:
+        return const Color(0xFF1E2A3A);
     }
   }
 
@@ -304,6 +308,8 @@ class _StatusBadge extends StatelessWidget {
         return const Color(0xFFFFB300);
       case MissingInstrumentStatus.resolved:
         return const Color(0xFF22C55E);
+      case MissingInstrumentStatus.other:
+        return const Color(0xFF64B5F6);
     }
   }
 

@@ -55,16 +55,43 @@ class TrayDetailsController extends GetxController {
     try {
       isLoading.value = true;
       final token = await PrefsHelper.getString('auth_token');
-      final res = await _repo.getTrayDetail(token, id);
-      final data = res['data'] as Map<String, dynamic>? ?? {};
+
+      final results = await Future.wait([
+        _repo.getTrayDetail(token, id),
+        _repo.getVendors(token),
+      ]);
+
+      final data = results[0]['data'] as Map<String, dynamic>? ?? {};
       final facilityMap = data['facility'] is Map ? data['facility'] as Map<String, dynamic> : <String, dynamic>{};
+
+      // Build vendor lookup map: id -> name
+      final vendorList = _asList(results[1]['data']);
+      final vendorById = <String, String>{};
+      for (final v in vendorList) {
+        if (v is Map<String, dynamic>) {
+          final vid = v['_id']?.toString() ?? '';
+          final vname = v['vendorName']?.toString() ?? v['name']?.toString() ?? '';
+          if (vid.isNotEmpty) vendorById[vid] = vname;
+        }
+      }
+
+      // Resolve vendor: populated object → name, raw ID → lookup, fallback to raw
+      final vendorRaw = data['vendor'];
+      String resolvedVendor = '';
+      if (vendorRaw is Map) {
+        resolvedVendor = (vendorRaw as Map<String, dynamic>)['vendorName']?.toString() ??
+            (vendorRaw)['name']?.toString() ?? '';
+      } else {
+        final vid = vendorRaw?.toString() ?? '';
+        resolvedVendor = vendorById[vid] ?? vid;
+      }
 
       unitName.value = data['title']?.toString() ?? '';
       inventoryModel.value = _capitalize(data['inventory']?.toString() ?? '');
       status.value = _capitalize(data['status']?.toString() ?? '');
-      serialNumber.value = data['_id']?.toString() ?? '';
+      serialNumber.value = data['title']?.toString() ?? data['trayId']?.toString() ?? '';
       systemType.value = data['systemType']?.toString() ?? '';
-      vendor.value = data['vendor']?.toString() ?? '';
+      vendor.value = resolvedVendor;
       availabilityStatus.value = _capitalize(data['productStatus']?.toString() ?? 'available');
       currentLocation.value = facilityMap['address']?.toString() ?? '';
       unitLocation.value = facilityMap['address']?.toString() ?? '';
@@ -76,6 +103,16 @@ class TrayDetailsController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  List<dynamic> _asList(dynamic data) {
+    if (data is List) return data;
+    if (data is Map) {
+      for (final key in ['items', 'list', 'data', 'docs']) {
+        if (data[key] is List) return data[key] as List;
+      }
+    }
+    return [];
   }
 
   String _capitalize(String s) {

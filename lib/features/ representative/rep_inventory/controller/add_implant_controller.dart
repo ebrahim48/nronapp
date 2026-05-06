@@ -6,6 +6,7 @@ import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../data/repositories/inventory_repository.dart';
+import '../model/implant_model.dart';
 
 class FacilityOption {
   final String id;
@@ -24,6 +25,13 @@ class AddImplantController extends GetxController {
     connectivityService: ConnectivityService(),
     apiService: ApiService(),
   );
+
+  /// When non-null, the controller is in edit mode.
+  final ImplantModel? editImplant;
+
+  AddImplantController({this.editImplant});
+
+  bool get isEditMode => editImplant != null;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -71,6 +79,20 @@ class AddImplantController extends GetxController {
     _loadVendors();
   }
 
+  void _prefillFromImplant() {
+    final imp = editImplant;
+    if (imp == null) return;
+    recipientEmailController.text = imp.recipientEmail;
+    serial1Controller.text = imp.serialNumber;
+    additionalNotesController.text = imp.inboundNotes ?? '';
+    brokenNotesController.text = imp.brokenNotes ?? '';
+    selectedSystemType.value = imp.systemType.isNotEmpty ? imp.systemType : null;
+    selectedFacilityId.value = imp.facilityId;
+    selectedFacilityName.value = imp.facility.isNotEmpty ? imp.facility : null;
+    selectedVendorId.value = imp.vendorId;
+    selectedVendorName.value = imp.vendor.isNotEmpty ? imp.vendor : null;
+  }
+
   Future<void> _loadFacilities() async {
     try {
       isLoadingFacilities.value = true;
@@ -84,6 +106,11 @@ class AddImplantController extends GetxController {
           name: m['facilityName']?.toString() ?? m['name']?.toString() ?? '',
         );
       }));
+      // Restore selection after list loads
+      if (isEditMode && selectedFacilityId.value != null) {
+        final match = facilities.where((f) => f.id == selectedFacilityId.value);
+        if (match.isNotEmpty) selectedFacilityName.value = match.first.name;
+      }
     } catch (_) {
       // silently fail
     } finally {
@@ -114,6 +141,13 @@ class AddImplantController extends GetxController {
           name: m['vendorName']?.toString() ?? m['name']?.toString() ?? '',
         );
       }));
+      // Restore selection after list loads
+      if (isEditMode && selectedVendorId.value != null) {
+        final match = vendors.where((v) => v.id == selectedVendorId.value);
+        if (match.isNotEmpty) selectedVendorName.value = match.first.name;
+      }
+      // Pre-fill text fields once vendors are loaded (needs to happen after init)
+      if (isEditMode) _prefillFromImplant();
     } catch (_) {
       // silently fail
     } finally {
@@ -187,19 +221,35 @@ class AddImplantController extends GetxController {
     try {
       isSaving.value = true;
       final token = await PrefsHelper.getString('auth_token');
-      await _repo.createImplant(
-        token,
-        facilityId: facilityId,
-        serialNumber: serial1Controller.text.trim(),
-        systemType: systemType,
-        material: selectedSystemSubType.value,
-        vendor: selectedVendorName.value ?? '',
-        recipientEmail: recipientEmailController.text.trim(),
-        additionalNotes: additionalNotesController.text.trim(),
-        brokenNotes: brokenNotesController.text.trim(),
-        inboundImages: inboundImages.isEmpty ? null : inboundImages.toList(),
-        brokenImages: brokenImages.isEmpty ? null : brokenImages.toList(),
-      );
+      if (isEditMode) {
+        await _repo.updateImplant(
+          token,
+          editImplant!.id,
+          facilityId: facilityId,
+          serialNumber: serial1Controller.text.trim(),
+          systemType: systemType,
+          vendor: selectedVendorName.value ?? '',
+          recipientEmail: recipientEmailController.text.trim(),
+          additionalNotes: additionalNotesController.text.trim(),
+          brokenNotes: brokenNotesController.text.trim(),
+          inboundImages: inboundImages.isEmpty ? null : inboundImages.toList(),
+          brokenImages: brokenImages.isEmpty ? null : brokenImages.toList(),
+        );
+      } else {
+        await _repo.createImplant(
+          token,
+          facilityId: facilityId,
+          serialNumber: serial1Controller.text.trim(),
+          systemType: systemType,
+          material: selectedSystemSubType.value,
+          vendor: selectedVendorName.value ?? '',
+          recipientEmail: recipientEmailController.text.trim(),
+          additionalNotes: additionalNotesController.text.trim(),
+          brokenNotes: brokenNotesController.text.trim(),
+          inboundImages: inboundImages.isEmpty ? null : inboundImages.toList(),
+          brokenImages: brokenImages.isEmpty ? null : brokenImages.toList(),
+        );
+      }
       _clear();
       return true;
     } catch (_) {

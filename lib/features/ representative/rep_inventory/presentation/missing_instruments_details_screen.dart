@@ -75,8 +75,8 @@ class MissingInstrumentDetailScreen extends StatelessWidget {
                   children: [
 
                     VendorNotifiedBanner(
-                      notified: c.vendorNotified.value,
-                      message: c.vendorNotified.value
+                      notified: c.isSentToVendor.value,
+                      message: c.isSentToVendor.value
                           ? 'Notification sent to vendor successfully.'
                           : 'Vendor has not been notified yet.',
                     ),
@@ -84,9 +84,9 @@ class MissingInstrumentDetailScreen extends StatelessWidget {
                     SizedBox(height: 16.h),
 
                     ReportTrayDetailsCard(
-                      trayId: c.trayId.value,
-                      facility: c.facility.value,
-                      location: c.location.value,
+                      trayId: c.trayTitle.value,
+                      vendorName: c.vendorName.value,
+                      issueType: c.issueType.value,
                     ),
 
                     SizedBox(height: 16.h),
@@ -94,7 +94,7 @@ class MissingInstrumentDetailScreen extends StatelessWidget {
                     ReportIssueInfoCard(
                       instrumentName: c.instrumentName.value,
                       notes: c.notes.value,
-                      status: c.status.value,
+                      status: c.issueType.value,
                     ),
 
                     SizedBox(height: 16.h),
@@ -116,11 +116,11 @@ class MissingInstrumentDetailScreen extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 16.h),
               child: Column(
                 children: [
-                  ReportActionButtons(
+                  Obx(() => ReportActionButtons(
                     onDownloadPdf: () => c.downloadPdf(context),
                     onSendEmail: () => c.sendToVendorEmail(context),
                     isSending: c.isSending.value,
-                  ),
+                  )),
                 ],
               ),
             ),

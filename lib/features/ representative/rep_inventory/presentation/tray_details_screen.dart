@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/%20representative/rep_inventory/presentation/widgets/tray_details_widgets.dart';
+import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/tray_details_controller.dart';
@@ -42,7 +44,7 @@ class TrayDetailsScreen extends StatelessWidget {
         titleSpacing: 0,
         actions: [
           GestureDetector(
-            onTap: () {},
+            onTap: () => context.pushNamed(AppRoutes.editTrayScreen, extra: id),
             child: Container(
               margin: EdgeInsets.only(right: 16.w),
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),

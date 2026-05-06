@@ -79,8 +79,6 @@ class ApiConstants {
 
   static const String getInventory = '/meta/inventory/my-overview';
   static const String getInventoryAll = '/meta/inventory/get-all'; // Category: Tray,Implant,Bio
-  static const String getSummaryCount = '/missing-instrument/my-overview';
-  static const String getMissingHistory = '/missing-instrument/history';
   static const String getImplant = '/implant/get-all';
   static String getSingleImplant(String id) => '/implant/find/$id';
   static const String createImplant = '/implant/create';
@@ -103,8 +101,12 @@ class ApiConstants {
   static String sendTrayById(String id) => '/tray/send/$id';
   static String receiveTrayById(String id) => '/tray/receive/$id';
 
+  static const String getSummaryCount = '/missing-instrument/my-overview';
+  static const String getMissingHistory = '/missing-instrument/history';
+  static const String createMissingInstrument = '/missing-instrument/create';
   static String findMissingInstrument(String id) => '/missing-instrument/find/$id';
   static String sendMissingVendorMail(String id) => '/missing-instrument/send-vendor/$id';
+
 
 
 

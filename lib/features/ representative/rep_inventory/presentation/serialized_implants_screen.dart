@@ -244,11 +244,54 @@ class _SerializedImplantsScreenState extends State<SerializedImplantsScreen> {
                         AppRoutes.implantDetailsScreen,
                         extra: imp.id,
                       ),
-                      onDelete: () => _ctrl.deleteImplant(imp.id),
-                      onEdit: () => context.pushNamed(
-                        AppRoutes.addImplantScreen,
-                        extra: imp,
-                      ),
+                      onDelete: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            backgroundColor: const Color(0xFF252525),
+                            title: Text(
+                              'Delete Implant',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            content: Text(
+                              'Are you sure you want to delete this implant? This action cannot be undone.',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text('Cancel',
+                                    style: TextStyle(color: Colors.white54, fontFamily: 'Poppins')),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: const Text('Delete',
+                                    style: TextStyle(color: Color(0xFFFF4B4B), fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
+                              ),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          _ctrl.deleteImplant(imp.id);
+                        }
+                      },
+                      onEdit: () async {
+                        await context.pushNamed(
+                          AppRoutes.updateImplantScreen,
+                          extra: imp,
+                        );
+                        // Refresh list after returning from edit
+                        _ctrl.fetchImplants();
+                      },
                     );
                   },
                 );

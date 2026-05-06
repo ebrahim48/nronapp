@@ -81,14 +81,14 @@ class VendorNotifiedBanner extends StatelessWidget {
 
 class ReportTrayDetailsCard extends StatelessWidget {
   final String trayId;
-  final String facility;
-  final String location;
+  final String vendorName;
+  final String issueType;
 
   const ReportTrayDetailsCard({
     super.key,
     required this.trayId,
-    required this.facility,
-    required this.location,
+    required this.vendorName,
+    required this.issueType,
   });
 
   @override
@@ -97,7 +97,6 @@ class ReportTrayDetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Row(
             children: [
               Icon(Icons.content_paste_outlined,
@@ -112,14 +111,12 @@ class ReportTrayDetailsCard extends StatelessWidget {
               ),
             ],
           ),
-
           SizedBox(height: 16.h),
-
-          _DetailField(label: 'ID', value: trayId),
+          _DetailField(label: 'Tray ID', value: trayId),
           SizedBox(height: 12.h),
-          _DetailField(label: 'Facility', value: facility),
+          _DetailField(label: 'Vendor', value: vendorName.isNotEmpty ? vendorName : '—'),
           SizedBox(height: 12.h),
-          _DetailField(label: 'Location', value: location),
+          _DetailField(label: 'Issue Type', value: issueType.isNotEmpty ? issueType[0].toUpperCase() + issueType.substring(1) : '—'),
         ],
       ),
     );

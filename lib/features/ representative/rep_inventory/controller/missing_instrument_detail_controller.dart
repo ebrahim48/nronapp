@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
@@ -16,15 +17,14 @@ class MissingInstrumentDetailController extends GetxController {
   final isSending = false.obs;
 
   String _id = '';
-  final trayId = ''.obs;
-  final facility = ''.obs;
-  final location = ''.obs;
+  final trayTitle = ''.obs;
+  final vendorName = ''.obs;
+  final issueType = ''.obs;
   final instrumentName = ''.obs;
   final notes = ''.obs;
   final evidenceFiles = <String>[].obs;
   final capturedAt = Rxn<DateTime>();
-  final vendorNotified = false.obs;
-  final status = ''.obs;
+  final isSentToVendor = false.obs;
 
   void loadDetail(String id) {
     if (id.isEmpty) {
@@ -41,15 +41,17 @@ class MissingInstrumentDetailController extends GetxController {
       final token = await PrefsHelper.getString('auth_token');
       final res = await _repo.getMissingDetail(token, instrumentId);
       final data = res['data'] as Map<String, dynamic>? ?? {};
+
       final trayMap = data['tray'] is Map ? data['tray'] as Map<String, dynamic> : <String, dynamic>{};
-      final facilityMap = data['facility'] is Map ? data['facility'] as Map<String, dynamic> : <String, dynamic>{};
-      trayId.value = trayMap['trayId']?.toString() ?? data['trayId']?.toString() ?? '';
-      facility.value = facilityMap['facilityName']?.toString() ?? facilityMap['address']?.toString() ?? '';
-      location.value = data['location']?.toString() ?? '';
-      instrumentName.value = data['instrumentName']?.toString() ?? data['itemName']?.toString() ?? '';
-      notes.value = data['notes']?.toString() ?? data['description']?.toString() ?? '';
-      status.value = data['status']?.toString() ?? '';
-      vendorNotified.value = data['vendorNotified'] == true;
+      final vendorMap = data['vendor'] is Map ? data['vendor'] as Map<String, dynamic> : <String, dynamic>{};
+
+      trayTitle.value = trayMap['title']?.toString() ?? data['trayTitle']?.toString() ?? '';
+      vendorName.value = vendorMap['name']?.toString() ?? vendorMap['companyName']?.toString() ?? '';
+      issueType.value = data['issueType']?.toString() ?? '';
+      instrumentName.value = data['instrumentName']?.toString() ?? '';
+      notes.value = data['descriptionAndNotes']?.toString() ?? data['notes']?.toString() ?? '';
+      isSentToVendor.value = data['isSentToVendor'] == true;
+
       final files = data['files'];
       if (files is List) {
         evidenceFiles.assignAll(files.map((e) => e.toString()));
@@ -70,16 +72,15 @@ class MissingInstrumentDetailController extends GetxController {
       isSending.value = true;
       final token = await PrefsHelper.getString('auth_token');
       await _repo.sendVendorMail(token, _id);
-      vendorNotified.value = true;
+      isSentToVendor.value = true;
       ToastMessageHelper.showSuccessMessage('Vendor notified successfully');
-    } catch (_) {
-      ToastMessageHelper.showErrorMessage('Failed to notify vendor');
+    } catch (e) {
+      final msg = e is AppException ? e.message : 'Failed to notify vendor';
+      ToastMessageHelper.showErrorMessage(msg);
     } finally {
       isSending.value = false;
     }
   }
 
-  void downloadPdf(BuildContext context) {
-    // TODO: implement PDF download
-  }
+  void downloadPdf(BuildContext context) {}
 }
