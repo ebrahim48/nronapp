@@ -159,11 +159,12 @@ class _NewTrayScreenState extends State<NewTrayScreen> {
               SizedBox(height: 4.h),
 
               const TrayFieldLabel(text: 'Vendor'),
-              TrayIconTextField(
-                controller: c.vendorController,
-                hintText: 'Select Vendor',
-                iconPath: 'assets/icons/selectvendor.svg',
-              ),
+              Obx(() => TrayVendorDropdown(
+                value: c.selectedVendorName.value,
+                options: c.vendorOptions,
+                isLoading: c.isLoadingDropdowns.value,
+                onChanged: c.selectVendorByName,
+              )),
 
               SizedBox(height: 4.h),
 
@@ -226,9 +227,13 @@ class _NewTrayScreenState extends State<NewTrayScreen> {
 
               SizedBox(height: 24.h),
 
-              CustomButton(
+              Obx(() => CustomButton(
                 title: 'Create Tray Record',
-                onpress: c.createTrayRecord,
+                loading: c.isSaving.value,
+                onpress: () async {
+                  final ok = await c.createTrayRecord();
+                  if (ok && context.mounted) Navigator.pop(context);
+                },
                 prefixIcon: SvgPicture.asset(
                   'assets/icons/add.svg',
                   width: 18.r,
@@ -238,7 +243,7 @@ class _NewTrayScreenState extends State<NewTrayScreen> {
                     BlendMode.srcIn,
                   ),
                 ),
-              ),
+              )),
 
               SizedBox(height: 16.h),
             ],

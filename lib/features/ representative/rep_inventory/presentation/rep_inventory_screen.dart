@@ -10,6 +10,7 @@ import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/rep_inventory_controller.dart';
+import '../model/implant_model.dart';
 
 
 class InventoryScreen extends StatelessWidget {
@@ -248,7 +249,21 @@ class InventoryScreen extends StatelessWidget {
                   return _InventoryListItem(
                     item: item,
                     onDelete: () => _showDeleteDialog(context, c, item['id']?.toString() ?? ''),
-                    onEdit: () => context.pushNamed(AppRoutes.addImplantScreen, extra: item['id']?.toString() ?? ''),
+                    onEdit: () {
+                      final implant = ImplantModel(
+                        id: item['id']?.toString() ?? '',
+                        serialNumber: item['serial']?.toString() ?? '',
+                        name: item['name']?.toString() ?? '',
+                        lotNumber: item['lot']?.toString() ?? '',
+                        material: item['material']?.toString() ?? '',
+                        systemType: item['systemType']?.toString() ?? '',
+                        vendor: item['vendor']?.toString() ?? '',
+                        status: item['status']?.toString() ?? '',
+                        facility: item['location']?.toString() ?? '',
+                        recipientEmail: item['email']?.toString() ?? '',
+                      );
+                      context.pushNamed(AppRoutes.updateImplantScreen, extra: implant);
+                    },
                   );
                 }).toList(),
               );
@@ -258,6 +273,49 @@ class InventoryScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showDeleteDialog(BuildContext context, InventoryController c, String id) {
+  showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: const Color(0xFF252525),
+      title: const Text(
+        'Delete Implant',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      content: const Text(
+        'Are you sure you want to delete this implant? This action cannot be undone.',
+        style: TextStyle(
+          color: Colors.white70,
+          fontSize: 13,
+          fontFamily: 'Poppins',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('Cancel',
+              style: TextStyle(color: Colors.white54, fontFamily: 'Poppins')),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          child: const Text('Delete',
+              style: TextStyle(
+                  color: Color(0xFFFF4B4B),
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600)),
+        ),
+      ],
+    ),
+  ).then((confirmed) {
+    if (confirmed == true) c.deleteImplant(id);
+  });
 }
 
 class _TrayListItem extends StatelessWidget {

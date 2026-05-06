@@ -11,11 +11,12 @@ import '../controller/send_tray_controller.dart';
 
 
 class SendTrayScreen extends StatelessWidget {
-  const SendTrayScreen({super.key});
+  final String trayId;
+  const SendTrayScreen({super.key, required this.trayId});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(SendTrayController());
+    final c = Get.put(SendTrayController())..trayId = trayId;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -147,9 +148,16 @@ class SendTrayScreen extends StatelessWidget {
                   // Button scrolls with content
                   Padding(
                     padding: EdgeInsets.only(bottom: 50.h),
-                    child: CustomButton(
+                    child: Obx(() => CustomButton(
                       title: 'Send Tray',
-                      onpress: c.sendTray,
+                      loading: c.isSending.value,
+                      onpress: () async {
+                        final ok = await c.sendTray();
+                        if (ok && context.mounted) {
+                          Get.delete<SendTrayController>(force: true);
+                          Navigator.pop(context);
+                        }
+                      },
                       prefixIcon: SvgPicture.asset(
                         'assets/icons/next.svg',
                         width: 18.r,
@@ -159,7 +167,7 @@ class SendTrayScreen extends StatelessWidget {
                           BlendMode.srcIn,
                         ),
                       ),
-                    ),
+                    )),
                   ),
                 ]),
               ),

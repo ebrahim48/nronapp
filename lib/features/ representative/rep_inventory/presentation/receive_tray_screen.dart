@@ -12,11 +12,12 @@ import '../../../../core/config/app-routes/app_routes.dart';
 import '../controller/receive_tray_controller.dart';
 
 class ReceiveTrayScreen extends StatelessWidget {
-  const ReceiveTrayScreen({super.key});
+  final String trayId;
+  const ReceiveTrayScreen({super.key, required this.trayId});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(ReceiveTrayController());
+    final c = Get.put(ReceiveTrayController())..trayId = trayId;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -176,7 +177,7 @@ class ReceiveTrayScreen extends StatelessWidget {
 
               // Report Missing Instrument Button
               GestureDetector(
-                onTap: () => context.pushNamed(AppRoutes.missingInstrumentScreen),
+                onTap: () => context.pushNamed(AppRoutes.missingInstrumentScreen, extra: trayId),
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
@@ -216,10 +217,17 @@ class ReceiveTrayScreen extends StatelessWidget {
               SizedBox(height: 24.h),
 
               // Confirm Button
-              CustomButton(
+              Obx(() => CustomButton(
                 title: 'Confirm Tray Receive',
-                onpress: c.confirmReceive,
-              ),
+                loading: c.isLoading.value,
+                onpress: () async {
+                  final ok = await c.confirmReceive();
+                  if (ok && context.mounted) {
+                    Get.delete<ReceiveTrayController>(force: true);
+                    Navigator.pop(context);
+                  }
+                },
+              )),
               SizedBox(height: 10.h),
               CustomText(
                 text: 'Verified by Central Sterile Services',

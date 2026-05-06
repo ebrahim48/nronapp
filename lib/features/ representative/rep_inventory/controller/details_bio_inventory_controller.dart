@@ -12,6 +12,7 @@ class DetailsBioInventoryController extends GetxController {
   );
 
   final isLoading = true.obs;
+  String bioId = '';
 
   final name = ''.obs;
   final lotNumber = ''.obs;
@@ -29,6 +30,7 @@ class DetailsBioInventoryController extends GetxController {
       isLoading.value = false;
       return;
     }
+    bioId = id;
     _fetchDetail(id);
   }
 

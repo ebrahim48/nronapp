@@ -24,6 +24,7 @@ import '../../../features/ representative/rep_home/presentation/new_po_screen.da
 import '../../../features/ representative/rep_home/presentation/update_purchase_screen.dart';
 import '../../../features/ representative/rep_home/presentation/review_send_po_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/add_bio_inventory_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/edit_bio_inventory_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/add_implant_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/create_implant_sale_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/create_shipment_implant_screen.dart';
@@ -38,11 +39,13 @@ import '../../../features/ representative/rep_inventory/presentation/receiving_s
 import '../../../features/ representative/rep_inventory/presentation/report_success_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/send_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/new_tray_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/edit_tray_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/rep_inventory_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/serialized_implants_screen.dart';
 import '../../../features/ representative/rep_inventory/model/implant_model.dart';
 import '../../../features/ representative/rep_inventory/presentation/receiving_complete_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/transfer_implant_screen.dart';
+import '../../../features/ representative/rep_inventory/presentation/update_implant_screen.dart';
 import '../../../features/ representative/rep_inventory/presentation/tray_details_screen.dart';
 import '../../../features/ representative/rep_qrscan/rep_qr_scan_screen.dart';
 import '../../../features/ representative/sales/add_representative_screen.dart';
@@ -132,6 +135,7 @@ class AppRoutes {
   static const String purchaseOrderScreen = "/purchaseOrderScreen";
   static const String inventoryScreen = "/inventoryScreen";
   static const String newTrayScreen = "/newTrayScreen";
+  static const String editTrayScreen = "/editTrayScreen";
   static const String trayDetailsScreen = "/trayDetailsScreen";
   static const String sendTrayScreen = "/sendTrayScreen";
   static const String receiveTrayScreen = "/receiveTrayScreen";
@@ -139,6 +143,7 @@ class AppRoutes {
   static const String reportSuccessScreen = "/reportSuccessScreen";
   static const String addBioInventoryScreen = "/addBioInventoryScreen";
   static const String detailsBioInventoryScreen = "/detailsBioInventoryScreen";
+  static const String editBioInventoryScreen = "/editBioInventoryScreen";
   static const String createExpenseScreen = "/createExpenseScreen";
   static const String expenseSuccessScreen = "/expenseSuccessScreen";
   static const String expensesScreen = "/expensesScreen";
@@ -235,6 +240,7 @@ static const allActivitiesScreen = '/all-activities';
   static const String updatePurchaseOrderScreen = '/updatePurchaseOrderScreen';
   static const String missingInstrumentDetailScreen = '/missingInstrumentDetailScreen';
   static const String missingInstrumentHistoryScreen = '/missingInstrumentHistoryScreen';
+  static const String updateImplantScreen = '/update-implant';
 
 
 
@@ -331,6 +337,13 @@ static const allActivitiesScreen = '/all-activities';
         builder: (context, state) => const NewTrayScreen(),
       ),
       GoRoute(
+        path: editTrayScreen,
+        name: editTrayScreen,
+        builder: (context, state) => EditTrayScreen(
+          trayId: state.extra as String? ?? '',
+        ),
+      ),
+      GoRoute(
         path: trayDetailsScreen,
         name: trayDetailsScreen,
         builder: (context, state) => TrayDetailsScreen(
@@ -340,17 +353,23 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: sendTrayScreen,
         name: sendTrayScreen,
-        builder: (context, state) => const SendTrayScreen(),
+        builder: (context, state) => SendTrayScreen(
+          trayId: state.extra as String? ?? '',
+        ),
       ),
       GoRoute(
         path: receiveTrayScreen,
         name: receiveTrayScreen,
-        builder: (context, state) => const ReceiveTrayScreen(),
+        builder: (context, state) => ReceiveTrayScreen(
+          trayId: state.extra as String? ?? '',
+        ),
       ),
       GoRoute(
         path: missingInstrumentScreen,
         name: missingInstrumentScreen,
-        builder: (context, state) => const MissingInstrumentScreen(),
+        builder: (context, state) => MissingInstrumentScreen(
+          trayId: state.extra as String? ?? '',
+        ),
       ),
       GoRoute(
         path: addBioInventoryScreen,
@@ -362,6 +381,13 @@ static const allActivitiesScreen = '/all-activities';
         name: detailsBioInventoryScreen,
         builder: (context, state) => DetailsBioInventoryScreen(
           id: state.extra as String? ?? '',
+        ),
+      ),
+      GoRoute(
+        path: editBioInventoryScreen,
+        name: editBioInventoryScreen,
+        builder: (context, state) => EditBioInventoryScreen(
+          bioId: state.extra as String? ?? '',
         ),
       ),
       GoRoute(
@@ -522,7 +548,9 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: addImplantScreen,
         name: addImplantScreen,
-        builder: (context, state) => const AddImplantScreen(),
+        builder: (context, state) => AddImplantScreen(
+          implant: state.extra is ImplantModel ? state.extra as ImplantModel : null,
+        ),
       ),
       GoRoute(
         path: transferImplantScreen,
@@ -794,6 +822,13 @@ static const allActivitiesScreen = '/all-activities';
         path: missingInstrumentHistoryScreen,
         name: missingInstrumentHistoryScreen,
         builder: (context, state) => const MissingInstrumentHistoryScreen(),
+      ),
+      GoRoute(
+        path: updateImplantScreen,
+        name: updateImplantScreen,
+        builder: (context, state) => UpdateImplantScreen(
+          implant: state.extra as ImplantModel,
+        ),
       ),
       GoRoute(
         path: updatePurchaseOrderScreen,

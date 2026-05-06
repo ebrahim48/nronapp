@@ -190,6 +190,50 @@ class ApiService {
     }
   }
 
+  Future<Response> delete(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      return await _dio.delete(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      throw UnknownException(e.toString());
+    }
+  }
+
+  Future<Response> put(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      return await _dio.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    } catch (e) {
+      throw UnknownException(e.toString());
+    }
+  }
+
   Future<Response> patch(
     String path, {
     dynamic data,

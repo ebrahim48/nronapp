@@ -9,11 +9,13 @@ import '../../../../../core/custom_widgets/custom_text.dart';
 class TrayPhotoSection extends StatelessWidget {
   final File? selectedPhoto;
   final VoidCallback onAddPhoto;
+  final String? existingImageUrl;
 
   const TrayPhotoSection({
     super.key,
     required this.selectedPhoto,
     required this.onAddPhoto,
+    this.existingImageUrl,
   });
 
   @override
@@ -92,16 +94,32 @@ class TrayPhotoSection extends StatelessWidget {
                             color: Colors.black54,
                             borderRadius: BorderRadius.circular(6.r),
                           ),
-                          child: Icon(
-                            Icons.edit_outlined,
-                            size: 14.r,
-                            color: Colors.white,
-                          ),
+                          child: Icon(Icons.edit_outlined, size: 14.r, color: Colors.white),
                         ),
                       ),
                     ),
                   ],
                 )
+              : (existingImageUrl != null && existingImageUrl!.startsWith('http'))
+                  ? Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(existingImageUrl!, fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                        Positioned(
+                          top: 8.r,
+                          right: 8.r,
+                          child: GestureDetector(
+                            onTap: onAddPhoto,
+                            child: Container(
+                              padding: EdgeInsets.all(4.r),
+                              decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(6.r)),
+                              child: Icon(Icons.edit_outlined, size: 14.r, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
               : Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,

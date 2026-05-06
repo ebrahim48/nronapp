@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/details_bio_inventory_controller.dart';
@@ -59,12 +60,35 @@ class DetailsBioInventoryScreen extends StatelessWidget {
                           color: AppColors.primaryTextColor, size: 18.r),
                     ),
                     SizedBox(width: 8.w),
-                    CustomText(
-                      text: 'Biological Details',
-                      fontsize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primaryTextColor,
-                      textAlign: TextAlign.start,
+                    Expanded(
+                      child: CustomText(
+                        text: 'Biological Details',
+                        fontsize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryTextColor,
+                        textAlign: TextAlign.start,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.pushNamed(
+                        AppRoutes.editBioInventoryScreen,
+                        extra: c.bioId,
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.5)),
+                        ),
+                        child: Row(children: [
+                          Icon(Icons.edit_outlined, color: AppColors.primaryColor, size: 14.r),
+                          SizedBox(width: 4.w),
+                          Text('Edit', style: TextStyle(
+                              color: AppColors.primaryColor, fontSize: 12.sp,
+                              fontFamily: 'Poppins', fontWeight: FontWeight.w500)),
+                        ]),
+                      ),
                     ),
                   ],
                 ),

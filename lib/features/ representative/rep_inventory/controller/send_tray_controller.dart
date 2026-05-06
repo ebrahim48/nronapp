@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nron_app/core/utils/app_colors.dart';
 import 'package:nron_app/core/custom_widgets/custom_text.dart';
+import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
@@ -172,8 +173,9 @@ class SendTrayController extends GetxController {
       );
       ToastMessageHelper.showSuccessMessage('Tray sent successfully');
       return true;
-    } catch (_) {
-      ToastMessageHelper.showErrorMessage('Failed to send tray');
+    } catch (e) {
+      final msg = e is AppException ? e.message : 'Failed to send tray';
+      ToastMessageHelper.showErrorMessage(msg);
       return false;
     } finally {
       isSending.value = false;

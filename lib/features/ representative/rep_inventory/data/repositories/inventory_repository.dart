@@ -136,9 +136,9 @@ class InventoryRepository {
 
   Future<Map<String, dynamic>> deleteImplant(String token, String id) async {
     await _connectivity.checkConnectivity();
-    final res = await _api.dio.delete(
+    final res = await _api.delete(
       ApiConstants.deleteImplantById(id),
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
+      options: _auth(token),
     );
     return res.data as Map<String, dynamic>;
   }
@@ -255,9 +255,9 @@ class InventoryRepository {
 
   Future<Map<String, dynamic>> deleteTray(String token, String id) async {
     await _connectivity.checkConnectivity();
-    final res = await _api.dio.delete(
+    final res = await _api.delete(
       ApiConstants.deleteTrayById(id),
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
+      options: _auth(token),
     );
     return res.data as Map<String, dynamic>;
   }
@@ -345,10 +345,13 @@ class InventoryRepository {
     File? photo,
   }) async {
     await _connectivity.checkConnectivity();
+    final parsedQty = num.tryParse(quantity) ??
+        num.tryParse(quantity.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+        quantity;
     final fields = <String, dynamic>{
       'itemName': itemName,
       'lotNumber': lotNumber,
-      'quantity': quantity,
+      'quantity': parsedQty,
       'location': location,
     };
     if (vendorId != null && vendorId.isNotEmpty) fields['vendor'] = vendorId;
@@ -380,7 +383,11 @@ class InventoryRepository {
     final fields = <String, dynamic>{};
     if (itemName != null && itemName.isNotEmpty) fields['itemName'] = itemName;
     if (lotNumber != null && lotNumber.isNotEmpty) fields['lotNumber'] = lotNumber;
-    if (quantity != null && quantity.isNotEmpty) fields['quantity'] = quantity;
+    if (quantity != null && quantity.isNotEmpty) {
+      final parsed = num.tryParse(quantity) ??
+          num.tryParse(quantity.replaceAll(RegExp(r'[^0-9.]'), ''));
+      fields['quantity'] = parsed ?? quantity;
+    }
     if (location != null && location.isNotEmpty) fields['location'] = location;
     if (vendorId != null && vendorId.isNotEmpty) fields['vendor'] = vendorId;
     if (expiryDate != null && expiryDate.isNotEmpty) fields['expiryDate'] = expiryDate;
@@ -399,14 +406,40 @@ class InventoryRepository {
 
   Future<Map<String, dynamic>> deleteBio(String token, String id) async {
     await _connectivity.checkConnectivity();
-    final res = await _api.dio.delete(
+    final res = await _api.delete(
       ApiConstants.deleteBioById(id),
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
+      options: _auth(token),
     );
     return res.data as Map<String, dynamic>;
   }
 
   // ── Missing Instruments ────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> createMissingInstrument(
+    String token, {
+    required String trayId,
+    required String instrumentName,
+    required String issueType,
+    String? vendorId,
+    String? descriptionAndNotes,
+    File? photo,
+  }) async {
+    await _connectivity.checkConnectivity();
+    final fields = <String, dynamic>{
+      'tray': trayId,
+      'instrumentName': instrumentName,
+      'issueType': issueType,
+    };
+    if (vendorId != null && vendorId.isNotEmpty) fields['vendor'] = vendorId;
+    if (descriptionAndNotes != null && descriptionAndNotes.isNotEmpty) fields['descriptionAndNotes'] = descriptionAndNotes;
+    if (photo != null) fields['files'] = await MultipartFile.fromFile(photo.path);
+    final res = await _api.post(
+      ApiConstants.createMissingInstrument,
+      data: FormData.fromMap(fields),
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
 
   Future<Map<String, dynamic>> getMissingOverview(String token) async {
     await _connectivity.checkConnectivity();

@@ -318,13 +318,15 @@ class SendTraySystemType extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Orthopedic', 'Cardiac'];
+    const labels = ['Orthopedic', 'Cardiac', 'Neuro', 'Spine', 'Other'];
 
-    return Row(
+    return Wrap(
+      spacing: 10.w,
+      runSpacing: 10.h,
       children: labels.asMap().entries.map((e) {
         final isActive = e.key == activeIndex;
         return Padding(
-          padding: EdgeInsets.only(right: e.key == 0 ? 10.w : 0),
+          padding: EdgeInsets.zero,
           child: GestureDetector(
             onTap: () => onSelect(e.key),
             child: AnimatedContainer(

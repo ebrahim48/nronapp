@@ -10,10 +10,14 @@ import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/add_implant_controller.dart';
+import '../model/implant_model.dart';
 
 
 class AddImplantScreen extends StatefulWidget {
-  const AddImplantScreen({super.key});
+  /// When provided, the screen operates in edit mode.
+  final ImplantModel? implant;
+
+  const AddImplantScreen({super.key, this.implant});
 
   @override
   State<AddImplantScreen> createState() => _AddImplantScreenState();
@@ -25,7 +29,9 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
   @override
   void initState() {
     super.initState();
-    _ctrl = Get.put(AddImplantController());
+    // Use a unique tag so edit and create instances don't collide.
+    final tag = widget.implant != null ? 'edit_${widget.implant!.id}' : 'create';
+    _ctrl = Get.put(AddImplantController(editImplant: widget.implant), tag: tag);
   }
 
   Widget _dropdownField({
@@ -156,6 +162,36 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
     );
   }
 
+  /// Shows existing network image URLs (read-only) for edit mode.
+  Widget _networkImageGrid(List<String> urls) {
+    if (urls.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.h),
+      child: Wrap(
+        spacing: 8.w,
+        runSpacing: 8.h,
+        children: urls.map((url) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: Image.network(
+              url,
+              width: 80.r,
+              height: 80.r,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 80.r,
+                height: 80.r,
+                color: const Color(0xFF2A2A2A),
+                child: Icon(Icons.broken_image_outlined,
+                    color: Colors.white24, size: 24.r),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -171,7 +207,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
         ),
         centerTitle: false,
         title: CustomText(
-          text: 'Add Serialized Implant',
+          text: _ctrl.isEditMode ? 'Edit Serialized Implant' : 'Add Serialized Implant',
           fontsize: 17.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.primaryTextColor,
@@ -401,7 +437,9 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                                   Expanded(
                                     child: DropdownButtonHideUnderline(
                                       child: DropdownButton<String>(
-                                        value: _ctrl.selectedSystemType.value,
+                                        value: _ctrl.systemTypes.contains(_ctrl.selectedSystemType.value)
+                                            ? _ctrl.selectedSystemType.value
+                                            : null,
                                         hint: CustomText(
                                           text: 'System',
                                           fontsize: 12.sp,
@@ -551,6 +589,8 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                       textAlign: TextAlign.start,
                       bottom: 8.h,
                     ),
+                    if (_ctrl.isEditMode && (widget.implant?.inboundFileUrls ?? []).isNotEmpty)
+                      _networkImageGrid(widget.implant!.inboundFileUrls),
                     _imageGrid(_ctrl.inboundImages.toList(), _ctrl.removeInboundImage),
                     DottedUploadBox(
                       label: 'Inbound Image Upload',
@@ -593,6 +633,8 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                       textAlign: TextAlign.start,
                       bottom: 8.h,
                     ),
+                    if (_ctrl.isEditMode && (widget.implant?.brokenFileUrls ?? []).isNotEmpty)
+                      _networkImageGrid(widget.implant!.brokenFileUrls),
                     _imageGrid(_ctrl.brokenImages.toList(), _ctrl.removeBrokenImage),
                     DottedUploadBox(
                       label: 'Broken Instrument Image',
@@ -632,7 +674,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   child: CustomButton(
-                    title: 'Save Implant',
+                    title: _ctrl.isEditMode ? 'Update Implant' : 'Save Implant',
                     loading: _ctrl.isSaving.value,
                     prefixIcon: Icon(Icons.save_outlined,
                         color: AppColors.primaryTextColor, size: 18.r),
