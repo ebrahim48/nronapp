@@ -5,13 +5,20 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nron_app/core/utils/app_colors.dart';
 import 'package:nron_app/core/custom_widgets/custom_text.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../data/repositories/inventory_repository.dart';
 
 class FacilityItem {
+  final String id;
   final String name;
   final String code;
   final String address;
 
   FacilityItem({
+    required this.id,
     required this.name,
     required this.code,
     required this.address,
@@ -19,71 +26,83 @@ class FacilityItem {
 }
 
 class SendTrayController extends GetxController {
+  final _repo = InventoryRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
+
+  String? trayId;
+
   final facilityController = TextEditingController();
   final recipientNameController = TextEditingController();
   final recipientEmailController = TextEditingController();
   final additionalNotesController = TextEditingController();
+  final searchController = TextEditingController();
 
   final systemTypeIndex = 0.obs;
+  static const _systemTypeValues = ['onthopedic', 'cardiac', 'neuro', 'spine', 'other'];
   final selectedPhoto = Rxn<File>();
   final isDropdownOpen = false.obs;
   final selectedFacility = Rxn<FacilityItem>();
+  final isLoadingFacilities = true.obs;
+  final isSending = false.obs;
 
   final ImagePicker _picker = ImagePicker();
 
-  final facilityList = [
-    FacilityItem(
-      name: 'City Hospital',
-      code: 'CH-001',
-      address: '123 Main Street, Downtown',
-    ),
-    FacilityItem(
-      name: 'Ortho Health Center',
-      code: 'OHC-002',
-      address: '456 Park Avenue, Midtown',
-    ),
-    FacilityItem(
-      name: 'Advanced Care Clinic',
-      code: 'ACC-003',
-      address: '789 Elm Street, Uptown',
-    ),
-    FacilityItem(
-      name: 'Joint Rehabilitation Center',
-      code: 'JRC-004',
-      address: '321 Oak Drive, Eastside',
-    ),
-    FacilityItem(
-      name: 'Metro Medical Center',
-      code: 'MMC-005',
-      address: '555 Boulevard, Westend',
-    ),
-    FacilityItem(
-      name: 'Premier Health Services',
-      code: 'PHS-006',
-      address: '888 Central Avenue, Northside',
-    ),
-  ];
-
-  final searchController = TextEditingController();
+  final _facilityList = <FacilityItem>[];
   final filteredFacilities = <FacilityItem>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    filteredFacilities.assignAll(facilityList);
     searchController.addListener(_filterFacilities);
+    _loadFacilities();
+  }
+
+  Future<void> _loadFacilities() async {
+    try {
+      isLoadingFacilities.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getFacilities(token);
+      final list = _asList(res['data']);
+      _facilityList.clear();
+      _facilityList.addAll(list.map((e) {
+        final m = e as Map<String, dynamic>;
+        return FacilityItem(
+          id: m['_id']?.toString() ?? '',
+          name: m['facilityName']?.toString() ?? m['name']?.toString() ?? '',
+          code: m['facilityCode']?.toString() ?? '',
+          address: m['address']?.toString() ?? '',
+        );
+      }));
+      filteredFacilities.assignAll(_facilityList);
+    } catch (_) {
+      // silently fail
+    } finally {
+      isLoadingFacilities.value = false;
+    }
+  }
+
+  List<dynamic> _asList(dynamic data) {
+    if (data is List) return data;
+    if (data is Map) {
+      for (final key in ['items', 'list', 'data', 'docs']) {
+        if (data[key] is List) return data[key] as List;
+      }
+    }
+    return [];
   }
 
   void _filterFacilities() {
     final query = searchController.text.toLowerCase();
     if (query.isEmpty) {
-      filteredFacilities.assignAll(facilityList);
+      filteredFacilities.assignAll(_facilityList);
     } else {
       filteredFacilities.assignAll(
-        facilityList.where((f) =>
+        _facilityList.where((f) =>
             f.name.toLowerCase().contains(query) ||
             f.code.toLowerCase().contains(query) ||
-            f.address.toLowerCase().contains(query)).toList(),
+            f.address.toLowerCase().contains(query)),
       );
     }
   }
@@ -98,7 +117,7 @@ class SendTrayController extends GetxController {
   void toggleDropdown() {
     isDropdownOpen.value = !isDropdownOpen.value;
     if (isDropdownOpen.value) {
-      filteredFacilities.assignAll(facilityList);
+      filteredFacilities.assignAll(_facilityList);
       searchController.clear();
     }
   }
@@ -117,18 +136,48 @@ class SendTrayController extends GetxController {
         Navigator.of(Get.context!).pop();
       }
     } catch (e) {
-      if (Get.context != null) {
-        Get.snackbar(
-          'Error',
-          'Failed to pick image: $e',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+      Get.snackbar('Error', 'Failed to pick image: $e',
+          snackPosition: SnackPosition.BOTTOM);
     }
   }
 
-  void sendTray() {
-    // Implement send tray logic
+  Future<bool> sendTray() async {
+    final facility = selectedFacility.value;
+    if (facility == null) {
+      ToastMessageHelper.showErrorMessage('Please select a facility');
+      return false;
+    }
+    if (trayId == null || trayId!.isEmpty) {
+      ToastMessageHelper.showErrorMessage('Tray ID is missing');
+      return false;
+    }
+    try {
+      isSending.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.sendTray(
+        token,
+        trayId!,
+        facilityId: facility.id,
+        systemType: _systemTypeValues[systemTypeIndex.value],
+        recipientName: recipientNameController.text.trim().isNotEmpty
+            ? recipientNameController.text.trim()
+            : null,
+        recipientEmail: recipientEmailController.text.trim().isNotEmpty
+            ? recipientEmailController.text.trim()
+            : null,
+        notes: additionalNotesController.text.trim().isNotEmpty
+            ? additionalNotesController.text.trim()
+            : null,
+        thumbnail: selectedPhoto.value,
+      );
+      ToastMessageHelper.showSuccessMessage('Tray sent successfully');
+      return true;
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to send tray');
+      return false;
+    } finally {
+      isSending.value = false;
+    }
   }
 
   @override

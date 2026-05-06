@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../rep_inventory/controller/receiving_session_controller.dart';
@@ -33,7 +34,7 @@ class _ReceivingSessionScreenState
         elevation: 0,
         toolbarHeight: 52.h,
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
+          onTap: () => context.canPop() ? context.pop() : context.go('/purchaseOrderScreen'),
           child: Icon(Icons.arrow_back_ios_new,
               color: AppColors.primaryTextColor, size: 18.r),
         ),
