@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:nron_app/features/%20representative/shipment/presentation/widgets/shipment_card.dart';
+import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
-import '../controller/shipments_controller.dart';
+import '../controller/shipments_list_controller.dart';
+import '../model/shipment_model.dart';
 import 'job_details_screen.dart';
-
+import 'widgets/shipment_card.dart';
 
 class ShipmentsListScreen extends StatefulWidget {
   const ShipmentsListScreen({super.key});
@@ -15,16 +17,32 @@ class ShipmentsListScreen extends StatefulWidget {
 }
 
 class _ShipmentsListScreenState extends State<ShipmentsListScreen> {
-  final _controller = ShipmentsController();
+  late final ShipmentsListController _ctrl;
   final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
 
   static const _tabs = ['All', 'Pending', 'Approved', 'Rejected'];
 
   @override
+  void initState() {
+    super.initState();
+    _ctrl = Get.put(ShipmentsListController());
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
   void dispose() {
-    _controller.dispose();
+    Get.delete<ShipmentsListController>(force: true);
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _ctrl.fetchShipments();
+    }
   }
 
   @override
@@ -48,27 +66,18 @@ class _ShipmentsListScreenState extends State<ShipmentsListScreen> {
           color: AppColors.primaryTextColor,
           textAlign: TextAlign.start,
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 16.w),
-            child: Icon(Icons.menu,
-                color: AppColors.primaryTextColor, size: 22.r),
-          ),
-        ],
       ),
-      body: ListenableBuilder(
-        listenable: _controller,
-        builder: (context, _) {
-          return Column(
-            children: [
-              Container(
+      body: Column(
+        children: [
+          // ── Tabs ──
+          Obx(() => Container(
                 color: const Color(0xFF1E2427),
                 child: Row(
                   children: List.generate(_tabs.length, (i) {
-                    final selected = _controller.selectedTabIndex == i;
+                    final selected = _ctrl.selectedTabIndex.value == i;
                     return Expanded(
                       child: GestureDetector(
-                        onTap: () => _controller.setTab(i),
+                        onTap: () => _ctrl.setTab(i),
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 12.h),
                           decoration: BoxDecoration(
@@ -96,105 +105,148 @@ class _ShipmentsListScreenState extends State<ShipmentsListScreen> {
                     );
                   }),
                 ),
-              ),
-              SizedBox(height: 12.h),
-              Center(
-                child: Container(
-                  width: 345.w,
-                  height: 1,
-                  color: const Color(0xFFD4D4D4),
-                ),
-              ),
-              SizedBox(height: 12.h),
+              )),
 
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Container(
-                  height: 44.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF252525),
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                        color: AppColors.dotButtonInactiveColor, width: 0.6),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 12.w),
-                      Icon(Icons.search,
-                          color: AppColors.secondaryTextColor, size: 18.r),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          style: TextStyle(
-                            color: AppColors.primaryTextColor,
-                            fontSize: 13.sp,
-                            fontFamily: 'Poppins',
-                          ),
-                          onChanged: _controller.setSearch,
-                          decoration: InputDecoration(
-                            hintText: 'Search by PO#, Surgeon, or facility',
-                            hintStyle: TextStyle(
-                              color: AppColors.secondaryTextColor,
-                              fontSize: 12.sp,
-                              fontFamily: 'Poppins',
-                            ),
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding:
-                            EdgeInsets.symmetric(vertical: 10.h),
-                          ),
-                        ),
+          SizedBox(height: 12.h),
+          Center(
+            child: Container(
+              width: 345.w,
+              height: 1,
+              color: const Color(0xFFD4D4D4),
+            ),
+          ),
+          SizedBox(height: 12.h),
+
+          // ── Search ──
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Container(
+              height: 44.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF252525),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(
+                    color: AppColors.dotButtonInactiveColor, width: 0.6),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(width: 12.w),
+                  Icon(Icons.search,
+                      color: AppColors.secondaryTextColor, size: 18.r),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      style: TextStyle(
+                        color: AppColors.primaryTextColor,
+                        fontSize: 13.sp,
+                        fontFamily: 'Poppins',
                       ),
-                    ],
+                      onChanged: _ctrl.setSearch,
+                      decoration: InputDecoration(
+                        hintText: 'Search by job name, company...',
+                        hintStyle: TextStyle(
+                          color: AppColors.secondaryTextColor,
+                          fontSize: 12.sp,
+                          fontFamily: 'Poppins',
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 10.h),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              SizedBox(height: 16.h),
+            ),
+          ),
+          SizedBox(height: 16.h),
 
-              // ── List ──────────────────────────────────────────────────────
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: CustomText(
-                    text: 'Recent Shipments',
-                    fontsize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                  ),
-                ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: CustomText(
+                text: 'Recent Shipments',
+                fontsize: 15.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryTextColor,
+                textAlign: TextAlign.start,
               ),
-              SizedBox(height: 10.h),
-              Expanded(
-                child: _controller.filteredShipments.isEmpty
-                    ? Center(
+            ),
+          ),
+          SizedBox(height: 10.h),
+
+          // ── List ──
+          Expanded(
+            child: Obx(() {
+              if (_ctrl.isLoading.value) return _shimmer();
+              if (_ctrl.shipments.isEmpty) {
+                return Center(
                   child: CustomText(
                     text: 'No shipments found',
                     color: AppColors.secondaryTextColor,
                   ),
-                )
-                    : ListView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  itemCount: _controller.filteredShipments.length,
-                  itemBuilder: (_, i) {
-                    final s = _controller.filteredShipments[i];
-                    return ShipmentCard(
-                      shipment: s,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => JobDetailsScreen(shipment: s),
+                );
+              }
+              return ListView.builder(
+                controller: _scrollController,
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                itemCount: _ctrl.shipments.length +
+                    (_ctrl.isLoadingMore.value ? 1 : 0),
+                itemBuilder: (_, i) {
+                  if (i == _ctrl.shipments.length) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      child: Center(
+                        child: SizedBox(
+                          width: 24.r,
+                          height: 24.r,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryColor,
+                          ),
                         ),
                       ),
                     );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+                  }
+                  final s = _ctrl.shipments[i];
+                  return ShipmentCard(
+                    shipment: s,
+                    onTap: () => _openDetails(context, s),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openDetails(BuildContext context, ShipmentModel s) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => JobDetailsScreen(id: s.id)),
+    );
+  }
+
+  Widget _shimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        itemCount: 5,
+        itemBuilder: (_, __) => Container(
+          margin: EdgeInsets.only(bottom: 12.h),
+          height: 120.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+        ),
       ),
     );
   }

@@ -44,7 +44,7 @@ class ImplantsController extends GetxController {
   List<dynamic> _asList(dynamic data) {
     if (data is List) return data;
     if (data is Map) {
-      for (final key in ['items', 'list', 'data', 'docs']) {
+      for (final key in ['results', 'items', 'list', 'data', 'docs']) {
         if (data[key] is List) return data[key] as List;
       }
     }

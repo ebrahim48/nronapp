@@ -26,13 +26,14 @@ class ShipmentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: CustomText(
-                    text: shipment.title,
+                    text: shipment.displayTitle.isNotEmpty
+                        ? shipment.displayTitle
+                        : 'Shipment',
                     fontsize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryTextColor,
@@ -40,18 +41,17 @@ class ShipmentCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 8.w),
-                _StatusBadge(status: shipment.status),
+                _StatusBadge(status: shipment.shipmentStatus),
               ],
             ),
             SizedBox(height: 2.h),
             CustomText(
-              text: 'Ref: ${shipment.refNumber}',
+              text: 'Ref: ${shipment.refDisplay}',
               fontsize: 11.sp,
               color: AppColors.secondaryTextColor,
               textAlign: TextAlign.start,
             ),
             SizedBox(height: 10.h),
-            // Driver / Pickup Date row
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -82,12 +82,16 @@ class ShipmentCard extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 6.w),
-                          CustomText(
-                            text: shipment.driverName,
-                            fontsize: 12.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.primaryTextColor,
-                            textAlign: TextAlign.start,
+                          Flexible(
+                            child: CustomText(
+                              text: shipment.driverName.isNotEmpty
+                                  ? shipment.driverName
+                                  : 'Unassigned',
+                              fontsize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primaryTextColor,
+                              textAlign: TextAlign.start,
+                            ),
                           ),
                         ],
                       ),
@@ -105,7 +109,9 @@ class ShipmentCard extends StatelessWidget {
                     ),
                     SizedBox(height: 3.h),
                     CustomText(
-                      text: '${shipment.pickupDate}, ${shipment.pickupTime}',
+                      text: shipment.pickupDate.isNotEmpty
+                          ? shipment.pickupDate
+                          : '—',
                       fontsize: 12.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.primaryTextColor,
@@ -116,10 +122,13 @@ class ShipmentCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 10.h),
-            // Pickup / Drop timeline
             _AddressTimeline(
-              pickup: shipment.pickupAddress,
-              dropoff: shipment.dropAddress,
+              pickup: shipment.pickupAddress.isNotEmpty
+                  ? shipment.pickupAddress
+                  : '—',
+              dropoff: shipment.dropoffAddress.isNotEmpty
+                  ? shipment.dropoffAddress
+                  : '—',
             ),
           ],
         ),
@@ -127,8 +136,6 @@ class ShipmentCard extends StatelessWidget {
     );
   }
 }
-
-// ── Status Badge ─────────────────────────────────────────────────────────────
 
 class _StatusBadge extends StatelessWidget {
   final String status;
@@ -139,12 +146,13 @@ class _StatusBadge extends StatelessWidget {
     final Color bg;
     final String label;
 
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'pending':
         bg = AppColors.warningColor;
         label = 'Pending';
         break;
       case 'in_transit':
+      case 'in transit':
         bg = AppColors.warningColor;
         label = 'In Transit';
         break;
@@ -162,7 +170,7 @@ class _StatusBadge extends StatelessWidget {
         break;
       default:
         bg = AppColors.secondaryTextColor;
-        label = status;
+        label = status.isNotEmpty ? status : 'Unknown';
     }
 
     return Container(
@@ -181,8 +189,6 @@ class _StatusBadge extends StatelessWidget {
   }
 }
 
-// ── Address Timeline ──────────────────────────────────────────────────────────
-
 class _AddressTimeline extends StatelessWidget {
   final String pickup;
   final String dropoff;
@@ -194,7 +200,6 @@ class _AddressTimeline extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Dot–line–dot indicator
         Column(
           children: [
             SizedBox(height: 3.h),
@@ -222,7 +227,6 @@ class _AddressTimeline extends StatelessWidget {
           ],
         ),
         SizedBox(width: 8.w),
-        // Labels
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

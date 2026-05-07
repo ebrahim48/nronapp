@@ -1,114 +1,75 @@
-import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
+import '../../../../core/exceptions/app_exceptions.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../data/repositories/shipment_repository.dart';
 import '../model/shipment_model.dart';
 
+class ShipmentsController extends GetxController {
+  final _repo = ShipmentRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
 
-class ShipmentsController extends ChangeNotifier {
-  int selectedTabIndex = 0;
-  String searchQuery = '';
+  final isLoading = true.obs;
+  final activeJobsCount = 0.obs;
+  final pendingPickupCount = 0.obs;
+  final inTransitCount = 0.obs;
+  final deliveredCount = 0.obs;
+  final activeShipments = <ShipmentModel>[].obs;
 
-  final List<ShipmentModel> allShipments = const [
-    ShipmentModel(
-      id: '1',
-      refNumber: '#JOB-88224',
-      title: 'Spinal Kit - Dr. Aris',
-      status: 'pending',
-      driverName: 'Unassigned',
-      driverAssigned: false,
-      pickupAddress: 'North Sterilization Center',
-      dropAddress: 'General Health Clinic, Surgical Wing',
-      pickupDate: 'Oct 25',
-      pickupTime: '09:00 AM',
-      packageType: 'Medical EXP',
-      serviceType: 'FedEx',
-      jobId: '#INV-99284',
-    ),
-    ShipmentModel(
-      id: '2',
-      refNumber: '#JOB-88224',
-      title: 'Spinal Kit - Dr. Aris',
-      status: 'pending',
-      driverName: 'Unassigned',
-      driverAssigned: false,
-      pickupAddress: 'North Sterilization Center',
-      dropAddress: 'General Health Clinic, Surgical Wing',
-      pickupDate: 'Oct 25',
-      pickupTime: '09:00 AM',
-      packageType: 'Medical EXP',
-      serviceType: 'FedEx',
-      jobId: '#INV-99285',
-    ),
-    ShipmentModel(
-      id: '3',
-      refNumber: '#JOB-88224',
-      title: 'Spinal Kit - Dr. Aris',
-      status: 'delivered',
-      driverName: 'Marcus Thompson',
-      driverAssigned: true,
-      pickupAddress: 'North Sterilization Center',
-      dropAddress: 'General Health Clinic, Surgical Wing',
-      pickupDate: 'Oct 25',
-      pickupTime: '09:00 AM',
-      packageType: 'Medical EXP',
-      serviceType: 'FedEx',
-      jobId: '#INV-99286',
-    ),
-    ShipmentModel(
-      id: '4',
-      refNumber: '#JOB-88225',
-      title: 'Spinal Kit - Dr. Aris',
-      status: 'in_transit',
-      driverName: 'Marcus Thompson',
-      driverAssigned: true,
-      pickupAddress: 'North Sterilization Center',
-      dropAddress: 'General Health Clinic, Surgical Wing',
-      pickupDate: 'Oct 25',
-      pickupTime: '09:00 AM',
-      packageType: 'Medical EXP',
-      serviceType: 'FedEx',
-      jobId: '#INV-99287',
-    ),
-  ];
-
-  List<ShipmentModel> get filteredShipments {
-    List<ShipmentModel> result = allShipments;
-    if (selectedTabIndex == 1) {
-      result = result.where((s) => s.status == 'pending').toList();
-    } else if (selectedTabIndex == 2) {
-      result = result.where((s) => s.status == 'approved').toList();
-    } else if (selectedTabIndex == 3) {
-      result = result.where((s) => s.status == 'rejected').toList();
-    }
-    if (searchQuery.isNotEmpty) {
-      result = result
-          .where((s) =>
-      s.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          s.refNumber.toLowerCase().contains(searchQuery.toLowerCase()))
-          .toList();
-    }
-    return result;
+  @override
+  void onInit() {
+    super.onInit();
+    fetchHome();
   }
 
-  List<ShipmentModel> get activeShipments => allShipments
-      .where((s) => s.status == 'pending' || s.status == 'in_transit')
-      .toList();
+  Future<void> fetchHome() async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
 
-  int get activeJobsCount =>
-      allShipments.where((s) => s.status != 'delivered').length;
-  int get pendingPickupCount =>
-      allShipments.where((s) => s.status == 'pending').length;
-  int get inTransitCount =>
-      allShipments.where((s) => s.status == 'in_transit').length;
-  int get deliveredCount =>
-      allShipments.where((s) => s.status == 'delivered').length;
+      // Run both requests in parallel
+      final results = await Future.wait([
+        _repo.getHome(token),
+        _repo.getList(token, page: 1, limit: 10),
+      ]);
 
-  void setTab(int index) {
-    selectedTabIndex = index;
-    notifyListeners();
+      // ── Stats from home endpoint ──
+      final homeData = results[0]['data'] as Map<String, dynamic>? ?? {};
+      final overview = homeData['overview'] as Map<String, dynamic>?
+          ?? homeData['summary'] as Map<String, dynamic>?
+          ?? homeData;
+
+      activeJobsCount.value   = _parseInt(overview['activeJobs']    ?? overview['active_jobs']    ?? homeData['activeJobs']    ?? 0);
+      pendingPickupCount.value = _parseInt(overview['pendingPickup'] ?? overview['pending_pickup'] ?? homeData['pendingPickup'] ?? 0);
+      inTransitCount.value    = _parseInt(overview['inTransit']     ?? overview['in_transit']     ?? homeData['inTransit']     ?? 0);
+      deliveredCount.value    = _parseInt(overview['delivered']     ?? homeData['delivered']      ?? 0);
+
+      // ── Active shipments from /shipment/get-my ──
+      final listData = results[1]['data'] as Map<String, dynamic>? ?? {};
+      final docs = listData['results'] as List?
+          ?? listData['docs'] as List?
+          ?? listData['shipments'] as List?
+          ?? [];
+      activeShipments.assignAll(
+        docs.whereType<Map<String, dynamic>>()
+            .map(ShipmentModel.fromJson)
+            .toList(),
+      );
+    } catch (e) {
+      final msg = e is AppException ? e.message : 'Failed to load shipments';
+      ToastMessageHelper.showErrorMessage(msg);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void setSearch(String query) {
-    searchQuery = query;
-    notifyListeners();
+  int _parseInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    return int.tryParse(v?.toString() ?? '') ?? 0;
   }
 }

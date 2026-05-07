@@ -1,33 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:nron_app/features/%20representative/shipment/presentation/widgets/section_card.dart';
+import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
-import '../controller/track_shipment_controller.dart';
-
+import '../controller/shipment_detail_controller.dart';
+import '../model/shipment_model.dart';
+import 'widgets/section_card.dart';
 
 class TrackShipmentScreen extends StatefulWidget {
-  const TrackShipmentScreen({super.key});
+  final String? shipmentId;
+  const TrackShipmentScreen({super.key, this.shipmentId});
 
   @override
   State<TrackShipmentScreen> createState() => _TrackShipmentScreenState();
 }
 
 class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
-  final _ctrl = TrackShipmentController();
+  late final ShipmentDetailController _ctrl;
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill demo data
-    _ctrl.trackingController.text = '1CZXCA6AC6AS5668685';
-    _ctrl.search();
+    _ctrl = Get.put(ShipmentDetailController(), tag: 'track');
+    if (widget.shipmentId != null && widget.shipmentId!.isNotEmpty) {
+      _searchController.text = widget.shipmentId!;
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _ctrl.loadDetail(widget.shipmentId!));
+    } else {
+      _ctrl.isLoading.value = false;
+    }
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    Get.delete<ShipmentDetailController>(tag: 'track', force: true);
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _search() {
+    final id = _searchController.text.trim();
+    if (id.isEmpty) return;
+    _ctrl.loadDetail(id);
   }
 
   @override
@@ -52,160 +69,248 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
           textAlign: TextAlign.start,
         ),
       ),
-      body: ListenableBuilder(
-        listenable: _ctrl,
-        builder: (context, _) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Search Field ───────────────────────────────────────────
-                CustomText(
-                  text: 'Enter Tracking Number',
-                  fontsize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.start,
-                  bottom: 8.h,
-                ),
-                Container(
-                  height: 48.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF252525),
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                        color: AppColors.dotButtonInactiveColor, width: 0.8),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(width: 14.w),
-                      Expanded(
-                        child: TextField(
-                          controller: _ctrl.trackingController,
-                          style: TextStyle(
-                            color: AppColors.primaryTextColor,
-                            fontSize: 13.sp,
-                            fontFamily: 'Poppins',
-                          ),
-                          onSubmitted: (_) => _ctrl.search(),
-                          decoration: InputDecoration(
-                            hintText: 'Enter tracking number',
-                            hintStyle: TextStyle(
-                              color: AppColors.secondaryTextColor,
-                              fontSize: 13.sp,
-                              fontFamily: 'Poppins',
+      body: Column(
+        children: [
+          // ── Search bar ──
+          if (widget.shipmentId == null)
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 46.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF252525),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                            color: AppColors.dotButtonInactiveColor, width: 0.6),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 12.w),
+                          Icon(Icons.search,
+                              color: AppColors.secondaryTextColor, size: 18.r),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              style: TextStyle(
+                                color: AppColors.primaryTextColor,
+                                fontSize: 13.sp,
+                                fontFamily: 'Poppins',
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Enter shipment ID...',
+                                hintStyle: TextStyle(
+                                  color: AppColors.secondaryTextColor,
+                                  fontSize: 12.sp,
+                                  fontFamily: 'Poppins',
+                                ),
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 10.h),
+                              ),
+                              onSubmitted: (_) => _search(),
                             ),
-                            border: InputBorder.none,
-                            isDense: true,
-                            contentPadding:
-                            EdgeInsets.symmetric(vertical: 12.h),
                           ),
-                        ),
+                        ],
                       ),
-                      GestureDetector(
-                        onTap: _ctrl.search,
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 14.w),
-                          child: Icon(Icons.search,
-                              color: AppColors.secondaryTextColor, size: 20.r),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 16.h),
+                  SizedBox(width: 10.w),
+                  GestureDetector(
+                    onTap: _search,
+                    child: Container(
+                      width: 46.r,
+                      height: 46.r,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(Icons.search, color: Colors.black, size: 22.r),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-                if (_ctrl.isLoading)
-                  Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24.r),
-                      child: CircularProgressIndicator(
-                          color: AppColors.primaryColor),
+          Expanded(
+            child: Obx(() {
+              if (_ctrl.isLoading.value) return _shimmer();
+              final s = _ctrl.shipment.value;
+              if (s == null) {
+                return Center(
+                  child: CustomText(
+                    text: widget.shipmentId == null
+                        ? 'Enter a shipment ID to track'
+                        : 'Shipment not found',
+                    color: AppColors.secondaryTextColor,
+                  ),
+                );
+              }
+              return _buildContent(s);
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(ShipmentModel s) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Status + Job ID ──
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: 'STATUS',
+                    fontsize: 10.sp,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                  SizedBox(height: 4.h),
+                  _StatusBadge(status: s.shipmentStatus),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CustomText(
+                    text: 'JOB ID',
+                    fontsize: 10.sp,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.end,
+                  ),
+                  SizedBox(height: 4.h),
+                  CustomText(
+                    text: s.refDisplay,
+                    fontsize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.end,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+
+          // ── Job Info Card ──
+          SectionCard(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(
+                    text: 'Job Info',
+                    fontsize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                  if (s.priority.isNotEmpty)
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7B1818),
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: CustomText(
+                        text: s.priority,
+                        fontsize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
-                  )
-                else if (_ctrl.hasResult) ...[
-                  // ── Tracking Result Card ─────────────────────────────────
+                ],
+              ),
+              SizedBox(height: 12.h),
+
+              Container(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E2427),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36.r,
+                      height: 36.r,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(Icons.business_outlined,
+                          color: AppColors.primaryColor, size: 18.r),
+                    ),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CustomText(
+                            text: s.company.isNotEmpty ? s.company : '—',
+                            fontsize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryTextColor,
+                            textAlign: TextAlign.start,
+                          ),
+                          CustomText(
+                            text: s.packageType.isNotEmpty
+                                ? s.packageType
+                                : 'Shipment',
+                            fontsize: 11.sp,
+                            color: AppColors.secondaryTextColor,
+                            textAlign: TextAlign.start,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.h),
+
+              Row(
+                children: [
                   Container(
-                    padding: EdgeInsets.all(14.r),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF252525),
-                      borderRadius: BorderRadius.circular(12.r),
+                    width: 36.r,
+                    height: 36.r,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF3A3A3A),
+                      shape: BoxShape.circle,
                     ),
+                    child: Icon(Icons.person,
+                        color: AppColors.secondaryTextColor, size: 18.r),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            // FedEx logo placeholder
-                            Container(
-                              width: 44.r,
-                              height: 44.r,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8.r),
-                              ),
-                              child: Center(
-                                child: CustomText(
-                                  text: 'FedEx',
-                                  fontsize: 9.sp,
-                                  fontWeight: FontWeight.w900,
-                                  color: const Color(0xFF4D148C),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 10.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CustomText(
-                                    text: _ctrl.trackedNumber,
-                                    fontsize: 12.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primaryTextColor,
-                                    textAlign: TextAlign.start,
-                                  ),
-                                  CustomText(
-                                    text: 'Medical Shipment',
-                                    fontsize: 11.sp,
-                                    color: AppColors.secondaryTextColor,
-                                    textAlign: TextAlign.start,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 10.w, vertical: 4.h),
-                              decoration: BoxDecoration(
-                                color: AppColors.warningColor,
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: CustomText(
-                                text: 'In Transit',
-                                fontsize: 11.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10.h),
-                        Container(
-                          height: 0.5,
-                          color: const Color(0xFF3A3A3A),
-                        ),
-                        SizedBox(height: 10.h),
                         CustomText(
-                          text: 'Expected by 5:00 PM Tomorrow',
+                          text: s.driverName.isNotEmpty
+                              ? s.driverName
+                              : 'Unassigned',
                           fontsize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primaryTextColor,
                           textAlign: TextAlign.start,
                         ),
                         CustomText(
-                          text: 'Estimated Delivery',
+                          text: 'Assigned Driver',
                           fontsize: 11.sp,
                           color: AppColors.secondaryTextColor,
                           textAlign: TextAlign.start,
@@ -213,201 +318,204 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 12.h),
-
-                  // ── Driver Card ──────────────────────────────────────────
-                  Container(
-                    padding: EdgeInsets.all(14.r),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF252525),
-                      borderRadius: BorderRadius.circular(12.r),
+                  if (s.driverPhone.isNotEmpty)
+                    ActionIconButton(
+                      icon: Icons.phone_outlined,
+                      onTap: () {},
                     ),
-                    child: Row(
-                      children: [
-                        // Driver avatar
-                        Container(
-                          width: 44.r,
-                          height: 44.r,
-                          decoration: BoxDecoration(
-                            color: AppColors.warningColor.withValues(alpha: 0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: ClipOval(
-                            child: Image.asset(
-                              'assets/images/trackdeiver.jpg',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Icon(
-                                Icons.person,
-                                color: AppColors.warningColor,
-                                size: 24.r,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CustomText(
-                                text: 'Marcus Thompson',
-                                fontsize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryTextColor,
-                                textAlign: TextAlign.start,
-                              ),
-                              CustomText(
-                                text: 'Assigned Driver',
-                                fontsize: 11.sp,
-                                color: AppColors.secondaryTextColor,
-                                textAlign: TextAlign.start,
-                              ),
-                            ],
-                          ),
-                        ),
-                        ActionIconButton(
-                          icon: Icons.chat_bubble_outline,
-                          onTap: () {},
-                        ),
-                        SizedBox(width: 8.w),
-                        ActionIconButton(
-                          icon: Icons.phone_outlined,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // ── Live Location (Map) ──────────────────────────────────
-                  CustomText(
-                    text: 'Live Location',
-                    fontsize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                    bottom: 10.h,
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12.r),
-                    child: Image.asset(
-                      'assets/images/activeshipments.png',
-                      width: double.infinity,
-                      height: 160.h,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // ── Tracking History ─────────────────────────────────────
-                  CustomText(
-                    text: 'Tracking History',
-                    fontsize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                    bottom: 12.h,
-                  ),
-                  _TrackingHistory(
-                    events: const [
-                      _TrackEvent(
-                        label: 'Pending Approval',
-                        date: 'Feb 15, 2:30 PM',
-                        isDone: true,
-                      ),
-                      _TrackEvent(
-                        label: 'Package Picked Up',
-                        subtitle: 'City Hospital Loading Dock',
-                        date: 'Feb 15, 2:30 PM',
-                        isDone: true,
-                      ),
-                      _TrackEvent(
-                        label: 'Departed FedEx Facility',
-                        subtitle: 'Springfield, IL',
-                        date: 'Feb 15, 2:30 PM',
-                        isDone: true,
-                      ),
-                      _TrackEvent(
-                        label: 'Arrived at FedEx Facility',
-                        subtitle: 'Chicago, IL',
-                        date: 'Feb 15, 2:30 PM',
-                        isDone: false,
-                      ),
-                      _TrackEvent(
-                        label: 'Delivered',
-                        date: 'Feb 15, 2:30 PM',
-                        isDone: false,
-                        isBold: true,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // ── Package Details ──────────────────────────────────────
-                  CustomText(
-                    text: 'Package Details',
-                    fontsize: 15.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                    bottom: 12.h,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _PackageDetailCard(
-                          label: 'Items',
-                          value: 'Medical\nImplant (2)',
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: _PackageDetailCard(
-                          label: 'Weight',
-                          value: '5.2 lbs',
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: _PackageDetailCard(
-                          label: 'Service',
-                          value: 'Priority\nOvernight',
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
                 ],
-              ],
+              ),
+            ],
+          ),
+
+          // ── Live Location Map ──
+          CustomText(
+            text: 'Live Location',
+            fontsize: 15.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.start,
+            bottom: 10.h,
+          ),
+          _LiveMap(shipment: s),
+          SizedBox(height: 20.h),
+
+          // ── Tracking History ──
+          if (s.trackingHistory.isNotEmpty) ...[
+            CustomText(
+              text: 'Tracking History',
+              fontsize: 15.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryTextColor,
+              textAlign: TextAlign.start,
+              bottom: 12.h,
             ),
-          );
-        },
+            _TrackingTimeline(events: s.trackingHistory),
+            SizedBox(height: 20.h),
+          ],
+
+          // ── Package Details ──
+          CustomText(
+            text: 'Package Details',
+            fontsize: 15.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.start,
+            bottom: 12.h,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: _PackageCard(
+                  label: 'Items',
+                  value: s.products.isNotEmpty
+                      ? '${s.products.length} item${s.products.length > 1 ? 's' : ''}'
+                      : '—',
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _PackageCard(
+                  label: 'Weight',
+                  value: s.weight.isNotEmpty ? '${s.weight} lbs' : '—',
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _PackageCard(
+                  label: 'Service',
+                  value: s.serviceType.isNotEmpty ? s.serviceType : '—',
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20.h),
+        ],
+      ),
+    );
+  }
+
+  Widget _shimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        child: Column(
+          children: List.generate(
+            4,
+            (_) => Container(
+              margin: EdgeInsets.only(bottom: 14.h),
+              height: 100.h,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-// ── Tracking History widget ───────────────────────────────────────────────────
+// ── Live Map ──────────────────────────────────────────────────────────────────
 
-class _TrackEvent {
-  final String label;
-  final String? subtitle;
-  final String date;
-  final bool isDone;
-  final bool isBold;
+class _LiveMap extends StatelessWidget {
+  final ShipmentModel shipment;
+  const _LiveMap({required this.shipment});
 
-  const _TrackEvent({
-    required this.label,
-    this.subtitle,
-    required this.date,
-    required this.isDone,
-    this.isBold = false,
-  });
+  LatLng? get _pickupPos =>
+      (shipment.pickupLat != null && shipment.pickupLng != null)
+          ? LatLng(shipment.pickupLat!, shipment.pickupLng!)
+          : null;
+
+  LatLng? get _dropoffPos =>
+      (shipment.dropoffLat != null && shipment.dropoffLng != null)
+          ? LatLng(shipment.dropoffLat!, shipment.dropoffLng!)
+          : null;
+
+  LatLng get _center {
+    final p = _pickupPos;
+    final d = _dropoffPos;
+    if (p != null && d != null) {
+      return LatLng(
+          (p.latitude + d.latitude) / 2, (p.longitude + d.longitude) / 2);
+    }
+    return p ?? d ?? const LatLng(37.7749, -122.4194);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_pickupPos == null && _dropoffPos == null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12.r),
+        child: Container(
+          width: double.infinity,
+          height: 160.h,
+          color: const Color(0xFF1A2E3A),
+          child: Center(
+            child: Icon(Icons.map_outlined, color: Colors.white24, size: 48.r),
+          ),
+        ),
+      );
+    }
+
+    final markers = <Marker>{};
+    final p = _pickupPos;
+    final d = _dropoffPos;
+    if (p != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('pickup'),
+        position: p,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow: const InfoWindow(title: 'Pickup'),
+      ));
+    }
+    if (d != null) {
+      markers.add(Marker(
+        markerId: const MarkerId('dropoff'),
+        position: d,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: const InfoWindow(title: 'Drop-off'),
+      ));
+    }
+
+    final polylines = <Polyline>{};
+    if (p != null && d != null) {
+      polylines.add(Polyline(
+        polylineId: const PolylineId('route'),
+        color: const Color(0xFF4DB6AC),
+        width: 3,
+        points: [p, d],
+      ));
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12.r),
+      child: SizedBox(
+        width: double.infinity,
+        height: 160.h,
+        child: GoogleMap(
+          initialCameraPosition:
+              CameraPosition(target: _center, zoom: 12),
+          markers: markers,
+          polylines: polylines,
+          zoomControlsEnabled: false,
+          myLocationButtonEnabled: false,
+          scrollGesturesEnabled: true,
+          zoomGesturesEnabled: true,
+        ),
+      ),
+    );
+  }
 }
 
-class _TrackingHistory extends StatelessWidget {
-  final List<_TrackEvent> events;
-  const _TrackingHistory({required this.events});
+// ── Tracking Timeline ─────────────────────────────────────────────────────────
+
+class _TrackingTimeline extends StatelessWidget {
+  final List<TrackingEvent> events;
+  const _TrackingTimeline({required this.events});
 
   @override
   Widget build(BuildContext context) {
@@ -419,7 +527,6 @@ class _TrackingHistory extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               SizedBox(
                 width: 24.w,
                 child: Column(
@@ -435,8 +542,8 @@ class _TrackingHistory extends StatelessWidget {
                         border: e.isDone
                             ? null
                             : Border.all(
-                            color: AppColors.secondaryTextColor,
-                            width: 1.5),
+                                color: AppColors.secondaryTextColor,
+                                width: 1.5),
                       ),
                     ),
                     if (!isLast)
@@ -450,7 +557,6 @@ class _TrackingHistory extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 10.w),
-              // Label
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 16.h),
@@ -458,18 +564,19 @@ class _TrackingHistory extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CustomText(
-                        text: e.label,
+                        text: e.status,
                         fontsize: 13.sp,
-                        fontWeight:
-                        e.isBold ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isLast
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: e.isDone
                             ? AppColors.primaryTextColor
                             : AppColors.secondaryTextColor,
                         textAlign: TextAlign.start,
                       ),
-                      if (e.subtitle != null)
+                      if (e.location != null && e.location!.isNotEmpty)
                         CustomText(
-                          text: e.subtitle!,
+                          text: e.location!,
                           fontsize: 11.sp,
                           color: AppColors.secondaryTextColor,
                           textAlign: TextAlign.start,
@@ -478,26 +585,40 @@ class _TrackingHistory extends StatelessWidget {
                   ),
                 ),
               ),
-              // Date
-              CustomText(
-                text: e.date,
-                fontsize: 11.sp,
-                color: AppColors.secondaryTextColor,
-                textAlign: TextAlign.end,
-              ),
+              if (e.timestamp.isNotEmpty)
+                CustomText(
+                  text: _formatTs(e.timestamp),
+                  fontsize: 11.sp,
+                  color: AppColors.secondaryTextColor,
+                  textAlign: TextAlign.end,
+                ),
             ],
           ),
         );
       }),
     );
   }
+
+  String _formatTs(String ts) {
+    try {
+      final dt = DateTime.parse(ts).toLocal();
+      final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      final h = dt.hour > 12 ? dt.hour - 12 : dt.hour == 0 ? 12 : dt.hour;
+      final m = dt.minute.toString().padLeft(2, '0');
+      final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+      return '${months[dt.month - 1]} ${dt.day}, $h:$m $ampm';
+    } catch (_) {
+      return ts;
+    }
+  }
 }
 
+// ── Package Card ──────────────────────────────────────────────────────────────
 
-class _PackageDetailCard extends StatelessWidget {
+class _PackageCard extends StatelessWidget {
   final String label;
   final String value;
-  const _PackageDetailCard({required this.label, required this.value});
+  const _PackageCard({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -523,6 +644,55 @@ class _PackageDetailCard extends StatelessWidget {
             color: AppColors.primaryTextColor,
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Status Badge ──────────────────────────────────────────────────────────────
+
+class _StatusBadge extends StatelessWidget {
+  final String status;
+  const _StatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    Color bg;
+    String label;
+    switch (status.toLowerCase()) {
+      case 'in_transit':
+      case 'in transit':
+        bg = AppColors.warningColor;
+        label = 'In Transit';
+        break;
+      case 'pending':
+        bg = AppColors.warningColor;
+        label = 'Pending';
+        break;
+      case 'delivered':
+        bg = const Color(0xFF00D500);
+        label = 'Delivered';
+        break;
+      case 'approved':
+        bg = AppColors.primaryColor;
+        label = 'Approved';
+        break;
+      default:
+        bg = AppColors.primaryColor;
+        label = status.isNotEmpty ? status : 'Unknown';
+    }
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+      decoration: BoxDecoration(
+        color: bg.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: bg, width: 0.8),
+      ),
+      child: CustomText(
+        text: label,
+        fontsize: 12.sp,
+        fontWeight: FontWeight.w500,
+        color: bg,
       ),
     );
   }
