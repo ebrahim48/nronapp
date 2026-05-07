@@ -151,7 +151,7 @@ class InventoryRepository {
     required String reason,
   }) async {
     await _connectivity.checkConnectivity();
-    final res = await _api.patch(
+    final res = await _api.post(
       ApiConstants.sendTransferRequest(id),
       data: {'from': from, 'to': to, 'reason': reason},
       options: _auth(token),
