@@ -107,7 +107,10 @@ class ApiConstants {
   static String findMissingInstrument(String id) => '/missing-instrument/find/$id';
   static String sendMissingVendorMail(String id) => '/missing-instrument/send-vendor/$id';
 
-
+  static const String getShipment = '/shipment/get-my/home';
+  static const String getMyShipment = '/shipment/get-my';
+  static String getShipmentDetails(String id) => '/shipment/find/$id';
+  static const String createShipment = '/shipment/create';
 
 
 
