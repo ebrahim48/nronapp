@@ -58,22 +58,31 @@ class ActiveImplantBanner extends StatelessWidget {
             ),
           ),
           SizedBox(width: 12.w),
-          Container(
-            width: 60.r,
-            height: 60.r,
-            decoration: BoxDecoration(
-              color: const Color(0xFF3A3A3A),
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: imageAsset != null
-                ? ClipRRect(
-              borderRadius: BorderRadius.circular(8.r),
-              child: Image.asset(imageAsset!, fit: BoxFit.cover),
-            )
-                : Icon(
-              Icons.medical_services_outlined,
-              color: AppColors.secondaryTextColor,
-              size: 28.r,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.r),
+            child: Container(
+              width: 60.r,
+              height: 60.r,
+              decoration: const BoxDecoration(
+                color: Color(0xFF3A3A3A),
+              ),
+              child: imageAsset != null && imageAsset!.isNotEmpty
+                  ? imageAsset!.startsWith('http')
+                      ? Image.network(
+                          imageAsset!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.medical_services_outlined,
+                            color: AppColors.secondaryTextColor,
+                            size: 28.r,
+                          ),
+                        )
+                      : Image.asset(imageAsset!, fit: BoxFit.cover)
+                  : Icon(
+                      Icons.medical_services_outlined,
+                      color: AppColors.secondaryTextColor,
+                      size: 28.r,
+                    ),
             ),
           ),
         ],

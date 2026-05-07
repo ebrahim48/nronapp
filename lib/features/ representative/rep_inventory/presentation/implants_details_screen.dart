@@ -229,10 +229,12 @@ class ImplantDetailsScreen extends StatelessWidget {
         material: '',
         systemType: c.systemType.value,
         vendor: c.vendor.value,
+        vendorId: c.vendorId.value.isNotEmpty ? c.vendorId.value : null,
         status: c.status.value,
         facility: c.facilityAddress.value,
+        facilityId: c.facilityId.value.isNotEmpty ? c.facilityId.value : null,
         recipientEmail: c.recipientEmail.value,
-        imageAsset: null,
+        imageAsset: c.imageUrl.value.isNotEmpty ? c.imageUrl.value : null,
         additionalNote: c.additionalNote.value,
       );
 }

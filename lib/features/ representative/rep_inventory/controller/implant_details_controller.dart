@@ -17,8 +17,10 @@ class ImplantDetailsController extends GetxController {
   final serialNumber = ''.obs;
   final systemType = ''.obs;
   final vendor = ''.obs;
+  final vendorId = ''.obs;
   final status = ''.obs;
   final facilityAddress = ''.obs;
+  final facilityId = ''.obs;
   final recipientEmail = ''.obs;
   final imageUrl = ''.obs;
   final additionalNote = ''.obs;
@@ -47,8 +49,10 @@ class ImplantDetailsController extends GetxController {
       serialNumber.value = data['serialNumber']?.toString() ?? '';
       systemType.value = data['systemType']?.toString() ?? '';
       vendor.value = vendorMap['vendorName']?.toString() ?? data['vendor']?.toString() ?? '';
+      vendorId.value = vendorMap['_id']?.toString() ?? '';
       status.value = _capitalize(data['productStatus']?.toString() ?? data['status']?.toString() ?? '');
       facilityAddress.value = facilityMap['address']?.toString() ?? '';
+      facilityId.value = facilityMap['_id']?.toString() ?? '';
       recipientEmail.value = data['recipientEmail']?.toString() ?? '';
       imageUrl.value = data['initialPhoto']?.toString() ?? '';
       additionalNote.value = data['inboundNotes']?.toString() ?? '';
