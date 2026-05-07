@@ -351,14 +351,17 @@ class _GeneralInfoRow extends StatelessWidget {
                   textAlign: TextAlign.start,
                 ),
               ),
-              customTrailing ??
-                  CustomText(
-                    text: value,
-                    fontsize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                  ),
+              customTrailing != null
+                  ? customTrailing!
+                  : Flexible(
+                      child: CustomText(
+                        text: value,
+                        fontsize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryTextColor,
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
             ],
           ),
         ),
@@ -662,25 +665,27 @@ class TrayLocationCard extends StatelessWidget {
             ),
           ),
           SizedBox(width: 12.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomText(
-                text: 'Current Location',
-                fontsize: 11.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.secondaryTextColor,
-                textAlign: TextAlign.start,
-              ),
-              SizedBox(height: 2.h),
-              CustomText(
-                text: location,
-                fontsize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryTextColor,
-                textAlign: TextAlign.start,
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: 'Current Location',
+                  fontsize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.secondaryTextColor,
+                  textAlign: TextAlign.start,
+                ),
+                SizedBox(height: 2.h),
+                CustomText(
+                  text: location,
+                  fontsize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryTextColor,
+                  textAlign: TextAlign.start,
+                ),
+              ],
+            ),
           ),
         ],
       ),

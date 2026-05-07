@@ -193,7 +193,7 @@ class MissingReportCard extends StatelessWidget {
             // ── Top row: trayId tag + status badge + arrow ──
             Row(
               children: [
-                _TrayIdBadge(trayId: item.trayId),
+                Flexible(child: _TrayIdBadge(trayId: item.trayId)),
                 SizedBox(width: 8.w),
                 _StatusBadge(status: item.status),
                 const Spacer(),
@@ -236,12 +236,14 @@ class MissingReportCard extends StatelessWidget {
                       : Icon(Icons.person, size: 14.r, color: AppColors.secondaryTextColor),
                 ),
                 SizedBox(width: 8.w),
-                CustomText(
-                  text: item.reportedBy,
-                  fontsize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.start,
+                Flexible(
+                  child: CustomText(
+                    text: item.reportedBy,
+                    fontsize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
                 ),
                 const Spacer(),
                 CustomText(
@@ -272,12 +274,16 @@ class _TrayIdBadge extends StatelessWidget {
         color: const Color(0xFF0D3A3A),
         borderRadius: BorderRadius.circular(6.r),
       ),
-      child: CustomText(
-        text: trayId,
-        fontsize: 11.sp,
-        fontWeight: FontWeight.w600,
-        color: const Color(0xFF00BCD4),
-        textAlign: TextAlign.start,
+      child: Text(
+        trayId,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF00BCD4),
+          fontFamily: 'Poppins',
+        ),
       ),
     );
   }

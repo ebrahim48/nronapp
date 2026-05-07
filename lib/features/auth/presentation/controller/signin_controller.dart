@@ -60,6 +60,8 @@ class SignInController extends GetxController {
         await PrefsHelper.setString('auth_refresh_token', data['refreshToken'] ?? '');
         final role = (data['results']?['role'] ?? 'representative').toString();
         await PrefsHelper.setString('user_role', role);
+        final userId = (data['results']?['_id'] ?? data['results']?['id'] ?? '').toString();
+        await PrefsHelper.setString('user_id', userId);
 
         if (context.mounted) _navigateByRole(context, role);
       } else {
