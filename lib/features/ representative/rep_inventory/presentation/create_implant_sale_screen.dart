@@ -72,7 +72,7 @@ class _CreateImplantSaleScreenState extends State<CreateImplantSaleScreen> {
                 ),
                 SizedBox(height: 14.h),
 
-                // ── Sale Type ──────────────────────────────────────────────
+
                 CustomText(
                   text: 'SALE TYPE',
                   fontsize: 11.sp,
