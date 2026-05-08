@@ -4,11 +4,11 @@ import '../../../../core/config/app-routes/app_routes.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_missing_report_controller.dart';
-
 
 class ManagerMissingReportScreen extends StatelessWidget {
   const ManagerMissingReportScreen({super.key});
@@ -24,10 +24,17 @@ class ManagerMissingReportScreen extends StatelessWidget {
         elevation: 0,
         toolbarHeight: 52.h,
         leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back_ios, color: AppColors.primaryTextColor, size: 18.r)),
-        title: CustomText(text: 'Missing Instrument Report', fontsize: 16.sp,
-            fontWeight: FontWeight.w600, color: AppColors.primaryTextColor, textAlign: TextAlign.start),
+          onTap: () => Navigator.pop(context),
+          child: Icon(Icons.arrow_back_ios,
+              color: AppColors.primaryTextColor, size: 18.r),
+        ),
+        title: CustomText(
+          text: 'Missing Instrument Report',
+          fontsize: 16.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primaryTextColor,
+          textAlign: TextAlign.start,
+        ),
         centerTitle: false,
         titleSpacing: 0,
       ),
@@ -35,6 +42,7 @@ class ManagerMissingReportScreen extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 40.h),
         child: Column(
           children: [
+            // ── Search bar ───────────────────────────────────────────────
             Row(
               children: [
                 Expanded(
@@ -48,18 +56,33 @@ class ManagerMissingReportScreen extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 14.w),
                     child: Row(
                       children: [
-                        SvgPicture.asset('assets/icons/search.svg', width: 18.r, height: 18.r,
-                            colorFilter: const ColorFilter.mode(AppColors.secondaryTextColor, BlendMode.srcIn)),
+                        SvgPicture.asset(
+                          'assets/icons/search.svg',
+                          width: 18.r,
+                          height: 18.r,
+                          colorFilter: const ColorFilter.mode(
+                              AppColors.secondaryTextColor, BlendMode.srcIn),
+                        ),
                         SizedBox(width: 10.w),
                         Expanded(
                           child: TextFormField(
                             onChanged: c.onSearch,
-                            style: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp, color: AppColors.primaryTextColor),
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13.sp,
+                              color: AppColors.primaryTextColor,
+                            ),
                             decoration: InputDecoration(
                               hintText: 'Search Tray ID or Facility...',
-                              hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 13.sp, color: AppColors.secondaryTextColor),
-                              border: InputBorder.none, isCollapsed: true,
-                              contentPadding: EdgeInsets.symmetric(vertical: 2.h),
+                              hintStyle: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 13.sp,
+                                color: AppColors.secondaryTextColor,
+                              ),
+                              border: InputBorder.none,
+                              isCollapsed: true,
+                              contentPadding:
+                                  EdgeInsets.symmetric(vertical: 2.h),
                             ),
                           ),
                         ),
@@ -69,39 +92,98 @@ class ManagerMissingReportScreen extends StatelessWidget {
                 ),
                 SizedBox(width: 12.w),
                 Container(
-                  width: 48.r, height: 48.r,
+                  width: 48.r,
+                  height: 48.r,
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E2121),
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(color: const Color(0xFF3A3A3A)),
                   ),
-                  child: Center(child: SvgPicture.asset('assets/icons/drawer1.svg', width: 20.r, height: 20.r,
-                      colorFilter: const ColorFilter.mode(AppColors.primaryTextColor, BlendMode.srcIn))),
+                  child: Center(
+                    child: SvgPicture.asset(
+                      'assets/icons/drawer1.svg',
+                      width: 20.r,
+                      height: 20.r,
+                      colorFilter: const ColorFilter.mode(
+                          AppColors.primaryTextColor, BlendMode.srcIn),
+                    ),
+                  ),
                 ),
               ],
             ),
 
             SizedBox(height: 16.h),
 
+            // ── Stats ────────────────────────────────────────────────────
             Obx(() => Row(
-              children: [
-                _StatBox(label: 'Total', value: '${c.total.value}', valueColor: AppColors.primaryTextColor),
-                SizedBox(width: 12.w),
-                _StatBox(label: 'Missing', value: '${c.missing.value}', valueColor: const Color(0xFFEC0101)),
-              ],
-            )),
+                  children: [
+                    _StatBox(
+                      label: 'Total',
+                      value: '${c.total.value}',
+                      valueColor: AppColors.primaryTextColor,
+                    ),
+                    SizedBox(width: 12.w),
+                    _StatBox(
+                      label: 'Missing',
+                      value: '${c.missing.value}',
+                      valueColor: const Color(0xFFEC0101),
+                    ),
+                  ],
+                )),
 
             SizedBox(height: 16.h),
 
-            Obx(() => Column(
-              children: c.filtered.map((r) => Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
-                child: GestureDetector(
-                  onTap: () => context.push(AppRoutes.managerReportDetailsScreen, extra: r),
-                  child: _MissingReportCard(item: r),
-                ),
-              )).toList(),
-            )),
+            // ── List ─────────────────────────────────────────────────────
+            Obx(() {
+              if (c.isLoading.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Column(
+                    children: List.generate(
+                      4,
+                      (_) => Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        height: 110.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              if (c.filtered.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 40.h),
+                    child: CustomText(
+                      text: 'No reports found.',
+                      fontsize: 14.sp,
+                      color: AppColors.secondaryTextColor,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                );
+              }
+
+              return Column(
+                children: c.filtered
+                    .map((r) => Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: GestureDetector(
+                            onTap: () => context.push(
+                              AppRoutes.managerReportDetailsScreen,
+                              extra: r,
+                            ),
+                            child: _MissingReportCard(item: r),
+                          ),
+                        ))
+                    .toList(),
+              );
+            }),
           ],
         ),
       ),
@@ -109,11 +191,14 @@ class ManagerMissingReportScreen extends StatelessWidget {
   }
 }
 
+// ── Widgets ───────────────────────────────────────────────────────────────────
+
 class _StatBox extends StatelessWidget {
   final String label;
   final String value;
   final Color valueColor;
-  const _StatBox({required this.label, required this.value, required this.valueColor});
+  const _StatBox(
+      {required this.label, required this.value, required this.valueColor});
 
   @override
   Widget build(BuildContext context) {
@@ -128,11 +213,21 @@ class _StatBox extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomText(text: label, fontsize: 12.sp, fontWeight: FontWeight.w400,
-                color: AppColors.secondaryTextColor, textAlign: TextAlign.start),
+            CustomText(
+              text: label,
+              fontsize: 12.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.secondaryTextColor,
+              textAlign: TextAlign.start,
+            ),
             SizedBox(height: 4.h),
-            CustomText(text: value, fontsize: 24.sp, fontWeight: FontWeight.w700,
-                color: valueColor, textAlign: TextAlign.start),
+            CustomText(
+              text: value,
+              fontsize: 24.sp,
+              fontWeight: FontWeight.w700,
+              color: valueColor,
+              textAlign: TextAlign.start,
+            ),
           ],
         ),
       ),
@@ -144,7 +239,29 @@ class _MissingReportCard extends StatelessWidget {
   final MissingReportItem item;
   const _MissingReportCard({required this.item});
 
-  Color get _statusColor => item.status == 'Missing' ? const Color(0xFFEC0101) : const Color(0xFFE6A817);
+  Color get _issueColor {
+    switch (item.issueType.toLowerCase()) {
+      case 'missing':
+        return const Color(0xFFEC0101);
+      case 'damage':
+        return const Color(0xFFE6A817);
+      default:
+        return AppColors.secondaryTextColor;
+    }
+  }
+
+  String _formatDate(String raw) {
+    try {
+      final dt = DateTime.parse(raw);
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    } catch (_) {
+      return raw;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,9 +280,10 @@ class _MissingReportCard extends StatelessWidget {
               children: [
                 _Badge(label: item.trayId, color: AppColors.primaryColor),
                 SizedBox(width: 8.w),
-                _Badge(label: item.status, color: _statusColor),
+                _Badge(label: item.issueType, color: _issueColor),
                 const Spacer(),
-                Icon(Icons.chevron_right, color: AppColors.secondaryTextColor, size: 18.r),
+                Icon(Icons.chevron_right,
+                    color: AppColors.secondaryTextColor, size: 18.r),
               ],
             ),
           ),
@@ -173,23 +291,58 @@ class _MissingReportCard extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: Align(
               alignment: Alignment.centerLeft,
-              child: CustomText(text: item.facility, fontsize: 15.sp,
-                  fontWeight: FontWeight.w700, color: AppColors.primaryTextColor, textAlign: TextAlign.start),
+              child: CustomText(
+                text: item.facilityName,
+                fontsize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryTextColor,
+                textAlign: TextAlign.start,
+              ),
             ),
           ),
           Padding(
             padding: EdgeInsets.all(14.r),
             child: Row(
               children: [
+                // Profile image
                 ClipOval(
-                  child: Image.asset(item.reporterImage, width: 28.r, height: 28.r, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => CircleAvatar(radius: 14.r, backgroundColor: const Color(0xFF2A2A2A))),
+                  child: item.profileUrl.isNotEmpty
+                      ? Image.network(
+                          item.profileUrl,
+                          width: 28.r,
+                          height: 28.r,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => CircleAvatar(
+                            radius: 14.r,
+                            backgroundColor: const Color(0xFF2A2A2A),
+                            child: Icon(Icons.person,
+                                color: Colors.white54, size: 14.r),
+                          ),
+                        )
+                      : CircleAvatar(
+                          radius: 14.r,
+                          backgroundColor: const Color(0xFF2A2A2A),
+                          child: Icon(Icons.person,
+                              color: Colors.white54, size: 14.r),
+                        ),
                 ),
                 SizedBox(width: 8.w),
-                Expanded(child: CustomText(text: item.reporter, fontsize: 13.sp,
-                    fontWeight: FontWeight.w500, color: AppColors.primaryTextColor, textAlign: TextAlign.start)),
-                CustomText(text: item.date, fontsize: 11.sp,
-                    fontWeight: FontWeight.w400, color: AppColors.secondaryTextColor, textAlign: TextAlign.end),
+                Expanded(
+                  child: CustomText(
+                    text: item.user,
+                    fontsize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                CustomText(
+                  text: _formatDate(item.date),
+                  fontsize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.secondaryTextColor,
+                  textAlign: TextAlign.end,
+                ),
               ],
             ),
           ),
@@ -213,8 +366,13 @@ class _Badge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
-      child: CustomText(text: label, fontsize: 11.sp, fontWeight: FontWeight.w600,
-          color: color, textAlign: TextAlign.center),
+      child: CustomText(
+        text: label,
+        fontsize: 11.sp,
+        fontWeight: FontWeight.w600,
+        color: color,
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }

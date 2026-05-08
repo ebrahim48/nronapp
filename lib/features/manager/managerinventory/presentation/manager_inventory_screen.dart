@@ -4,12 +4,12 @@ import '../../../../core/config/app-routes/app_routes.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/manager/managerinventory/presentation/widgets/manager_inventory_widgets.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_inventory_controller.dart';
 import '../../appdrawer/app_drawer.dart';
-
 
 class ManagerInventoryScreen extends StatelessWidget {
   const ManagerInventoryScreen({super.key});
@@ -17,7 +17,6 @@ class ManagerInventoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(ManagerInventoryController());
-
     final scaffoldKey = GlobalKey<ScaffoldState>();
 
     return Scaffold(
@@ -43,9 +42,12 @@ class ManagerInventoryScreen extends StatelessWidget {
             padding: EdgeInsets.only(right: 24.w),
             child: GestureDetector(
               onTap: () => scaffoldKey.currentState?.openDrawer(),
-              child: SvgPicture.asset('assets/icons/drawer.svg',
-                width: 22.r, height: 22.r,
-                colorFilter: const ColorFilter.mode(AppColors.primaryTextColor, BlendMode.srcIn),
+              child: SvgPicture.asset(
+                'assets/icons/drawer.svg',
+                width: 22.r,
+                height: 22.r,
+                colorFilter: const ColorFilter.mode(
+                    AppColors.primaryTextColor, BlendMode.srcIn),
               ),
             ),
           ),
@@ -55,58 +57,134 @@ class ManagerInventoryScreen extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 40.h),
         child: Column(
           children: [
-            Obx(() => Column(
-              children: [
-                Row(children: [
-                  ManagerStatCard(iconPath: 'assets/icons/managerinventory.svg', label: 'Serialized Implants', value: '${c.serializedImplants.value}'),
-                  SizedBox(width: 12.w),
-                  ManagerStatCard(iconPath: 'assets/icons/managerinventory.svg', label: 'Total  Trays', value: '${c.totalTrays.value}'),
-                ]),
-                SizedBox(height: 12.h),
-                Row(children: [
-                  ManagerStatCard(iconPath: 'assets/icons/managerinventory.svg', label: 'Bio Inventory', value: '${c.bioInventory.value}'),
-                  SizedBox(width: 12.w),
-                  ManagerStatCard(iconPath: 'assets/icons/managerinventory.svg', label: 'Low Stock Alart', value: '${c.lowStockAlert.value}'),
-                ]),
-                SizedBox(height: 12.h),
-                Row(children: [
-                  ManagerAlertCard(
-                    iconPath: 'assets/icons/missingandtransfer.svg',
-                    count: c.missingCount.value,
-                    title: 'Missing Instrument',
-                    subtitle: 'Inter-hospital logistics requiring manager approval to proceed.',
-                    onTap: () => context.push(AppRoutes.managerMissingReportScreen),
+            // ── Stats + Alert cards ──────────────────────────────────────
+            Obx(() {
+              if (c.isLoadingStats.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Column(
+                    children: [
+                      Row(children: [
+                        _ShimmerCard(),
+                        SizedBox(width: 12.w),
+                        _ShimmerCard(),
+                      ]),
+                      SizedBox(height: 12.h),
+                      Row(children: [
+                        _ShimmerCard(),
+                        SizedBox(width: 12.w),
+                        _ShimmerCard(),
+                      ]),
+                      SizedBox(height: 12.h),
+                      Row(children: [
+                        _ShimmerCard(height: 120.h),
+                        SizedBox(width: 12.w),
+                        _ShimmerCard(height: 120.h),
+                      ]),
+                    ],
                   ),
-                  SizedBox(width: 12.w),
-                  ManagerAlertCard(
-                    iconPath: 'assets/icons/transferrequests.svg',
-                    count: c.pendingTransferCount.value,
-                    title: 'Pending Transfer Requests',
-                    subtitle: 'Inter-hospital logistics requiring manager approval to proceed.',
-                    onTap: () => context.push(AppRoutes.managerTransferRequestsScreen),
-                  ),
-                ]),
-              ],
-            )),
+                );
+              }
+
+              return Column(
+                children: [
+                  Row(children: [
+                    ManagerStatCard(
+                      iconPath: 'assets/icons/managerinventory.svg',
+                      label: 'Total Inventory',
+                      value: '${c.totalInventory.value}',
+                    ),
+                    SizedBox(width: 12.w),
+                    ManagerStatCard(
+                      iconPath: 'assets/icons/managerinventory.svg',
+                      label: 'Available',
+                      value: '${c.totalAvailable.value}',
+                    ),
+                  ]),
+                  SizedBox(height: 12.h),
+                  Row(children: [
+                    ManagerStatCard(
+                      iconPath: 'assets/icons/managerinventory.svg',
+                      label: 'This Month',
+                      value: '${c.thisMonthInventory.value}',
+                    ),
+                    SizedBox(width: 12.w),
+                    ManagerStatCard(
+                      iconPath: 'assets/icons/managerinventory.svg',
+                      label: 'Low Stock Alert',
+                      value: '${c.lowStockAlert.value}',
+                      valueColor: c.isLowStock.value
+                          ? const Color(0xFFEC0101)
+                          : Colors.white,
+                    ),
+                  ]),
+                  SizedBox(height: 12.h),
+                  Row(children: [
+                    ManagerAlertCard(
+                      iconPath: 'assets/icons/missingandtransfer.svg',
+                      count: c.missingCount.value,
+                      title: 'Missing Instrument',
+                      subtitle:
+                          'Inter-hospital logistics requiring manager approval to proceed.',
+                      onTap: () =>
+                          context.push(AppRoutes.managerMissingReportScreen),
+                    ),
+                    SizedBox(width: 12.w),
+                    ManagerAlertCard(
+                      iconPath: 'assets/icons/transferrequests.svg',
+                      count: c.missingTotal.value,
+                      title: 'Pending Transfer Requests',
+                      subtitle:
+                          'Inter-hospital logistics requiring manager approval to proceed.',
+                      onTap: () =>
+                          context.push(AppRoutes.managerTransferRequestsScreen),
+                    ),
+                  ]),
+                ],
+              );
+            }),
 
             SizedBox(height: 16.h),
 
+            // ── Distribution card (static UI) ────────────────────────────
             Obx(() => InventoryDistributionCard(
-              selectedLine: c.selectedProductLine.value,
-              lines: c.productLines,
-              items: c.distributionItems.cast<Map<String, dynamic>>(),
-              onChanged: (v) { if (v != null) c.selectProductLine(v); },
-            )),
+                  selectedLine: c.selectedProductLine.value,
+                  lines: c.productLines,
+                  items: c.distributionItems.cast<Map<String, dynamic>>(),
+                  onChanged: (v) {
+                    if (v != null) c.selectProductLine(v);
+                  },
+                )),
 
             SizedBox(height: 16.h),
 
+            // ── Recent movement card (static UI) ─────────────────────────
             Obx(() => RecentMovementCard(
-              activeTab: c.movementTab.value,
-              data: c.weeklyData,
-              days: c.weekDays,
-              onTabChange: c.selectMovementTab,
-            )),
+                  activeTab: c.movementTab.value,
+                  data: c.weeklyData,
+                  days: c.weekDays,
+                  onTabChange: c.selectMovementTab,
+                )),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerCard extends StatelessWidget {
+  final double? height;
+  const _ShimmerCard({this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        height: height ?? 90.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
         ),
       ),
     );
