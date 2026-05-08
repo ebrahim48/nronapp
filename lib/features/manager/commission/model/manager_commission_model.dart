@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 enum CommissionPaymentStatus { all, paid, unpaid }
-
 enum CommissionBillStatus { all, open, closed }
+
+// ── Stat card ─────────────────────────────────────────────────────────────────
 
 class ManagerCommissionStat {
   final String label;
@@ -16,51 +17,98 @@ class ManagerCommissionStat {
   });
 }
 
+// ── Trend data point ──────────────────────────────────────────────────────────
+
+class TrendDataPoint {
+  final String month;
+  final double value;
+
+  const TrendDataPoint({required this.month, required this.value});
+
+  factory TrendDataPoint.fromJson(Map<String, dynamic> e) {
+    return TrendDataPoint(
+      month: e['month']?.toString() ?? '',
+      value: (e['totalCommission'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
+// ── Commission list item ──────────────────────────────────────────────────────
+
 class CommissionListItem {
+  final String id;
   final String saleId;
   final String repName;
   final String repInitials;
   final String area;
   final CommissionBillStatus billStatus;
+  final String status; // 'paid' | 'unpaid'
 
   const CommissionListItem({
+    required this.id,
     required this.saleId,
     required this.repName,
     required this.repInitials,
     required this.area,
     required this.billStatus,
+    required this.status,
   });
+
+  static String _initials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    return name.isNotEmpty ? name[0].toUpperCase() : '?';
+  }
+
+  factory CommissionListItem.fromJson(Map<String, dynamic> e) {
+    final saleMap = e['sale'] is Map ? e['sale'] as Map<String, dynamic> : <String, dynamic>{};
+    final facilityMap = saleMap['facility'] is Map ? saleMap['facility'] as Map<String, dynamic> : <String, dynamic>{};
+    final status = e['status']?.toString() ?? 'unpaid';
+    final invoiceStatus = (saleMap['invoice'] is Map)
+        ? (saleMap['invoice'] as Map)['status']?.toString() ?? ''
+        : '';
+
+    return CommissionListItem(
+      id: e['_id']?.toString() ?? '',
+      saleId: saleMap['saleId']?.toString() ?? '',
+      repName: '',
+      repInitials: '??',
+      area: facilityMap['address']?.toString() ?? '',
+      billStatus: invoiceStatus == 'paid'
+          ? CommissionBillStatus.closed
+          : CommissionBillStatus.open,
+      status: status,
+    );
+  }
 }
 
+// ── Commission detail ─────────────────────────────────────────────────────────
+
 class CommissionDetailModel {
+  final String id;
   final String repName;
   final String repRole;
-  final String? repAvatarAsset;
+  final String? repAvatarUrl;
   final CommissionPaymentStatus paymentStatus;
 
-  // Transaction Details card
   final double totalCommissionDue;
   final double saleAmount;
   final double rate;
   final String date;
 
-  // Transaction Details table
   final String saleId;
   final String facility;
   final String territory;
-  final String? saleAmount2; // for image7 variant
 
-  // Close Bills
   final List<CommissionBillItem> bills;
-
-  // Split Commission
   final List<CommissionSplitItem> splits;
   final double totalCommissionPool;
 
   const CommissionDetailModel({
+    required this.id,
     required this.repName,
     required this.repRole,
-    this.repAvatarAsset,
+    this.repAvatarUrl,
     required this.paymentStatus,
     required this.totalCommissionDue,
     required this.saleAmount,
@@ -69,11 +117,86 @@ class CommissionDetailModel {
     required this.saleId,
     required this.facility,
     required this.territory,
-    this.saleAmount2,
     required this.bills,
     required this.splits,
     required this.totalCommissionPool,
   });
+
+  static String _formatDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(raw);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    } catch (_) { return raw; }
+  }
+
+  factory CommissionDetailModel.fromJson(Map<String, dynamic> e) {
+    final saleMap = e['sale'] is Map ? e['sale'] as Map<String, dynamic> : <String, dynamic>{};
+    final createdByMap = saleMap['createdBy'] is Map ? saleMap['createdBy'] as Map<String, dynamic> : <String, dynamic>{};
+    final facilityMap = saleMap['facility'] is Map ? saleMap['facility'] as Map<String, dynamic> : <String, dynamic>{};
+    final billingMap = saleMap['billing'] is Map ? saleMap['billing'] as Map<String, dynamic> : <String, dynamic>{};
+    final invoiceMap = saleMap['invoice'] is Map ? saleMap['invoice'] as Map<String, dynamic> : <String, dynamic>{};
+    final repsMap = saleMap['representatives'] is Map ? saleMap['representatives'] as Map<String, dynamic> : <String, dynamic>{};
+    final repUsers = repsMap['users'] is List ? repsMap['users'] as List : [];
+
+    final status = e['status']?.toString() ?? 'unpaid';
+    final totalAmount = (billingMap['totalAmount'] as num?)?.toDouble() ?? 0.0;
+    final totalCommission = (repsMap['totalCommission'] as num?)?.toDouble() ?? 0.0;
+
+    // Build splits from rep users
+    final splits = repUsers.map((u) {
+      final uMap = u is Map ? u as Map<String, dynamic> : <String, dynamic>{};
+      return CommissionSplitItem(
+        name: uMap['assignRole']?.toString() ?? '',
+        splitPercent: (uMap['commissionRate'] as num?)?.toInt() ?? 0,
+        splitAmount: (uMap['commission'] as num?)?.toDouble(),
+        role: uMap['assignRole']?.toString(),
+      );
+    }).toList();
+
+    // Invoice as bill
+    final bills = invoiceMap.isNotEmpty
+        ? [
+            CommissionBillItem(
+              billId: invoiceMap['invoiceNumber']?.toString() ?? '',
+              date: _formatDate(invoiceMap['invoiceDate']?.toString()),
+              amount: (invoiceMap['invoiceAmount'] as num?)?.toDouble() ?? 0.0,
+              status: invoiceMap['status']?.toString().toUpperCase() ?? '',
+            )
+          ]
+        : <CommissionBillItem>[];
+
+    return CommissionDetailModel(
+      id: e['_id']?.toString() ?? '',
+      repName: createdByMap['fullName']?.toString() ?? '',
+      repRole: 'Sales Representative',
+      repAvatarUrl: createdByMap['profileUrl']?.toString(),
+      paymentStatus: status == 'paid'
+          ? CommissionPaymentStatus.paid
+          : CommissionPaymentStatus.unpaid,
+      totalCommissionDue: totalCommission,
+      saleAmount: totalAmount,
+      rate: repUsers.isNotEmpty
+          ? (repUsers.first is Map
+              ? (repUsers.first as Map)['commissionRate'] as num? ?? 0
+              : 0).toDouble()
+          : 0.0,
+      date: _formatDate(saleMap['procedureDate']?.toString()),
+      saleId: saleMap['saleId']?.toString() ?? '',
+      facility: facilityMap['address']?.toString() ?? '',
+      territory: '',
+      bills: bills,
+      splits: splits,
+      totalCommissionPool: totalCommission,
+    );
+  }
+
+  static const CommissionDetailModel empty = CommissionDetailModel(
+    id: '', repName: '', repRole: '', paymentStatus: CommissionPaymentStatus.unpaid,
+    totalCommissionDue: 0, saleAmount: 0, rate: 0, date: '',
+    saleId: '', facility: '', territory: '', bills: [], splits: [], totalCommissionPool: 0,
+  );
 }
 
 class CommissionBillItem {
@@ -104,6 +227,8 @@ class CommissionSplitItem {
   });
 }
 
+// ── Transaction detail ────────────────────────────────────────────────────────
+
 class TransactionDetailModel {
   final double amount;
   final bool isPaid;
@@ -130,27 +255,53 @@ class TransactionDetailModel {
     required this.surgeon,
     required this.facility,
   });
+
+  static const TransactionDetailModel empty = TransactionDetailModel(
+    amount: 0, isPaid: false, date: '', transactionId: '',
+    invoiceLink: '', expenseLink: '', paymentMethod: '',
+    payoutSchedule: '', relatedSaleId: '', surgeon: '', facility: '',
+  );
 }
+
+// ── Commission manage (rep rate) ──────────────────────────────────────────────
 
 class CommissionRepRate {
+  final String id;
   final String name;
   final String role;
-  final String? avatarAsset;
+  final String? avatarUrl;
   final String updatedDate;
   final double currentRate;
+  final double commissionAmount;
 
   const CommissionRepRate({
+    required this.id,
     required this.name,
     required this.role,
-    this.avatarAsset,
+    this.avatarUrl,
     required this.updatedDate,
     required this.currentRate,
+    required this.commissionAmount,
   });
-}
 
-class TrendDataPoint {
-  final String month;
-  final double value;
+  static String _formatDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(raw);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return '${months[dt.month - 1]} ${dt.day}';
+    } catch (_) { return raw; }
+  }
 
-  const TrendDataPoint({required this.month, required this.value});
+  factory CommissionRepRate.fromJson(Map<String, dynamic> e) {
+    return CommissionRepRate(
+      id: e['_id']?.toString() ?? '',
+      name: '',
+      role: 'Representative',
+      avatarUrl: null,
+      updatedDate: _formatDate(e['updatedAt']?.toString()),
+      currentRate: (e['commissionRate'] as num?)?.toDouble() ?? 0.0,
+      commissionAmount: (e['commissionAmount'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
 }

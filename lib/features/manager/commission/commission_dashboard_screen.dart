@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/manager/appdrawer/app_drawer.dart';
 import 'package:nron_app/features/manager/commission/presentation/widgets/monthly_commission_trend_card.dart';
 import 'package:nron_app/features/manager/commission/presentation/widgets/quick_action_card.dart';
@@ -11,7 +12,6 @@ import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../core/config/app-routes/app_routes.dart';
 import 'controller/manager_commission_controller.dart';
-
 
 class CommissionDashboardScreen extends StatelessWidget {
   const CommissionDashboardScreen({super.key});
@@ -53,42 +53,67 @@ class CommissionDashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                CommissionStatCard(
-                  label: c.stats[0].label,
-                  value: c.stats[0].value,
-                  valueColor: c.stats[0].valueColor,
-                ),
-                SizedBox(width: 12.w),
-                CommissionStatCard(
-                  label: c.stats[1].label,
-                  value: c.stats[1].value,
-                  valueColor: c.stats[1].valueColor,
-                ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Row(
-              children: [
-                CommissionStatCard(
-                  label: c.stats[2].label,
-                  value: c.stats[2].value,
-                  valueColor: c.stats[2].valueColor,
-                ),
-                SizedBox(width: 12.w),
-                CommissionStatCard(
-                  label: c.stats[3].label,
-                  value: c.stats[3].value,
-                  valueColor: c.stats[3].valueColor,
-                ),
-              ],
-            ),
+            // ── Stats ────────────────────────────────────────────────────
+            Obx(() {
+              if (c.isLoadingStats.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Column(
+                    children: [
+                      Row(children: [
+                        _ShimmerCard(), SizedBox(width: 12.w), _ShimmerCard(),
+                      ]),
+                      SizedBox(height: 12.h),
+                      Row(children: [
+                        _ShimmerCard(), SizedBox(width: 12.w), _ShimmerCard(),
+                      ]),
+                    ],
+                  ),
+                );
+              }
+              final s = c.stats;
+              return Column(
+                children: [
+                  Row(children: [
+                    CommissionStatCard(label: s[0].label, value: s[0].value, valueColor: s[0].valueColor),
+                    SizedBox(width: 12.w),
+                    CommissionStatCard(label: s[1].label, value: s[1].value, valueColor: s[1].valueColor),
+                  ]),
+                  SizedBox(height: 12.h),
+                  Row(children: [
+                    CommissionStatCard(label: s[2].label, value: s[2].value, valueColor: s[2].valueColor),
+                    SizedBox(width: 12.w),
+                    CommissionStatCard(label: s[3].label, value: s[3].value, valueColor: s[3].valueColor),
+                  ]),
+                ],
+              );
+            }),
+
             SizedBox(height: 16.h),
-            Obx(() => MonthlyCommissionTrendChart(
-              points: c.trendPoints.toList(),
-            )),
+
+            // ── Trend chart ───────────────────────────────────────────────
+            Obx(() {
+              if (c.isLoadingStats.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Container(
+                    height: 200.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                );
+              }
+              return MonthlyCommissionTrendChart(
+                points: c.trendPoints.toList(),
+              );
+            }),
+
             SizedBox(height: 20.h),
+
             CustomText(
               text: 'Quick Actions',
               fontsize: 15.sp,
@@ -118,6 +143,21 @@ class CommissionDashboardScreen extends StatelessWidget {
             ),
             SizedBox(height: 24.h),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        height: 80.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
         ),
       ),
     );

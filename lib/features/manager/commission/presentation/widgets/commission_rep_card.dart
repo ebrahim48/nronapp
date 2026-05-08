@@ -7,14 +7,14 @@ import '../../../../../core/custom_widgets/custom_text.dart';
 class CommissionRepCard extends StatelessWidget {
   final String name;
   final String role;
-  final String? avatarAsset;
+  final String? avatarUrl;
   final CommissionPaymentStatus? status;
 
   const CommissionRepCard({
     super.key,
     required this.name,
     required this.role,
-    this.avatarAsset,
+    this.avatarUrl,
     this.status,
   });
 
@@ -29,13 +29,16 @@ class CommissionRepCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28.r,
-            backgroundImage: avatarAsset != null ? AssetImage(avatarAsset!) : null,
-            backgroundColor: const Color(0xFF3A3A3A),
-            child: avatarAsset == null
-                ? Icon(Icons.person, color: AppColors.secondaryTextColor, size: 26.r)
-                : null,
+          ClipOval(
+            child: avatarUrl != null && avatarUrl!.isNotEmpty
+                ? Image.network(
+                    avatarUrl!,
+                    width: 56.r,
+                    height: 56.r,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _fallback(),
+                  )
+                : _fallback(),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -43,7 +46,7 @@ class CommissionRepCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomText(
-                  text: name,
+                  text: name.isNotEmpty ? name : '—',
                   fontsize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primaryTextColor,
@@ -79,6 +82,15 @@ class CommissionRepCard extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _fallback() {
+    return Container(
+      width: 56.r,
+      height: 56.r,
+      color: const Color(0xFF3A3A3A),
+      child: Icon(Icons.person, color: AppColors.secondaryTextColor, size: 26.r),
     );
   }
 }
