@@ -140,7 +140,8 @@ class ApiConstants {
   static String getCommissionManageSingle(String id) => '/commission-manage/find/$id';
   static String updateCommissionRate(String id) => '/commission-manage/update-commission/$id';
 
-
+  static const String getManagerSales = '/sales/get-all';
+  static String getManagerSaleDetail(String id) => '/sales/find/$id';
 
 
 

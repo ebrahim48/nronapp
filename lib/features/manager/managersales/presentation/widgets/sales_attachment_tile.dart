@@ -21,24 +21,18 @@ class SaleAttachmentTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 36.r,
-            height: 36.r,
-            decoration: BoxDecoration(
-              color: attachment.isPdf
-                  ? AppColors.redColorFF1D1D.withValues(alpha: 0.15)
-                  : AppColors.primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6.r),
-            ),
-            child: Icon(
-              attachment.isPdf
-                  ? Icons.picture_as_pdf_outlined
-                  : Icons.image_outlined,
-              color: attachment.isPdf
-                  ? AppColors.redColorFF1D1D
-                  : AppColors.primaryColor,
-              size: 18.r,
-            ),
+          // Thumbnail or icon
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6.r),
+            child: !attachment.isPdf && attachment.url.isNotEmpty
+                ? Image.network(
+                    attachment.url,
+                    width: 36.r,
+                    height: 36.r,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _fileIcon(),
+                  )
+                : _fileIcon(),
           ),
           SizedBox(width: 10.w),
           Expanded(
@@ -46,24 +40,53 @@ class SaleAttachmentTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomText(
-                  text: attachment.fileName,
+                  text: attachment.fileName.isNotEmpty
+                      ? attachment.fileName
+                      : 'Attachment',
                   fontsize: 12.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.primaryTextColor,
                   textAlign: TextAlign.start,
+                  maxline: 1,
+                  textOverflow: TextOverflow.ellipsis,
                 ),
-                CustomText(
-                  text: '${attachment.size} • ${attachment.date}',
-                  fontsize: 10.sp,
-                  color: AppColors.secondaryTextColor,
-                  textAlign: TextAlign.start,
-                ),
+                if (attachment.size.isNotEmpty || attachment.date.isNotEmpty)
+                  CustomText(
+                    text: [attachment.size, attachment.date]
+                        .where((s) => s.isNotEmpty)
+                        .join(' • '),
+                    fontsize: 10.sp,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
               ],
             ),
           ),
           Icon(Icons.remove_red_eye_outlined,
               color: AppColors.primaryColor, size: 20.r),
         ],
+      ),
+    );
+  }
+
+  Widget _fileIcon() {
+    return Container(
+      width: 36.r,
+      height: 36.r,
+      decoration: BoxDecoration(
+        color: attachment.isPdf
+            ? AppColors.redColorFF1D1D.withValues(alpha: 0.15)
+            : AppColors.primaryColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: Icon(
+        attachment.isPdf
+            ? Icons.picture_as_pdf_outlined
+            : Icons.image_outlined,
+        color: attachment.isPdf
+            ? AppColors.redColorFF1D1D
+            : AppColors.primaryColor,
+        size: 18.r,
       ),
     );
   }

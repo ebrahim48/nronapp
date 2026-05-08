@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/manager/managersales/presentation/widgets/manager_sales_card.dart';
 import 'package:nron_app/features/manager/managersales/presentation/widgets/sales_filter_chips.dart';
 import 'package:nron_app/features/manager/managersales/presentation/widgets/sales_search_bar.dart';
@@ -11,7 +12,6 @@ import '../../appdrawer/app_drawer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_sales_controller.dart';
-
 
 class ManagerSalesScreen extends StatelessWidget {
   const ManagerSalesScreen({super.key});
@@ -68,6 +68,27 @@ class ManagerSalesScreen extends StatelessWidget {
             SizedBox(height: 10.h),
             Expanded(
               child: Obx(() {
+                // ── Shimmer ────────────────────────────────────────────
+                if (c.isLoading.value) {
+                  return Shimmer.fromColors(
+                    baseColor: const Color(0xFF2A2A2A),
+                    highlightColor: const Color(0xFF3A3A3A),
+                    child: ListView.builder(
+                      padding: EdgeInsets.only(bottom: 24.h),
+                      itemCount: 6,
+                      itemBuilder: (_, __) => Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        height: 100.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                // ── Empty ──────────────────────────────────────────────
                 final list = c.filteredSales;
                 if (list.isEmpty) {
                   return Center(
@@ -78,12 +99,19 @@ class ManagerSalesScreen extends StatelessWidget {
                     ),
                   );
                 }
+
+                // ── List ───────────────────────────────────────────────
                 return ListView.builder(
                   padding: EdgeInsets.only(bottom: 24.h),
                   itemCount: list.length,
                   itemBuilder: (context, i) => ManagerSaleCard(
                     sale: list[i],
-                    onTap: () => context.push(AppRoutes.managerSaleDetailScreen),
+                    onTap: () async {
+                      await c.fetchSaleDetail(list[i].id);
+                      if (context.mounted) {
+                        context.push(AppRoutes.managerSaleDetailScreen);
+                      }
+                    },
                   ),
                 );
               }),
