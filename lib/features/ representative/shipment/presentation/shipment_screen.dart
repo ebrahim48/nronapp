@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nron_app/core/config/app-routes/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
@@ -85,17 +87,13 @@ class _ShipmentsScreenState extends State<ShipmentsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Top action buttons ──
                 Row(
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const TrackShipmentScreen(),
-                          ),
-                        ),
+                        onTap: () {
+                          context.pushNamed(AppRoutes.trackShipmentScreen);
+                        },
                         child: Container(
                           height: 100.h,
                           decoration: BoxDecoration(
@@ -169,6 +167,7 @@ class _ShipmentsScreenState extends State<ShipmentsScreen> {
                     ),
                   ],
                 ),
+
                 SizedBox(height: 16.h),
                 Row(
                   children: [

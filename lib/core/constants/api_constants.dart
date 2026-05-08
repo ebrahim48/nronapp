@@ -1,6 +1,13 @@
 class ApiConstants {
-  static const String baseUrl = 'https://wn85j8p6-9001.asse.devtunnels.ms/api/v1';
-  static const String socketUrl = "https://wn85j8p6-9001.asse.devtunnels.ms";
+
+
+  static const String baseUrl = 'https://wn85j8p6-9002.asse.devtunnels.ms/api/v1';
+  static const String socketUrl = "https://wn85j8p6-9002.asse.devtunnels.ms";
+
+
+
+  // static const String baseUrl = 'https://wn85j8p6-9001.asse.devtunnels.ms/api/v1';
+  // static const String socketUrl = "https://wn85j8p6-9001.asse.devtunnels.ms";
 
 
 
@@ -100,13 +107,11 @@ class ApiConstants {
   static String deleteTrayById(String id) => '/tray/delete/$id';
   static String sendTrayById(String id) => '/tray/send/$id';
   static String receiveTrayById(String id) => '/tray/receive/$id';
-
   static const String getSummaryCount = '/missing-instrument/my-overview';
   static const String getMissingHistory = '/missing-instrument/history';
   static const String createMissingInstrument = '/missing-instrument/create';
   static String findMissingInstrument(String id) => '/missing-instrument/find/$id';
   static String sendMissingVendorMail(String id) => '/missing-instrument/send-vendor/$id';
-
   static const String getShipment = '/shipment/get-my/home';
   static const String getMyShipment = '/shipment/get-my';
   static String getShipmentDetails(String id) => '/shipment/find/$id';

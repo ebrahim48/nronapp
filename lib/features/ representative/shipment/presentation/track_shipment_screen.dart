@@ -3,9 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/shipment_detail_controller.dart';
+import '../data/repositories/shipment_repository.dart';
 import '../model/shipment_model.dart';
 import 'widgets/section_card.dart';
 
@@ -19,32 +23,63 @@ class TrackShipmentScreen extends StatefulWidget {
 
 class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
   late final ShipmentDetailController _ctrl;
-  final _searchController = TextEditingController();
+
+  // List mode state (when no ID passed)
+  final _repo = ShipmentRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
+  final _list = <ShipmentModel>[];
+  bool _listLoading = true;
 
   @override
   void initState() {
     super.initState();
     _ctrl = Get.put(ShipmentDetailController(), tag: 'track');
     if (widget.shipmentId != null && widget.shipmentId!.isNotEmpty) {
-      _searchController.text = widget.shipmentId!;
       WidgetsBinding.instance
           .addPostFrameCallback((_) => _ctrl.loadDetail(widget.shipmentId!));
     } else {
       _ctrl.isLoading.value = false;
+      _loadList();
     }
   }
 
   @override
   void dispose() {
     Get.delete<ShipmentDetailController>(tag: 'track', force: true);
-    _searchController.dispose();
     super.dispose();
   }
 
-  void _search() {
-    final id = _searchController.text.trim();
-    if (id.isEmpty) return;
-    _ctrl.loadDetail(id);
+  Future<void> _loadList() async {
+    try {
+      setState(() => _listLoading = true);
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getList(token, page: 1, limit: 50);
+      final data = res['data'] as Map<String, dynamic>? ?? {};
+      final docs = data['results'] as List?
+          ?? data['docs'] as List?
+          ?? data['shipments'] as List?
+          ?? [];
+      setState(() {
+        _list.clear();
+        _list.addAll(
+          docs.whereType<Map<String, dynamic>>().map(ShipmentModel.fromJson),
+        );
+      });
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _listLoading = false);
+    }
+  }
+
+  void _openTracking(ShipmentModel s) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TrackShipmentScreen(shipmentId: s.id),
+      ),
+    );
   }
 
   @override
@@ -69,93 +104,54 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
           textAlign: TextAlign.start,
         ),
       ),
-      body: Column(
-        children: [
-          // ── Search bar ──
-          if (widget.shipmentId == null)
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 46.h,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF252525),
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(
-                            color: AppColors.dotButtonInactiveColor, width: 0.6),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(width: 12.w),
-                          Icon(Icons.search,
-                              color: AppColors.secondaryTextColor, size: 18.r),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              style: TextStyle(
-                                color: AppColors.primaryTextColor,
-                                fontSize: 13.sp,
-                                fontFamily: 'Poppins',
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Enter shipment ID...',
-                                hintStyle: TextStyle(
-                                  color: AppColors.secondaryTextColor,
-                                  fontSize: 12.sp,
-                                  fontFamily: 'Poppins',
-                                ),
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding:
-                                    EdgeInsets.symmetric(vertical: 10.h),
-                              ),
-                              onSubmitted: (_) => _search(),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  GestureDetector(
-                    onTap: _search,
-                    child: Container(
-                      width: 46.r,
-                      height: 46.r,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Icon(Icons.search, color: Colors.black, size: 22.r),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      body: widget.shipmentId != null
+          ? _buildDetailView()
+          : _buildListView(),
+    );
+  }
 
-          Expanded(
-            child: Obx(() {
-              if (_ctrl.isLoading.value) return _shimmer();
-              final s = _ctrl.shipment.value;
-              if (s == null) {
-                return Center(
-                  child: CustomText(
-                    text: widget.shipmentId == null
-                        ? 'Enter a shipment ID to track'
-                        : 'Shipment not found',
-                    color: AppColors.secondaryTextColor,
-                  ),
-                );
-              }
-              return _buildContent(s);
-            }),
-          ),
-        ],
+  // ── List view (no ID passed) ──────────────────────────────────────────────
+  Widget _buildListView() {
+    if (_listLoading) return _listShimmer();
+    if (_list.isEmpty) {
+      return Center(
+        child: CustomText(
+          text: 'No shipments found',
+          color: AppColors.secondaryTextColor,
+        ),
+      );
+    }
+    return RefreshIndicator(
+      color: AppColors.primaryColor,
+      backgroundColor: const Color(0xFF252525),
+      onRefresh: _loadList,
+      child: ListView.separated(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        itemCount: _list.length,
+        separatorBuilder: (_, __) => SizedBox(height: 12.h),
+        itemBuilder: (_, i) => _ShipmentListCard(
+          shipment: _list[i],
+          onTap: () => _openTracking(_list[i]),
+        ),
       ),
     );
+  }
+
+  // ── Detail / tracking view (ID passed) ───────────────────────────────────
+  Widget _buildDetailView() {
+    return Obx(() {
+      if (_ctrl.isLoading.value) return _detailShimmer();
+      final s = _ctrl.shipment.value;
+      if (s == null) {
+        return Center(
+          child: CustomText(
+            text: 'Shipment not found',
+            color: AppColors.secondaryTextColor,
+          ),
+        );
+      }
+      return _buildContent(s);
+    });
   }
 
   Widget _buildContent(ShipmentModel s) {
@@ -235,7 +231,6 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
                 ],
               ),
               SizedBox(height: 12.h),
-
               Container(
                 padding:
                     EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
@@ -282,7 +277,6 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
                 ),
               ),
               SizedBox(height: 10.h),
-
               Row(
                 children: [
                   Container(
@@ -319,10 +313,7 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
                     ),
                   ),
                   if (s.driverPhone.isNotEmpty)
-                    ActionIconButton(
-                      icon: Icons.phone_outlined,
-                      onTap: () {},
-                    ),
+                    ActionIconButton(icon: Icons.phone_outlined, onTap: () {}),
                 ],
               ),
             ],
@@ -395,7 +386,26 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
     );
   }
 
-  Widget _shimmer() {
+  Widget _listShimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: ListView.separated(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        itemCount: 6,
+        separatorBuilder: (_, __) => SizedBox(height: 12.h),
+        itemBuilder: (_, __) => Container(
+          height: 90.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _detailShimmer() {
     return Shimmer.fromColors(
       baseColor: const Color(0xFF2A2A2A),
       highlightColor: const Color(0xFF3A3A3A),
@@ -419,8 +429,72 @@ class _TrackShipmentScreenState extends State<TrackShipmentScreen> {
   }
 }
 
-// ── Live Map ──────────────────────────────────────────────────────────────────
+// ── Shipment List Card ────────────────────────────────────────────────────────
+class _ShipmentListCard extends StatelessWidget {
+  final ShipmentModel shipment;
+  final VoidCallback onTap;
+  const _ShipmentListCard({required this.shipment, required this.onTap});
 
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(14.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E2427),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: const Color(0xFF2E2E2E)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42.r,
+              height: 42.r,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(Icons.local_shipping_outlined,
+                  color: AppColors.primaryColor, size: 20.r),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: shipment.displayTitle.isNotEmpty
+                        ? shipment.displayTitle
+                        : 'Shipment',
+                    fontsize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                  SizedBox(height: 3.h),
+                  CustomText(
+                    text: shipment.refDisplay,
+                    fontsize: 11.sp,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 8.w),
+            _StatusBadge(status: shipment.shipmentStatus),
+            SizedBox(width: 8.w),
+            Icon(Icons.chevron_right,
+                color: AppColors.secondaryTextColor, size: 18.r),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Live Map ──────────────────────────────────────────────────────────────────
 class _LiveMap extends StatelessWidget {
   final ShipmentModel shipment;
   const _LiveMap({required this.shipment});
@@ -497,8 +571,7 @@ class _LiveMap extends StatelessWidget {
         width: double.infinity,
         height: 160.h,
         child: GoogleMap(
-          initialCameraPosition:
-              CameraPosition(target: _center, zoom: 12),
+          initialCameraPosition: CameraPosition(target: _center, zoom: 12),
           markers: markers,
           polylines: polylines,
           zoomControlsEnabled: false,
@@ -512,7 +585,6 @@ class _LiveMap extends StatelessWidget {
 }
 
 // ── Tracking Timeline ─────────────────────────────────────────────────────────
-
 class _TrackingTimeline extends StatelessWidget {
   final List<TrackingEvent> events;
   const _TrackingTimeline({required this.events});
@@ -550,7 +622,8 @@ class _TrackingTimeline extends StatelessWidget {
                       Expanded(
                         child: Container(
                           width: 1.5.w,
-                          color: AppColors.primaryColor.withValues(alpha: 0.3),
+                          color:
+                              AppColors.primaryColor.withValues(alpha: 0.3),
                         ),
                       ),
                   ],
@@ -566,9 +639,8 @@ class _TrackingTimeline extends StatelessWidget {
                       CustomText(
                         text: e.status,
                         fontsize: 13.sp,
-                        fontWeight: isLast
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+                        fontWeight:
+                            isLast ? FontWeight.w700 : FontWeight.w500,
                         color: e.isDone
                             ? AppColors.primaryTextColor
                             : AppColors.secondaryTextColor,
@@ -602,8 +674,15 @@ class _TrackingTimeline extends StatelessWidget {
   String _formatTs(String ts) {
     try {
       final dt = DateTime.parse(ts).toLocal();
-      final months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      final h = dt.hour > 12 ? dt.hour - 12 : dt.hour == 0 ? 12 : dt.hour;
+      const months = [
+        'Jan','Feb','Mar','Apr','May','Jun',
+        'Jul','Aug','Sep','Oct','Nov','Dec'
+      ];
+      final h = dt.hour > 12
+          ? dt.hour - 12
+          : dt.hour == 0
+              ? 12
+              : dt.hour;
       final m = dt.minute.toString().padLeft(2, '0');
       final ampm = dt.hour >= 12 ? 'PM' : 'AM';
       return '${months[dt.month - 1]} ${dt.day}, $h:$m $ampm';
@@ -614,7 +693,6 @@ class _TrackingTimeline extends StatelessWidget {
 }
 
 // ── Package Card ──────────────────────────────────────────────────────────────
-
 class _PackageCard extends StatelessWidget {
   final String label;
   final String value;
@@ -650,7 +728,6 @@ class _PackageCard extends StatelessWidget {
 }
 
 // ── Status Badge ──────────────────────────────────────────────────────────────
-
 class _StatusBadge extends StatelessWidget {
   final String status;
   const _StatusBadge({required this.status});
