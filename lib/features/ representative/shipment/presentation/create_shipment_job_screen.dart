@@ -634,7 +634,7 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
               CustomTextField(
                 controller: _ctrl.dropoffPhoneController,
                 labelText: 'Phone Number *',
-                hintText: '01324567899',
+                hintText: 'phone no',
                 keyboardType: TextInputType.phone,
               ),
               CustomTextField(

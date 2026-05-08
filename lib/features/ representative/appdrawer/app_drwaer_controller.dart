@@ -35,8 +35,8 @@ class AppDrawerController extends GetxController {
       barrierDismissible: false,
       builder: (dialogContext) => SignOutDialog(
         onConfirm: () {
-          Navigator.of(dialogContext).pop(); // Close dialog first
-          context.go(AppRoutes.signInScreen);
+          Navigator.of(dialogContext).pop();
+          context.go(AppRoutes.roleSelection);
         },
       ),
     );

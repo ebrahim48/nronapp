@@ -61,8 +61,10 @@ import '../../../features/ representative/settingsprofile/presentation/others_sc
 import '../../../features/ representative/settingsprofile/presentation/privacy_policy_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/profile_screen.dart';
 import '../../../features/ representative/settingsprofile/presentation/settings_profile_screen.dart';
+import '../../../features/ representative/shipment/presentation/create_shipment_job_screen.dart';
 import '../../../features/ representative/shipment/presentation/job_details_screen.dart' as rep_job_details;
 import '../../../features/ representative/shipment/presentation/shipment_select_implants_screen.dart';
+import '../../../features/ representative/shipment/presentation/track_shipment_screen.dart';
 import '../../../features/driver/driver_home/presentation/job_details_screen.dart';
 import '../../../features/ representative/shipment/presentation/shipment_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
@@ -243,6 +245,8 @@ static const allActivitiesScreen = '/all-activities';
   static const String missingInstrumentHistoryScreen = '/missingInstrumentHistoryScreen';
   static const String updateImplantScreen = '/update-implant';
   static const String shipmentSelectImplantsScreen = '/shipmentSelectImplantsScreen';
+  static const String createShipmentJobScreen = '/createShipmentJobScreen';
+  static const String trackShipmentScreen = '/trackShipmentScreen';
 
 
 
@@ -845,6 +849,16 @@ static const allActivitiesScreen = '/all-activities';
         path: shipmentSelectImplantsScreen,
         name: shipmentSelectImplantsScreen,
         builder: (context, state) => ShipmentSelectImplantsScreen(),
+      ),
+      GoRoute(
+        path: createShipmentJobScreen,
+        name: createShipmentJobScreen,
+        builder: (context, state) => CreateShipmentJobScreen(),
+      ),
+      GoRoute(
+        path: trackShipmentScreen,
+        name: trackShipmentScreen,
+        builder: (context, state) => TrackShipmentScreen(),
       ),
 
 
