@@ -117,6 +117,14 @@ class ApiConstants {
   static String getShipmentDetails(String id) => '/shipment/find/$id';
   static const String createShipment = '/shipment/create';
 
+  /// ==============================> Manager ===============================>
+  static const String getManagerInventory = '/meta/inventory/overview';
+  static const String getManagerSummaryCountInstrument = '/missing-instrument/overview';
+  static const String getMissingInstrumentReport = '/missing-instrument/report';
+  static String getManagerMissingInstrumentDetail(String id) => '/missing-instrument/find/$id';
+  static String sendManagerVendorMail(String id) => '/missing-instrument/send-vendor/$id';
+  static const String getAllTransferRequest = '/meta/inventory/transfer-requests';
+
 
 
 

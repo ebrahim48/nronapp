@@ -13,8 +13,23 @@ class ManagerReportDetailsScreen extends StatelessWidget {
 
   const ManagerReportDetailsScreen({super.key, required this.item});
 
+  String _formatDate(String raw) {
+    try {
+      final dt = DateTime.parse(raw);
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    } catch (_) {
+      return raw;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final c = Get.find<ManagerMissingReportController>();
+
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
@@ -22,10 +37,17 @@ class ManagerReportDetailsScreen extends StatelessWidget {
         elevation: 0,
         toolbarHeight: 52.h,
         leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back_ios, color: AppColors.primaryTextColor, size: 18.r)),
-        title: CustomText(text: 'Report Details', fontsize: 16.sp,
-            fontWeight: FontWeight.w600, color: AppColors.primaryTextColor, textAlign: TextAlign.start),
+          onTap: () => Navigator.pop(context),
+          child: Icon(Icons.arrow_back_ios,
+              color: AppColors.primaryTextColor, size: 18.r),
+        ),
+        title: CustomText(
+          text: 'Report Details',
+          fontsize: 16.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primaryTextColor,
+          textAlign: TextAlign.start,
+        ),
         centerTitle: false,
         titleSpacing: 0,
       ),
@@ -36,20 +58,117 @@ class ManagerReportDetailsScreen extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 24.h),
               child: Column(
                 children: [
-                  _VendorNotifiedBanner(),
+                  // ── Vendor notified banner ───────────────────────────
+                  _VendorNotifiedBanner(isSent: item.isSentToVendor),
                   SizedBox(height: 12.h),
-                  _TrayDetailsCard(),
+
+                  // ── Tray details ─────────────────────────────────────
+                  _SectionCard(
+                    headerIcon: Icons.inventory_2_outlined,
+                    headerIconColor: const Color(0xFF137FEC),
+                    title: 'Tray Details',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _DetailRow(
+                            label: 'Tray ID',
+                            value: item.trayTitle ?? item.trayId),
+                        SizedBox(height: 12.h),
+                        _DetailRow(
+                            label: 'Facility', value: item.facilityName),
+                        SizedBox(height: 12.h),
+                        _DetailRow(
+                            label: 'Reported By', value: item.user),
+                        SizedBox(height: 12.h),
+                        _DetailRow(
+                            label: 'Date',
+                            value: _formatDate(item.date)),
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 12.h),
-                  _IssueInfoCard(),
+
+                  // ── Issue info ───────────────────────────────────────
+                  _SectionCard(
+                    headerIcon: Icons.warning_amber_rounded,
+                    headerIconColor: const Color(0xFFEC0101),
+                    title: 'Issue Info',
+                    badge: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEC0101),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: CustomText(
+                        text: item.issueType.toUpperCase(),
+                        fontsize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _DetailRow(
+                            label: 'Instrument',
+                            value: item.instrumentName),
+                        if ((item.descriptionAndNotes ?? '').isNotEmpty) ...[
+                          SizedBox(height: 12.h),
+                          _DetailRow(
+                              label: 'Notes',
+                              value: item.descriptionAndNotes!),
+                        ],
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 12.h),
-                  _UploadedEvidenceCard(),
-                  SizedBox(height: 16.h),
+
+                  // ── Vendor info ──────────────────────────────────────
+                  if (item.vendorName != null)
+                    _SectionCard(
+                      headerIcon: Icons.business_outlined,
+                      headerIconColor: AppColors.primaryColor,
+                      title: 'Vendor Info',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _DetailRow(
+                              label: 'Name',
+                              value: item.vendorName ?? ''),
+                          if ((item.vendorEmail ?? '').isNotEmpty) ...[
+                            SizedBox(height: 12.h),
+                            _DetailRow(
+                                label: 'Email',
+                                value: item.vendorEmail!),
+                          ],
+                          if ((item.vendorPhone ?? '').isNotEmpty) ...[
+                            SizedBox(height: 12.h),
+                            _DetailRow(
+                                label: 'Phone',
+                                value: item.vendorPhone!),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                  if (item.vendorName != null) SizedBox(height: 12.h),
+
+                  // ── Uploaded evidence ────────────────────────────────
+                  if (item.files.isNotEmpty)
+                    _UploadedEvidenceCard(files: item.files),
+
+                  if (item.files.isNotEmpty) SizedBox(height: 16.h),
+
                   _SyncNote(),
                   SizedBox(height: 80.h),
                 ],
               ),
             ),
           ),
+
+          // ── Bottom actions ───────────────────────────────────────────
           Container(
             color: AppColors.backgroundColor,
             padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 24.h),
@@ -61,18 +180,90 @@ class ManagerReportDetailsScreen extends StatelessWidget {
                   onTap: () {},
                 ),
                 SizedBox(height: 10.h),
-                CustomButton(
-                  title: 'Send to Vendor Email',
-                  onpress: () {
+                Obx(() => CustomButton(
+                      title: item.isSentToVendor
+                          ? 'Already Sent to Vendor'
+                          : 'Send to Vendor Email',
+                      loading: c.isSendingMail.value,
+                      onpress: item.isSentToVendor
+                          ? () {}
+                          : () => c.sendVendorMail(item.id),
+                      suffixIcon: SvgPicture.asset(
+                        'assets/icons/createjob.svg',
+                        width: 18.r,
+                        height: 18.r,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.black, BlendMode.srcIn),
+                      ),
+                    )),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
-                  },
-                  suffixIcon:
-                  SvgPicture.asset('assets/icons/createjob.svg',
-                      width: 18.r,
-                      height: 18.r,
-                      colorFilter:
-                      const ColorFilter.mode(Colors.black,
-                          BlendMode.srcIn)),
+// ── Widgets ───────────────────────────────────────────────────────────────────
+
+class _VendorNotifiedBanner extends StatelessWidget {
+  final bool isSent;
+  const _VendorNotifiedBanner({required this.isSent});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSent ? AppColors.primaryColor : AppColors.secondaryTextColor;
+    final label = isSent ? 'Vendor Notified ✅' : 'Vendor Not Yet Notified';
+    final subtitle = isSent
+        ? 'Notification has been sent to the vendor.'
+        : 'Tap "Send to Vendor Email" below to notify the vendor.';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(14.r),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36.r,
+            height: 36.r,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+            ),
+            child: Center(
+              child: Icon(
+                isSent ? Icons.check : Icons.info_outline,
+                color: Colors.white,
+                size: 18.r,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  text: label,
+                  fontsize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                  textAlign: TextAlign.start,
+                ),
+                SizedBox(height: 2.h),
+                CustomText(
+                  text: subtitle,
+                  fontsize: 11.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.secondaryTextColor,
+                  textAlign: TextAlign.start,
+                  textHeight: 1.4,
                 ),
               ],
             ),
@@ -83,101 +274,18 @@ class ManagerReportDetailsScreen extends StatelessWidget {
   }
 }
 
-class _VendorNotifiedBanner extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(14.r),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A3A3A),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.primaryColor.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36.r, height: 36.r,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primaryColor,
-            ),
-            child: Center(child: Icon(Icons.check, color: Colors.white, size: 18.r)),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(children: [
-                  CustomText(text: 'Vendor Notified', fontsize: 14.sp,
-                      fontWeight: FontWeight.w700, color: AppColors.primaryColor, textAlign: TextAlign.start),
-                  SizedBox(width: 4.w),
-                  const Text('✅'),
-                ]),
-                SizedBox(height: 2.h),
-                CustomText(text: 'Notification sent to Medical Logistics Service on Oct 24, 2023',
-                    fontsize: 11.sp, fontWeight: FontWeight.w400, color: AppColors.secondaryTextColor,
-                    textAlign: TextAlign.start, textHeight: 1.4),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TrayDetailsCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return _SectionCard(
-      headerIcon: Icons.inventory_2_outlined,
-      headerIconColor: const Color(0xFF137FEC),
-      title: 'Tray Details',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _DetailRow(label: 'ID', value: 'TR-8829'),
-          SizedBox(height: 12.h),
-          _DetailRow(label: 'Facility', value: 'City Hospital'),
-          SizedBox(height: 12.h),
-          _DetailRow(label: 'Location', value: 'Central Sterile Zone A'),
-        ],
-      ),
-    );
-  }
-}
-
-class _IssueInfoCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return _SectionCard(
-      headerIcon: Icons.warning_amber_rounded,
-      headerIconColor: const Color(0xFFEC0101),
-      title: 'Issue Info',
-      badge: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFFEC0101),
-          borderRadius: BorderRadius.circular(4.r),
-        ),
-        child: CustomText(text: 'MISSING', fontsize: 10.sp, fontWeight: FontWeight.w700,
-            color: Colors.white, textAlign: TextAlign.center),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _DetailRow(label: 'Instrument', value: 'Gibbon Lees Custom'),
-          SizedBox(height: 12.h),
-          _DetailRow(label: 'Notes', value: "'2 forceps and 1 scissors missing from tray.'"),
-        ],
-      ),
-    );
-  }
-}
-
 class _UploadedEvidenceCard extends StatelessWidget {
+  final List<String> files;
+  const _UploadedEvidenceCard({required this.files});
+
+  bool _isImage(String url) {
+    final lower = url.toLowerCase();
+    return lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.webp');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -188,38 +296,73 @@ class _UploadedEvidenceCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFF3A3A3A)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: EdgeInsets.all(14.r),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(children: [
-                  Icon(Icons.image_outlined, color: AppColors.primaryColor, size: 18.r),
-                  SizedBox(width: 8.w),
-                  CustomText(text: 'Uploaded\nEvidence', fontsize: 13.sp,
-                      fontWeight: FontWeight.w700, color: AppColors.primaryTextColor, textAlign: TextAlign.start),
-                ]),
-                CustomText(text: 'Captured Oct 24, 08:12 AM', fontsize: 11.sp,
-                    fontWeight: FontWeight.w400, color: AppColors.secondaryTextColor, textAlign: TextAlign.end),
+                Icon(Icons.image_outlined,
+                    color: AppColors.primaryColor, size: 18.r),
+                SizedBox(width: 8.w),
+                CustomText(
+                  text: 'Uploaded Evidence',
+                  fontsize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTextColor,
+                  textAlign: TextAlign.start,
+                ),
               ],
             ),
           ),
-          ClipRRect(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(12.r),
-              bottomRight: Radius.circular(12.r),
-            ),
-            child: Image.asset(
-              'assets/images/tray.jpg',
-              width: double.infinity,
-              height: 180.h,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                height: 180.h,
-                color: const Color(0xFF2A3A3A),
-                child: Center(child: Icon(Icons.image_outlined, color: AppColors.secondaryTextColor, size: 40.r)),
-              ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            child: Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: files.map((url) {
+                if (_isImage(url)) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: Image.network(
+                      url,
+                      width: 80.r,
+                      height: 80.r,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 80.r,
+                        height: 80.r,
+                        color: const Color(0xFF2A2A2A),
+                        child: Icon(Icons.broken_image_outlined,
+                            color: Colors.white24, size: 24.r),
+                      ),
+                    ),
+                  );
+                }
+                // Non-image file (PDF etc.)
+                return Container(
+                  width: 80.r,
+                  height: 80.r,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A2A2A),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.insert_drive_file_outlined,
+                          color: AppColors.primaryColor, size: 28.r),
+                      SizedBox(height: 4.h),
+                      CustomText(
+                        text: 'File',
+                        fontsize: 10.sp,
+                        color: AppColors.secondaryTextColor,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
@@ -236,9 +379,13 @@ class _SyncNote extends StatelessWidget {
         Icon(Icons.history, color: AppColors.secondaryTextColor, size: 16.r),
         SizedBox(height: 4.h),
         CustomText(
-          text: 'Last synchronized with inventory management system 4 minutes ago.',
-          fontsize: 11.sp, fontWeight: FontWeight.w400,
-          color: AppColors.secondaryTextColor, textAlign: TextAlign.center, textHeight: 1.4,
+          text:
+              'Last synchronized with inventory management system 4 minutes ago.',
+          fontsize: 11.sp,
+          fontWeight: FontWeight.w400,
+          color: AppColors.secondaryTextColor,
+          textAlign: TextAlign.center,
+          textHeight: 1.4,
         ),
       ],
     );
@@ -279,14 +426,20 @@ class _SectionCard extends StatelessWidget {
               Row(children: [
                 Icon(headerIcon, color: headerIconColor, size: 18.r),
                 SizedBox(width: 8.w),
-                CustomText(text: title, fontsize: 14.sp, fontWeight: FontWeight.w700,
-                    color: AppColors.primaryTextColor, textAlign: TextAlign.start),
+                CustomText(
+                  text: title,
+                  fontsize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryTextColor,
+                  textAlign: TextAlign.start,
+                ),
               ]),
               if (badge != null) badge!,
             ],
           ),
           SizedBox(height: 12.h),
-          Divider(color: const Color(0xFF3A3A3A), thickness: 0.5, height: 1),
+          Divider(
+              color: const Color(0xFF3A3A3A), thickness: 0.5, height: 1),
           SizedBox(height: 12.h),
           child,
         ],
@@ -306,18 +459,20 @@ class _DetailRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomText(
-            text: label,
-            fontsize: 11.sp,
-            fontWeight: FontWeight.w400,
-            color: AppColors.secondaryTextColor,
-            textAlign: TextAlign.start),
+          text: label,
+          fontsize: 11.sp,
+          fontWeight: FontWeight.w400,
+          color: AppColors.secondaryTextColor,
+          textAlign: TextAlign.start,
+        ),
         SizedBox(height: 2.h),
         CustomText(
-            text: value,
-            fontsize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primaryTextColor,
-            textAlign: TextAlign.start),
+          text: value.isNotEmpty ? value : '—',
+          fontsize: 14.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primaryTextColor,
+          textAlign: TextAlign.start,
+        ),
       ],
     );
   }
@@ -327,7 +482,8 @@ class _OutlinedActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _OutlinedActionButton({required this.icon, required this.label, required this.onTap});
+  const _OutlinedActionButton(
+      {required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -344,8 +500,13 @@ class _OutlinedActionButton extends StatelessWidget {
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Icon(icon, color: AppColors.primaryTextColor, size: 18.r),
           SizedBox(width: 8.w),
-          CustomText(text: label, fontsize: 14.sp, fontWeight: FontWeight.w600,
-              color: AppColors.primaryTextColor, textAlign: TextAlign.center),
+          CustomText(
+            text: label,
+            fontsize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.center,
+          ),
         ]),
       ),
     );
