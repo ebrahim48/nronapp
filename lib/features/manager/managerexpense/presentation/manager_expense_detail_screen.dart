@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/manager/managerexpense/presentation/widgets/approve_dialog.dart';
 import 'package:nron_app/features/manager/managerexpense/presentation/widgets/expense-attachment_tile.dart';
 import 'package:nron_app/features/manager/managerexpense/presentation/widgets/reject-dialog.dart';
@@ -19,7 +20,6 @@ class ManagerExpenseDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.find<ManagerExpenseController>();
-    final d = c.expenseDetail;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -41,104 +41,173 @@ class ManagerExpenseDetailScreen extends StatelessWidget {
         ),
         centerTitle: false,
       ),
-      body: Column(
-        children: [
-          Expanded(
+      body: Obx(() {
+        // ── Shimmer while loading ──────────────────────────────────────
+        if (c.isLoadingDetail.value) {
+          return Shimmer.fromColors(
+            baseColor: const Color(0xFF2A2A2A),
+            highlightColor: const Color(0xFF3A3A3A),
             child: SingleChildScrollView(
               padding:
-              EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                  EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Rep card
-                  ExpenseRepCard(detail: d),
-
+                  // Rep card shimmer
+                  Container(
+                    height: 90.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
                   SizedBox(height: 12.h),
-
-                  // Total amount card
-                  ExpenseTotalAmountCard(
-                      amount: d.totalAmount, status: d.status),
-
+                  // Amount card shimmer
+                  Container(
+                    height: 80.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
                   SizedBox(height: 20.h),
-
-                  // Expense Details section
-                  CustomText(
-                    text: 'Expense Details',
-                    fontsize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
+                  // Table shimmer
+                  Container(
+                    height: 160.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
                   ),
-
-                  SizedBox(height: 10.h),
-
-                  ExpenseDetailTable(rows: [
-                    ExpenseDetailRow('Physician / Client', d.physicianClient),
-                    ExpenseDetailRow('Category', d.category),
-                    ExpenseDetailRow('Date of Expense', d.dateOfExpense),
-                    ExpenseDetailRow('Paid Status', d.paidStatus),
-                  ]),
-
                   SizedBox(height: 20.h),
-
-                  // Description section
-                  CustomText(
-                    text: 'Expense Details',
-                    fontsize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
+                  // Description shimmer
+                  Container(
+                    height: 80.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
                   ),
-
-                  SizedBox(height: 10.h),
-
-                  ExpenseDescriptionBox(description: d.description),
-
-                  SizedBox(height: 20.h),
-
-                  // Attachments section
-                  CustomText(
-                    text: 'Attachments',
-                    fontsize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryTextColor,
-                    textAlign: TextAlign.start,
-                  ),
-
-                  SizedBox(height: 10.h),
-
-                  ...d.attachments.map(
-                        (att) => ExpenseAttachmentTile(attachment: att),
-                  ),
-
-                  SizedBox(height: 16.h),
                 ],
               ),
             ),
-          ),
+          );
+        }
 
-          Container(
-            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E2427),
-              border: Border(
-                top: BorderSide(
-                    color: const Color(0xFF3A3A3A), width: 0.5),
+        final d = c.expenseDetail.value;
+
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 16.w, vertical: 14.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Rep card
+                    ExpenseRepCard(detail: d),
+
+                    SizedBox(height: 12.h),
+
+                    // Total amount card
+                    ExpenseTotalAmountCard(
+                        amount: d.totalAmount, status: d.status),
+
+                    SizedBox(height: 20.h),
+
+                    // Expense Details section
+                    CustomText(
+                      text: 'Expense Details',
+                      fontsize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryTextColor,
+                      textAlign: TextAlign.start,
+                    ),
+
+                    SizedBox(height: 10.h),
+
+                    ExpenseDetailTable(rows: [
+                      ExpenseDetailRow(
+                          'Physician / Client',
+                          d.physicianClient.isNotEmpty
+                              ? d.physicianClient
+                              : '—'),
+                      ExpenseDetailRow('Category',
+                          d.category.isNotEmpty ? d.category : '—'),
+                      ExpenseDetailRow('Date of Expense',
+                          d.dateOfExpense.isNotEmpty
+                              ? d.dateOfExpense
+                              : '—'),
+                      ExpenseDetailRow('Paid Status',
+                          d.paidStatus.isNotEmpty ? d.paidStatus : '—'),
+                    ]),
+
+                    SizedBox(height: 20.h),
+
+                    // Description section
+                    CustomText(
+                      text: 'Description',
+                      fontsize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryTextColor,
+                      textAlign: TextAlign.start,
+                    ),
+
+                    SizedBox(height: 10.h),
+
+                    ExpenseDescriptionBox(
+                        description: d.description.isNotEmpty
+                            ? d.description
+                            : 'No description provided.'),
+
+                    SizedBox(height: 20.h),
+
+                    // Attachments section
+                    if (d.attachments.isNotEmpty) ...[
+                      CustomText(
+                        text: 'Attachments',
+                        fontsize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryTextColor,
+                        textAlign: TextAlign.start,
+                      ),
+                      SizedBox(height: 10.h),
+                      ...d.attachments.map(
+                        (att) => ExpenseAttachmentTile(attachment: att),
+                      ),
+                    ],
+
+                    SizedBox(height: 16.h),
+                  ],
+                ),
               ),
             ),
-            child: ExpenseActionButtons(
-              onReject: () => RejectDialog.show(
-                context,
-                onSubmit: c.rejectExpense,
+
+            // Bottom action buttons
+            Container(
+              padding:
+                  EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E2427),
+                border: Border(
+                  top: BorderSide(
+                      color: const Color(0xFF3A3A3A), width: 0.5),
+                ),
               ),
-              onApprove: () => ApproveDialog.show(
-                context,
-                onConfirm: c.approveExpense,
+              child: ExpenseActionButtons(
+                onReject: () => RejectDialog.show(
+                  context,
+                  onSubmit: () => c.rejectExpense(context),
+                ),
+                onApprove: () => ApproveDialog.show(
+                  context,
+                  onConfirm: () => c.approveExpense(context),
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 }
