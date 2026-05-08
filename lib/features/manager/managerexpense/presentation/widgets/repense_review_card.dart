@@ -14,6 +14,24 @@ class ExpenseReviewCard extends StatelessWidget {
     this.onTap,
   });
 
+  Color _statusColor(ManagerExpenseStatus s) {
+    switch (s) {
+      case ManagerExpenseStatus.pending:  return AppColors.warningColor;
+      case ManagerExpenseStatus.approved: return const Color(0xFF1DB954);
+      case ManagerExpenseStatus.rejected: return AppColors.redColorFF1D1D;
+      default: return AppColors.secondaryTextColor;
+    }
+  }
+
+  String _statusLabel(ManagerExpenseStatus s) {
+    switch (s) {
+      case ManagerExpenseStatus.pending:  return 'PENDING';
+      case ManagerExpenseStatus.approved: return 'APPROVED';
+      case ManagerExpenseStatus.rejected: return 'REJECTED';
+      default: return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -29,41 +47,27 @@ class ExpenseReviewCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Initials avatar
-            Container(
-              width: 44.r,
-              height: 44.r,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A3A5C),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Center(
-                child: Text(
-                  expense.repInitials,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryTextColor,
-                  ),
-                ),
-              ),
+            // Avatar — always show initials
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10.r),
+              child: _InitialsAvatar(initials: expense.repInitials),
             ),
 
             SizedBox(width: 12.w),
 
-            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title + Amount row
+                  // Title + Amount
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: CustomText(
-                          text: expense.title,
+                          text: expense.title.isNotEmpty
+                              ? expense.title
+                              : expense.repName,
                           fontsize: 13.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryTextColor,
@@ -74,8 +78,7 @@ class ExpenseReviewCard extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
                       CustomText(
-                        text:
-                        '\$${expense.amount.toStringAsFixed(2)}',
+                        text: '\$${expense.amount.toStringAsFixed(2)}',
                         fontsize: 14.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primaryTextColor,
@@ -98,13 +101,10 @@ class ExpenseReviewCard extends StatelessWidget {
                           color: AppColors.secondaryTextColor,
                         ),
                       ),
-                      Text(
-                        ' • ',
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: AppColors.secondaryTextColor,
-                        ),
-                      ),
+                      Text(' • ',
+                          style: TextStyle(
+                              fontSize: 10.sp,
+                              color: AppColors.secondaryTextColor)),
                       Text(
                         expense.typeTag,
                         style: TextStyle(
@@ -125,11 +125,9 @@ class ExpenseReviewCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            color: AppColors.secondaryTextColor,
-                            size: 11.r,
-                          ),
+                          Icon(Icons.calendar_today_outlined,
+                              color: AppColors.secondaryTextColor,
+                              size: 11.r),
                           SizedBox(width: 4.w),
                           CustomText(
                             text: expense.date,
@@ -139,7 +137,6 @@ class ExpenseReviewCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      // Status dot + label
                       Row(
                         children: [
                           Container(
@@ -172,30 +169,29 @@ class ExpenseReviewCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Color _statusColor(ManagerExpenseStatus s) {
-    switch (s) {
-      case ManagerExpenseStatus.pending:
-        return AppColors.warningColor;
-      case ManagerExpenseStatus.approved:
-        return const Color(0xFF1DB954);
-      case ManagerExpenseStatus.rejected:
-        return AppColors.redColorFF1D1D;
-      default:
-        return AppColors.secondaryTextColor;
-    }
-  }
+class _InitialsAvatar extends StatelessWidget {
+  final String initials;
+  const _InitialsAvatar({required this.initials});
 
-  String _statusLabel(ManagerExpenseStatus s) {
-    switch (s) {
-      case ManagerExpenseStatus.pending:
-        return 'PENDING';
-      case ManagerExpenseStatus.approved:
-        return 'APPROVED';
-      case ManagerExpenseStatus.rejected:
-        return 'REJECTED';
-      default:
-        return '';
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44.r,
+      height: 44.r,
+      color: const Color(0xFF1A3A5C),
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 }

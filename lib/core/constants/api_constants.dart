@@ -125,6 +125,9 @@ class ApiConstants {
   static String sendManagerVendorMail(String id) => '/missing-instrument/send-vendor/$id';
   static const String getAllTransferRequest = '/meta/inventory/transfer-requests';
 
+  static const String getExpenseAll = '/expense/get-all';
+  static String getManagerSingleExpense(String id) => '/expense/find/$id';
+
 
 
 

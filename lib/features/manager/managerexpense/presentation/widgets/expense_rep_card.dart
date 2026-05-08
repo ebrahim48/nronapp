@@ -21,28 +21,27 @@ class ExpenseRepCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Avatar
-          CircleAvatar(
-            radius: 28.r,
-            backgroundImage: detail.repAvatarAsset != null
-                ? AssetImage(detail.repAvatarAsset!)
-                : null,
-            backgroundColor: const Color(0xFF3A3A3A),
-            child: detail.repAvatarAsset == null
-                ? Icon(Icons.person,
-                color: AppColors.secondaryTextColor, size: 26.r)
-                : null,
+          // Avatar — network or fallback
+          ClipOval(
+            child: detail.repProfileUrl.isNotEmpty
+                ? Image.network(
+                    detail.repProfileUrl,
+                    width: 56.r,
+                    height: 56.r,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _fallbackAvatar(),
+                  )
+                : _fallbackAvatar(),
           ),
 
           SizedBox(width: 14.w),
 
-          // Name + role + date
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomText(
-                  text: detail.repName,
+                  text: detail.repName.isNotEmpty ? detail.repName : '—',
                   fontsize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primaryTextColor,
@@ -67,6 +66,16 @@ class ExpenseRepCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _fallbackAvatar() {
+    return Container(
+      width: 56.r,
+      height: 56.r,
+      color: const Color(0xFF3A3A3A),
+      child: Icon(Icons.person,
+          color: AppColors.secondaryTextColor, size: 26.r),
     );
   }
 }
