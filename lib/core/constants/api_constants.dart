@@ -128,7 +128,17 @@ class ApiConstants {
   static const String getExpenseAll = '/expense/get-all';
   static String getManagerSingleExpense(String id) => '/expense/find/$id';
 
+  // Commission
+  static const String getCommissionOverviewManager = '/commission/overview';
+  static const String getCommissionAllManager = '/commission/get-all';
+  static String approveCommissionById(String id) => '/sales/status-update/$id';
+  static String getCommissionDetail(String id) => '/commission/find/$id';
 
+  // Commission Manage
+  static const String getCommissionManageOverview = '/commission-manage/overview';
+  static const String getCommissionManageAll = '/commission-manage/get-all';
+  static String getCommissionManageSingle(String id) => '/commission-manage/find/$id';
+  static String updateCommissionRate(String id) => '/commission-manage/update-commission/$id';
 
 
 
