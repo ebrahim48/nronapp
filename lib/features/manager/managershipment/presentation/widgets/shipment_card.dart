@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../model/shipment_model.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
@@ -18,28 +17,47 @@ class ActiveShipmentCard extends StatelessWidget {
   Color _statusColor(ShipmentStatus s) {
     switch (s) {
       case ShipmentStatus.pending:
+      case ShipmentStatus.pendingApproval:
         return AppColors.warningColor;
       case ShipmentStatus.inTransit:
+      case ShipmentStatus.accepted:
         return const Color(0xFF1DB954);
       case ShipmentStatus.delivered:
         return AppColors.primaryColor;
+      default:
+        return AppColors.secondaryTextColor;
     }
   }
 
-  String _statusLabel(ShipmentStatus s) {
-    switch (s) {
-      case ShipmentStatus.pending:
-        return 'Pending';
-      case ShipmentStatus.inTransit:
-        return 'In Transit';
-      case ShipmentStatus.delivered:
-        return 'Delivered';
+  String _statusLabel(ShipmentModel s) {
+    final raw = s.displayStatus;
+    switch (raw.toLowerCase()) {
+      case 'pending_approval': return 'Pending Approval';
+      case 'accepted':         return 'Accepted';
+      case 'in_transit':       return 'In Transit';
+      case 'delivered':        return 'Delivered';
+      default:
+        return raw.isNotEmpty
+            ? raw[0].toUpperCase() + raw.substring(1)
+            : 'Pending';
+    }
+  }
+
+  String _formatDate(String raw) {
+    if (raw.isEmpty) return '—';
+    try {
+      final dt = DateTime.parse(raw);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun',
+                      'Jul','Aug','Sep','Oct','Nov','Dec'];
+      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    } catch (_) {
+      return raw;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sc = _statusColor(shipment.status);
+    final sc = _statusColor(shipment.statusEnum);
 
     return GestureDetector(
       onTap: onTap,
@@ -60,7 +78,7 @@ class ActiveShipmentCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: CustomText(
-                    text: shipment.title,
+                    text: shipment.displayTitle,
                     fontsize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryTextColor,
@@ -68,13 +86,14 @@ class ActiveShipmentCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 12.w, vertical: 5.h),
                   decoration: BoxDecoration(
                     color: sc.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
-                    _statusLabel(shipment.status),
+                    _statusLabel(shipment),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontFamily: 'Poppins',
@@ -88,7 +107,9 @@ class ActiveShipmentCard extends StatelessWidget {
 
             SizedBox(height: 2.h),
             CustomText(
-              text: shipment.refNumber,
+              text: shipment.shipmentId.isNotEmpty
+                  ? 'Ref: #${shipment.shipmentId}'
+                  : '',
               fontsize: 11.sp,
               color: AppColors.secondaryTextColor,
               textAlign: TextAlign.start,
@@ -96,7 +117,7 @@ class ActiveShipmentCard extends StatelessWidget {
 
             SizedBox(height: 10.h),
 
-            // Driver + Pickup Date row
+            // Driver + Pickup Date
             Row(
               children: [
                 Container(
@@ -106,8 +127,19 @@ class ActiveShipmentCard extends StatelessWidget {
                     color: const Color(0xFF2A2A2A),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.person_outline,
-                      color: AppColors.secondaryTextColor, size: 18.r),
+                  child: shipment.driverProfileUrl.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            shipment.driverProfileUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Icon(
+                                Icons.person_outline,
+                                color: AppColors.secondaryTextColor,
+                                size: 18.r),
+                          ),
+                        )
+                      : Icon(Icons.person_outline,
+                          color: AppColors.secondaryTextColor, size: 18.r),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
@@ -121,7 +153,9 @@ class ActiveShipmentCard extends StatelessWidget {
                         textAlign: TextAlign.start,
                       ),
                       CustomText(
-                        text: shipment.driver,
+                        text: shipment.driverName.isNotEmpty
+                            ? shipment.driverName
+                            : 'Unassigned',
                         fontsize: 12.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primaryTextColor,
@@ -140,7 +174,7 @@ class ActiveShipmentCard extends StatelessWidget {
                       textAlign: TextAlign.start,
                     ),
                     CustomText(
-                      text: shipment.pickupDate,
+                      text: _formatDate(shipment.pickupDate),
                       fontsize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primaryTextColor,
@@ -194,7 +228,9 @@ class ActiveShipmentCard extends StatelessWidget {
                         textAlign: TextAlign.start,
                       ),
                       CustomText(
-                        text: shipment.pickup,
+                        text: shipment.pickupAddress.isNotEmpty
+                            ? shipment.pickupAddress
+                            : '—',
                         fontsize: 12.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primaryTextColor,
@@ -208,7 +244,9 @@ class ActiveShipmentCard extends StatelessWidget {
                         textAlign: TextAlign.start,
                       ),
                       CustomText(
-                        text: shipment.dropAddress,
+                        text: shipment.dropoffAddress.isNotEmpty
+                            ? shipment.dropoffAddress
+                            : '—',
                         fontsize: 12.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primaryTextColor,

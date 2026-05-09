@@ -113,7 +113,7 @@ class ApiConstants {
   static const String createShipment = '/shipment/create';
 
   /// ==============================> Manager ===============================>
-  static const String getManagerInventory = '/meta/inventory/overview';
+  static const String getManagerInventory = '/meta/inventory/manager-overview';
   static const String getManagerSummaryCountInstrument = '/missing-instrument/overview';
   static const String getMissingInstrumentReport = '/missing-instrument/report';
   static String getManagerMissingInstrumentDetail(String id) => '/missing-instrument/find/$id';
@@ -139,6 +139,11 @@ class ApiConstants {
   static String getManagerSaleDetail(String id) => '/sales/find/$id';
 
   static const String getManagerOverviewHome = '/purchase-order/overview';
+
+  static const String getManagerShipment = '/shipment/get-all';
+  static const String getManagerShipmentStats = '/shipment/get-stats/home';
+  static String getManagerShipmentDetail(String id) => '/shipment/find/$id';
+  static String updateManagerShipmentStatus(String id) => '/shipment/status-update/$id';
 
 
 
