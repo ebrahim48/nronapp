@@ -1,132 +1,127 @@
 import 'package:get/get.dart';
-
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../data/manager_po_repository.dart';
 import '../model/manager_po_model.dart';
 
 class ManagerPOController extends GetxController {
+  final _repo = ManagerPORepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
+
+
+  final isLoading = true.obs;
   final searchQuery = ''.obs;
   final selectedFilter = ManagerPOStatus.all.obs;
+  final allOrders = <ManagerPOModel>[].obs;
 
-  final allOrders = <ManagerPOModel>[
-    ManagerPOModel(
-      id: '1',
-      date: 'Feb 15, 2026',
-      serialNumber: 'SN: XYZ14324',
-      doctor: 'Dr. Robert Smith',
-      facility: 'City Hospital',
-      typeLabel: 'Commission',
-      commissionAmount: 630.00,
-      totalAmount: 4200.00,
-      status: ManagerPOStatus.complete,
-    ),
-    ManagerPOModel(
-      id: '2',
-      date: 'Mar 01, 2026',
-      serialNumber: 'SN: ABC56789',
-      doctor: 'Dr. Emily Johnson',
-      facility: 'Greenwood Clinic',
-      typeLabel: 'Consultation',
-      commissionAmount: 450.00,
-      totalAmount: 2250.00,
-      status: ManagerPOStatus.open,
-    ),
-    ManagerPOModel(
-      id: '3',
-      date: 'Apr 15, 2026',
-      serialNumber: 'SN: JKL67890',
-      doctor: 'Dr. David Brown',
-      facility: 'Sunrise Clinic',
-      typeLabel: 'Commission',
-      commissionAmount: 350.00,
-      totalAmount: 1750.00,
-      status: ManagerPOStatus.lost,
-    ),
-    ManagerPOModel(
-      id: '4',
-      date: 'Mar 15, 2026',
-      serialNumber: 'SN: DEF98765',
-      doctor: 'Dr. Michael Lee',
-      facility: 'Downtown Medical Center',
-      typeLabel: 'Surgery',
-      commissionAmount: 1200.00,
-      totalAmount: 7200.00,
-      status: ManagerPOStatus.complete,
-    ),
-  ].obs;
+
+  final isLoadingDetail = false.obs;
+  final isSendingMail = false.obs;
+  final poDetailObs = ManagerPODetailModel.empty.obs;
+  ManagerPODetailModel get poDetail => poDetailObs.value;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchOrders();
+  }
+
+  // ── Fetch list ────────────────────────────────────────────────────────────
+
+  Future<void> fetchOrders() async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final statusParam = selectedFilter.value == ManagerPOStatus.all
+          ? null
+          : selectedFilter.value.name;
+      final res = await _repo.getAll(token, status: statusParam);
+      final results = _asList(res['data']);
+      allOrders.assignAll(
+        results.map((e) =>
+            ManagerPOModel.fromJson(e as Map<String, dynamic>)),
+      );
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to load purchase orders');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ── Fetch detail ──────────────────────────────────────────────────────────
+
+  Future<void> fetchDetail(String id) async {
+    try {
+      isLoadingDetail.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getDetail(token, id);
+      final data = res['data'];
+      if (data is Map<String, dynamic>) {
+        poDetailObs.value = ManagerPODetailModel.fromJson(data);
+      }
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to load PO details');
+    } finally {
+      isLoadingDetail.value = false;
+    }
+  }
+
+  // ── Send vendor mail ──────────────────────────────────────────────────────
+
+  Future<void> sendVendorMail(String id) async {
+    try {
+      isSendingMail.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.sendVendorMail(token, id);
+      ToastMessageHelper.showSuccessMessage('Email sent to vendor successfully');
+      // Refresh detail to update isSentToVendor
+      await fetchDetail(id);
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to send vendor mail');
+    } finally {
+      isSendingMail.value = false;
+    }
+  }
+
+  // ── Filtered list ─────────────────────────────────────────────────────────
 
   List<ManagerPOModel> get filteredOrders {
-    List<ManagerPOModel> result = allOrders;
+    var result = allOrders.toList();
     if (selectedFilter.value != ManagerPOStatus.all) {
-      result =
-          result.where((o) => o.status == selectedFilter.value).toList();
+      result = result
+          .where((o) => o.status == selectedFilter.value)
+          .toList();
     }
     if (searchQuery.value.isNotEmpty) {
       final q = searchQuery.value.toLowerCase();
       result = result
           .where((o) =>
-      o.serialNumber.toLowerCase().contains(q) ||
-          o.doctor.toLowerCase().contains(q) ||
-          o.facility.toLowerCase().contains(q))
+              o.serialNumber.toLowerCase().contains(q) ||
+              o.doctor.toLowerCase().contains(q) ||
+              o.facility.toLowerCase().contains(q))
           .toList();
     }
     return result;
   }
 
   void onSearchChanged(String v) => searchQuery.value = v;
-  void onFilterSelected(ManagerPOStatus s) => selectedFilter.value = s;
 
-  // ── Detail data ───────────────────────────────────────────────────────────
-  final poDetail = const ManagerPODetailModel(
-    poNumber: 'PO #88234',
-    urgencyTag: 'Emergency',
-    title: 'Urgent Surgical Supplies',
-    patientId: '1002120JSC2254S',
-    facility: 'City Hospital',
-    facilityEmail: 'example@gmial.com',
-    dateOfSurgery: 'Feb 14, 2024',
-    surgeryTime: '08:30 AM EST',
-    surgeon: 'Dr. Michael Lee',
-    surgeonSpecialty: 'Orthopedic Surgery',
-    vendor: 'MedTech Inc.',
-    vendorEmail: 'example@gmi...',
-    totalAmount: 4250.00,
-    imageAsset: 'assets/images/review.png',
-    products: [
-      POProductItem(
-          name: 'Bulk Quinoa', spec: '50kg × \$4.50', price: 225.00),
-      POProductItem(
-          name: 'Flax Seeds', spec: '20kg × \$3.20', price: 64.00),
-    ],
-    documents: [
-      PODocumentItem(
-          fileName: 'PO_889_Final.pdf',
-          size: '1.2 MB',
-          date: 'FEB 15',
-          isPdf: true),
-      PODocumentItem(
-          fileName: 'Implant_Serial_Photo.jpg',
-          size: '3.4 MB',
-          date: 'FEB 15',
-          isPdf: false),
-    ],
-    timeline: [
-      POTimelineItem(
-          title: 'Created',
-          subtitle: 'Feb 15, 10:30 AM',
-          status: POTimelineStatus.done),
-      POTimelineItem(
-          title: 'Submitted',
-          subtitle: 'Feb 15, 10:30 AM',
-          status: POTimelineStatus.done),
-      POTimelineItem(
-          title: 'PAID',
-          subtitle: 'Pending',
-          status: POTimelineStatus.inProgress),
-      POTimelineItem(
-          title: 'Commission Paid',
-          subtitle: 'Feb 15, 10:30 AM',
-          status: POTimelineStatus.pending),
-    ],
-    repName: 'Sarah Johnson',
-    repAvatarAsset: 'assets/images/profile.jpg',
-  );
+  void onFilterSelected(ManagerPOStatus s) {
+    selectedFilter.value = s;
+    fetchOrders();
+  }
+
+  List<dynamic> _asList(dynamic data) {
+    if (data is List) return data;
+    if (data is Map) {
+      for (final key in ['results', 'items', 'list', 'data', 'docs']) {
+        if (data[key] is List) return data[key] as List;
+      }
+    }
+    return [];
+  }
 }

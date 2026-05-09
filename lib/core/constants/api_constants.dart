@@ -145,6 +145,10 @@ class ApiConstants {
   static String getManagerShipmentDetail(String id) => '/shipment/find/$id';
   static String updateManagerShipmentStatus(String id) => '/shipment/status-update/$id';
 
+  static String getManagerPurchaseOrder = '/purchase-order/get-all';
+  static String getManagerSinglePurchaseOrder(String id) => '/purchase-order/find/$id';
+  static String managerSendVendorMail(String id) => '/purchase-order/send-to-mail/$id';
+
 
 
 
