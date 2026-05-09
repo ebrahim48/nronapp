@@ -3,16 +3,15 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/manager_po_card.dart';
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/manager_po_filter_tabs.dart';
 import 'package:nron_app/features/manager/manager_home/presentation/widgets/manager_po_search_bar.dart';
-import '../../../ representative/appdrawer/app_drawer.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../manager_controller/manager_po_controller.dart';
-
 
 class ManagerPurchaseOrderScreen extends StatelessWidget {
   const ManagerPurchaseOrderScreen({super.key});
@@ -66,6 +65,27 @@ class ManagerPurchaseOrderScreen extends StatelessWidget {
             SizedBox(height: 14.h),
             Expanded(
               child: Obx(() {
+                // ── Shimmer ──────────────────────────────────────────
+                if (c.isLoading.value) {
+                  return Shimmer.fromColors(
+                    baseColor: const Color(0xFF2A2A2A),
+                    highlightColor: const Color(0xFF3A3A3A),
+                    child: ListView.builder(
+                      padding: EdgeInsets.only(bottom: 24.h),
+                      itemCount: 6,
+                      itemBuilder: (_, __) => Container(
+                        margin: EdgeInsets.only(bottom: 12.h),
+                        height: 110.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                // ── Empty ────────────────────────────────────────────
                 final orders = c.filteredOrders;
                 if (orders.isEmpty) {
                   return Center(
@@ -76,12 +96,19 @@ class ManagerPurchaseOrderScreen extends StatelessWidget {
                     ),
                   );
                 }
+
+                // ── List ─────────────────────────────────────────────
                 return ListView.builder(
                   padding: EdgeInsets.only(bottom: 24.h),
                   itemCount: orders.length,
                   itemBuilder: (context, i) => ManagerPOCard(
                     order: orders[i],
-                    onTap: () => context.push(AppRoutes.poReviewScreen),
+                    onTap: () async {
+                      await c.fetchDetail(orders[i].id);
+                      if (context.mounted) {
+                        context.push(AppRoutes.poReviewScreen);
+                      }
+                    },
                   ),
                 );
               }),
