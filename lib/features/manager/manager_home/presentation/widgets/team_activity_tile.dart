@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 import '../../model/manager_home_model.dart';
@@ -23,59 +22,70 @@ class TeamActivityTile extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 10.h),
           child: Row(
             children: [
-              // Avatar
-              CircleAvatar(
-                radius: 20.r,
-                backgroundImage: activity.avatarAsset != null
-                    ? AssetImage(activity.avatarAsset!)
-                    : null,
-                backgroundColor: const Color(0xFF00C5DA),
-                child: activity.avatarAsset == null
-                    ? Icon(Icons.person,
-                    color: Colors.white,
-                    size: 18.r)
-                    : null,
+              // Avatar — network or fallback
+              ClipOval(
+                child: activity.avatarUrl != null &&
+                        activity.avatarUrl!.isNotEmpty
+                    ? Image.network(
+                        activity.avatarUrl!,
+                        width: 40.r,
+                        height: 40.r,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _fallbackAvatar(),
+                      )
+                    : _fallbackAvatar(),
               ),
 
               SizedBox(width: 12.w),
 
               // Content
               Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${activity.memberName} ',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryTextColor,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    Text(
+                      activity.title.isNotEmpty
+                          ? activity.title
+                          : '${activity.memberName.isNotEmpty ? activity.memberName : 'User'} ${activity.action}',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryTextColor,
+                      ),
+                    ),
+                    if (activity.description.isNotEmpty)
+                      Padding(
+                        padding: EdgeInsets.only(top: 2.h),
+                        child: Text(
+                          activity.description,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontFamily: 'Poppins',
+                            color: AppColors.secondaryTextColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      TextSpan(
-                        text: activity.action,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.primaryTextColor,
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
+
         // Sub info
         Padding(
           padding: EdgeInsets.only(left: 52.w, bottom: 4.h),
           child: Row(
             children: [
               CustomText(
-                text: '${activity.timeAgo} • ${activity.location}',
+                text: [
+                  if (activity.timeAgo.isNotEmpty) activity.timeAgo,
+                  if (activity.location.isNotEmpty) activity.location,
+                ].join(' • '),
                 fontsize: 11.sp,
                 color: AppColors.secondaryTextColor,
                 textAlign: TextAlign.start,
@@ -83,12 +93,22 @@ class TeamActivityTile extends StatelessWidget {
             ],
           ),
         ),
+
         if (!isLast)
           Divider(
               height: 1,
               color: const Color(0xFF3A3A3A),
               thickness: 0.5),
       ],
+    );
+  }
+
+  Widget _fallbackAvatar() {
+    return Container(
+      width: 40.r,
+      height: 40.r,
+      color: const Color(0xFF00C5DA),
+      child: Icon(Icons.person, color: Colors.white, size: 18.r),
     );
   }
 }

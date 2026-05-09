@@ -1,13 +1,8 @@
 class ApiConstants {
 
 
-  static const String baseUrl = 'https://wn85j8p6-9002.asse.devtunnels.ms/api/v1';
-  static const String socketUrl = "https://wn85j8p6-9002.asse.devtunnels.ms";
-
-
-
-  // static const String baseUrl = 'https://wn85j8p6-9001.asse.devtunnels.ms/api/v1';
-  // static const String socketUrl = "https://wn85j8p6-9001.asse.devtunnels.ms";
+  static const String baseUrl = 'https://wn85j8p6-9001.asse.devtunnels.ms/api/v1';
+  static const String socketUrl = "https://wn85j8p6-9001.asse.devtunnels.ms";
 
 
 
@@ -142,6 +137,8 @@ class ApiConstants {
 
   static const String getManagerSales = '/sales/get-all';
   static String getManagerSaleDetail(String id) => '/sales/find/$id';
+
+  static const String getManagerOverviewHome = '/purchase-order/overview';
 
 
 
