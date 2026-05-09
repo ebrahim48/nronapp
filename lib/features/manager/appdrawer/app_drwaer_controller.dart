@@ -33,7 +33,7 @@ class ManagerAppDrawerController extends GetxController {
       builder: (dialogContext) => SignOutDialog(
         onConfirm: () {
           Navigator.of(dialogContext).pop(); // Close dialog first
-          context.go(AppRoutes.signInScreen);
+          context.go(AppRoutes.roleSelection);
         },
       ),
     );

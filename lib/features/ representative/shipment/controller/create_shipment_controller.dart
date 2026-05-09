@@ -55,7 +55,7 @@ class CreateShipmentController extends GetxController {
   // exact API enum values
   static const serviceTypes = ['fedex', 'ups', 'usps', 'courier'];
   static const packageTypes = ['implant', 'tray', 'bio', 'other'];
-  static const priorities   = ['urgent', 'high', 'normal', 'low'];
+  static const priorities   = ['urgent', 'express', 'priority', 'standard', 'economy'];
 
   final selectedServiceType = 'fedex'.obs;
   final selectedPackageType = 'implant'.obs;
@@ -142,6 +142,14 @@ class CreateShipmentController extends GetxController {
       ToastMessageHelper.showErrorMessage('Please add at least one product');
       return false;
     }
+    if (distanceController.text.trim().isEmpty) {
+      ToastMessageHelper.showErrorMessage('Please enter distance');
+      return false;
+    }
+    if (totalCostController.text.trim().isEmpty) {
+      ToastMessageHelper.showErrorMessage('Please enter total cost');
+      return false;
+    }
     return true;
   }
 
@@ -164,14 +172,6 @@ class CreateShipmentController extends GetxController {
     }
     if (selectedFacilityId.value.isEmpty) {
       ToastMessageHelper.showErrorMessage('Please select a drop-off facility');
-      return false;
-    }
-    if (distanceController.text.trim().isEmpty) {
-      ToastMessageHelper.showErrorMessage('Please enter distance');
-      return false;
-    }
-    if (totalCostController.text.trim().isEmpty) {
-      ToastMessageHelper.showErrorMessage('Please enter total cost');
       return false;
     }
     return true;
