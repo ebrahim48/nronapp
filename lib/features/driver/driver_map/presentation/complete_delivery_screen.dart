@@ -17,76 +17,82 @@ class CompleteDeliveryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.find<DriverMapController>();
-    final detail = c.pickupDetail;
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      appBar: AppBar(
+    return Obx(() {
+      final job = c.mapJob.value;
+      final shipmentId = job?.shipmentId ?? '';
+      final pickupLocation = job?.pickup.name ?? '—';
+      final dropoffLocation = job?.destination.name ?? '—';
+      final distance = job?.distanceMi ?? '—';
+
+      return Scaffold(
         backgroundColor: AppColors.backgroundColor,
-        elevation: 0,
-        toolbarHeight: 60.h,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Icon(Icons.arrow_back_ios,
-              color: AppColors.primaryTextColor, size: 18.r),
+        appBar: AppBar(
+          backgroundColor: AppColors.backgroundColor,
+          elevation: 0,
+          toolbarHeight: 60.h,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.arrow_back_ios,
+                color: AppColors.primaryTextColor, size: 18.r),
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomText(
+                text: 'Complete Delivery',
+                fontsize: 18.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryTextColor,
+                textAlign: TextAlign.start,
+              ),
+              CustomText(
+                text: shipmentId.isNotEmpty ? shipmentId : 'Delivery',
+                fontsize: 11.sp,
+                color: AppColors.secondaryTextColor,
+                textAlign: TextAlign.start,
+              ),
+            ],
+          ),
+          centerTitle: false,
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: Column(
           children: [
-            CustomText(
-              text: 'Complete Delivery',
-              fontsize: 18.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primaryTextColor,
-              textAlign: TextAlign.start,
+            Expanded(
+              child: SingleChildScrollView(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                child: Column(
+                  children: [
+                    PickupDetailsCard(
+                      location: pickupLocation,
+                      recipient: dropoffLocation,
+                      items: distance,
+                    ),
+
+                    SizedBox(height: 14.h),
+
+                    const PhotoCaptureSection(),
+
+                    SizedBox(height: 14.h),
+
+                    DeliveryNotesField(controller: c.deliveryNotes),
+
+                    SizedBox(height: 16.h),
+                  ],
+                ),
+              ),
             ),
-            CustomText(
-              text: c.mapJob.shipmentId,
-              fontsize: 11.sp,
-              color: AppColors.secondaryTextColor,
-              textAlign: TextAlign.start,
+
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+              child: CompleteDeliveryButton(
+                onTap: () => c.completeDelivery(context),
+              ),
             ),
           ],
         ),
-        centerTitle: false,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding:
-              EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-              child: Column(
-                children: [
-                  PickupDetailsCard(
-                    location: detail.location,
-                    recipient: detail.recipient,
-                    items: detail.items,
-                  ),
-
-                  SizedBox(height: 14.h),
-
-                  const PhotoCaptureSection(),
-
-                  SizedBox(height: 14.h),
-
-                  DeliveryNotesField(controller: c.deliveryNotes),
-
-                  SizedBox(height: 16.h),
-                ],
-              ),
-            ),
-          ),
-
-          Padding(
-            padding:
-            EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
-            child: CompleteDeliveryButton(
-              onTap: () => c.completeDelivery(context),
-            ),
-          ),
-        ],
-      ),
-    );
+      );
+    });
   }
 }

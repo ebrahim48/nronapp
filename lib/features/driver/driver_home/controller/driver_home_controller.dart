@@ -1,80 +1,96 @@
 import 'package:get/get.dart';
-
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../data/driver_home_repository.dart';
 import '../model/driver_home_model.dart';
 
-
 class DriverHomeController extends GetxController {
-  final driverName = 'Driver Alex'.obs;
-  final isOnline = true.obs;
-  final showLocationPrompt = false.obs;
-  final selectedNavIndex = 0.obs;
-
-  final stats = <DriverStatModel>[
-    DriverStatModel(
-      iconPath: 'assets/icons/pendingpickups.svg',
-      value: '2',
-      label: 'Pending Pickups',
-    ),
-    DriverStatModel(
-      iconPath: 'assets/icons/activedeliveries.svg',
-      value: '2',
-      label: 'Active Deliveries',
-    ),
-    DriverStatModel(
-      iconPath: 'assets/icons/completedtoday.svg',
-      value: '2',
-      label: 'Completed Today',
-    ),
-    DriverStatModel(
-      iconPath: 'assets/icons/todayearnings.svg',
-      value: '\$245',
-      label: 'Today Earnings',
-    ),
-  ].obs;
-
-  final jobRequests = <JobRequestModel>[
-    JobRequestModel(
-      id: '1',
-      shipmentId: 'SH-1847',
-      isUrgent: true,
-      timeAway: '25 min away',
-      pickup: 'City Medical Center',
-      dropoff: 'Hope Clinic',
-      distanceKm: 4.2,
-      earnings: 18,
-    ),
-    JobRequestModel(
-      id: '2',
-      shipmentId: 'SH-1848',
-      isUrgent: false,
-      timeAway: '15 min away',
-      pickup: 'General Hospital',
-      dropoff: 'St. Jude Clinic',
-      distanceKm: 2.8,
-      earnings: 12,
-    ),
-  ].obs;
-
-  final jobDetail = const JobDetailModel(
-    shipmentId: 'SH-1847',
-    isUrgent: true,
-    earnings: 18,
-    distanceKm: 4.2,
-    pickupName: 'City Medical Center',
-    pickupAddress: '123 Medical Plaza, Downtown',
-    pickupContact: 'Dr. Sarah Johnson',
-    pickupPhone: '+1 555-0123',
-    dropoffName: 'Hope Clinic',
-    dropoffAddress: '456 Hope Avenue, Westside',
-    dropoffContact: 'Nurse Mike Chen',
-    dropoffPhone: '+1 555-0456',
-    serviceType: 'FedEx',
-    weight: '5 kg',
-    dimensions: '12*10*6',
-    specialInstructions: 'Temperature controlled items - handle with care',
+  final _repo = DriverHomeRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
   );
 
-  int get availableJobs => jobRequests.length;
+  // ── State ─────────────────────────────────────────────────────────────────
+  final isLoading = true.obs;
+  final driverName = ''.obs;
+  final isOnline = true.obs;
+  final showLocationPrompt = false.obs;
+  final homeData = DriverHomeData.empty.obs;
+
+  // ── Selected job for detail screen ────────────────────────────────────────
+  final selectedJob = Rxn<JobRequestModel>();
+
+  // ── Stat cards ────────────────────────────────────────────────────────────
+  List<DriverStatModel> get stats => [
+        DriverStatModel(
+          iconPath: 'assets/icons/pendingpickups.svg',
+          value: '${homeData.value.newJobs}',
+          label: 'New Jobs',
+        ),
+        DriverStatModel(
+          iconPath: 'assets/icons/activedeliveries.svg',
+          value: '${homeData.value.active}',
+          label: 'Active Deliveries',
+        ),
+        DriverStatModel(
+          iconPath: 'assets/icons/completedtoday.svg',
+          value: '${homeData.value.completed}',
+          label: 'Completed Today',
+        ),
+        DriverStatModel(
+          iconPath: 'assets/icons/todayearnings.svg',
+          value: '\$${homeData.value.todayEarnings.toStringAsFixed(0)}',
+          label: 'Today Earnings',
+        ),
+      ];
+
+  int get availableJobs => homeData.value.newJobRequests.length;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadDriverName();
+    fetchHome();
+  }
+
+  Future<void> _loadDriverName() async {
+    final name = await PrefsHelper.getString('user_name');
+    driverName.value = name.isNotEmpty ? name : 'Driver';
+  }
+
+  // ── Fetch home data ───────────────────────────────────────────────────────
+
+  Future<void> fetchHome() async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getDriverHome(token);
+      final data = res['data'];
+      if (data is Map<String, dynamic>) {
+        homeData.value = DriverHomeData.fromJson(data);
+      }
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to load home data');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ── Job detail ────────────────────────────────────────────────────────────
+
+  JobDetailModel? get jobDetail {
+    final job = selectedJob.value;
+    if (job == null) return null;
+    return JobDetailModel.fromJobRequest(job);
+  }
+
+  void selectJob(JobRequestModel job) {
+    selectedJob.value = job;
+  }
+
+  // ── Online toggle ─────────────────────────────────────────────────────────
 
   void toggleOnlineStatus() {
     isOnline.value = !isOnline.value;
@@ -92,15 +108,16 @@ class DriverHomeController extends GetxController {
     showLocationPrompt.value = false;
   }
 
+  // ── Job actions ───────────────────────────────────────────────────────────
+
   void acceptJob() {
-    Get.snackbar('Accepted', 'Job accepted successfully', snackPosition: SnackPosition.BOTTOM);
+    Get.snackbar('Accepted', 'Job accepted successfully',
+        snackPosition: SnackPosition.BOTTOM);
   }
 
   void declineJob() {
     Get.back();
   }
 
-  void onNavTap(int index) {
-    selectedNavIndex.value = index;
-  }
+  void onNavTap(int index) {}
 }

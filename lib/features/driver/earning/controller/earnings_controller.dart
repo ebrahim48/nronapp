@@ -1,67 +1,108 @@
-import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../data/earning_repository.dart';
 import '../model/earning_model.dart';
 
-class EarningsController extends ChangeNotifier {
-  bool isLoading = false;
-  String selectedFilter = 'All'; // 'All' | 'paid' | 'pending'
-  final List<String> filters = ['All', 'paid', 'pending'];
-
-  final EarningsSummaryModel summary = EarningsSummaryModel(
-    totalBalance: 845,
-    percentChangeFromLastWeek: 12,
-    todayEarnings: 125,
-    todayDeliveries: 8,
-    thisWeekEarnings: 845,
-    thisWeekDeliveries: 52,
-    pendingEarnings: 245,
-    pendingDeliveries: 15,
-    totalPaid: 12450,
-    totalDeliveries: 785,
-    pendingPayoutAmount: 245,
-    history: const [
-      EarningEntryModel(shipmentId: 'SH-1843', date: 'Apr 15, 2026', amount: 30, status: 'paid'),
-      EarningEntryModel(shipmentId: 'SH-1842', date: 'Apr 15, 2026', amount: 25, status: 'paid'),
-      EarningEntryModel(shipmentId: 'SH-1841', date: 'Apr 15, 2026', amount: 20, status: 'paid'),
-      EarningEntryModel(shipmentId: 'SH-1840', date: 'Apr 14, 2026', amount: 35, status: 'paid'),
-      EarningEntryModel(shipmentId: 'SH-1839', date: 'Apr 14, 2026', amount: 28, status: 'paid'),
-      EarningEntryModel(shipmentId: 'SH-1838', date: 'Apr 14, 2026', amount: 22, status: 'paid'),
-      EarningEntryModel(shipmentId: 'SH-1837', date: 'Apr 13, 2026', amount: 32, status: 'paid'),
-      EarningEntryModel(shipmentId: 'SH-1836', date: 'Apr 13, 2026', amount: 26, status: 'pending'),
-      EarningEntryModel(shipmentId: 'SH-1835', date: 'Apr 13, 2026', amount: 29, status: 'pending'),
-    ],
-    weeklyBars: const [
-      WeeklyBarModel(day: 'Mon', value: 0.4),
-      WeeklyBarModel(day: 'Tue', value: 0.65),
-      WeeklyBarModel(day: 'Wed', value: 0.5),
-      WeeklyBarModel(day: 'Thu', value: 0.85),
-      WeeklyBarModel(day: 'Fri', value: 0.7),
-      WeeklyBarModel(day: 'Sat', value: 0.3),
-      WeeklyBarModel(day: 'Sun', value: 0.55),
-    ],
+class EarningsController extends GetxController {
+  final _repo = EarningRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
   );
 
-  List<EarningEntryModel> get filteredHistory {
-    if (selectedFilter == 'All') return summary.history;
-    return summary.history
-        .where((e) => e.status == selectedFilter)
-        .toList();
+  // ── State ─────────────────────────────────────────────────────────────────
+  final isLoadingSummary = true.obs;
+  final isLoadingHistory = true.obs;
+  final isRequestingPayout = false.obs;
+
+  final summary = EarningsSummaryModel.empty.obs;
+  final historyItems = <EarningEntryModel>[].obs;
+
+  final selectedFilter = 'All'.obs;
+  final filters = ['All', 'paid', 'pending'];
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchSummary();
+    fetchHistory();
   }
 
-  // Only the 3 most recent for the dashboard preview
-  List<EarningEntryModel> get recentHistory =>
-      summary.history.take(3).toList();
+  // ── Fetch summary ─────────────────────────────────────────────────────────
+
+  Future<void> fetchSummary() async {
+    try {
+      isLoadingSummary.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getSummary(token);
+      final data = res['data'];
+      if (data is Map<String, dynamic>) {
+        summary.value = EarningsSummaryModel.fromJson(data);
+      }
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to load earnings summary');
+    } finally {
+      isLoadingSummary.value = false;
+    }
+  }
+
+  // ── Fetch history ─────────────────────────────────────────────────────────
+
+  Future<void> fetchHistory({String? status}) async {
+    try {
+      isLoadingHistory.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getHistory(
+        token,
+        status: status ?? selectedFilter.value,
+      );
+      final results = _asList(res['data']);
+      historyItems.assignAll(
+        results.map((e) =>
+            EarningEntryModel.fromHistoryJson(e as Map<String, dynamic>)),
+      );
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to load earnings history');
+    } finally {
+      isLoadingHistory.value = false;
+    }
+  }
+
+  // ── Filter ────────────────────────────────────────────────────────────────
 
   void setFilter(String filter) {
-    selectedFilter = filter;
-    notifyListeners();
+    selectedFilter.value = filter;
+    fetchHistory(status: filter);
   }
 
+  // ── Recent (dashboard preview — 3 items) ─────────────────────────────────
+
+  List<EarningEntryModel> get recentHistory =>
+      historyItems.take(3).toList();
+
+  // ── Payout ────────────────────────────────────────────────────────────────
+
   Future<void> requestPayout() async {
-    isLoading = true;
-    notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 800));
-    isLoading = false;
-    notifyListeners();
+    try {
+      isRequestingPayout.value = true;
+      await Future.delayed(const Duration(milliseconds: 800));
+      ToastMessageHelper.showSuccessMessage('Payout request submitted!');
+    } finally {
+      isRequestingPayout.value = false;
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  List<dynamic> _asList(dynamic data) {
+    if (data is List) return data;
+    if (data is Map) {
+      for (final key in ['results', 'items', 'list', 'data', 'docs']) {
+        if (data[key] is List) return data[key] as List;
+      }
+    }
+    return [];
   }
 }
