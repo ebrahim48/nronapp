@@ -55,6 +55,7 @@ class ApiConstants {
   static const String createExpense = '/expense/create';
   static String updateExpense(String id) => '/expense/update/$id';
   static String deleteExpense(String id) => '/expense/delete/$id';
+  static String expenseStatusUpdate(String id) => '/expense/status-update/$id';
   static const String getCommonAllRepresentative = '/common/all-representatives';
 
 
@@ -87,6 +88,9 @@ class ApiConstants {
   static String updateImplantById(String id) => '/implant/update/$id';
   static String deleteImplantById(String id) => '/implant/delete/$id';
   static String sendTransferRequest(String id) => '/implant/send-transfer-request/$id';
+  static String inventoryUpdateTransferRequest(String id) => '/meta/inventory/update-transfer-request/$id';
+
+
 
   static const String approveCommission = '/sales/status-update/69d0d1da3c027fd6339e1724'; // id  patch
   static const String getBio = '/bio/get-all';
@@ -127,7 +131,9 @@ class ApiConstants {
   static const String getCommissionOverviewManager = '/commission/overview';
   static const String getCommissionAllManager = '/commission/get-all';
   static String approveCommissionById(String id) => '/sales/status-update/$id';
+  static String updateSalesNotes(String id) => '/sales/update/$id';
   static String getCommissionDetail(String id) => '/commission/find/$id';
+  static String markPaid(String id) => '/commission/mark-as-paid/$id';
 
   // Commission Manage
   static const String getCommissionManageOverview = '/commission-manage/overview';

@@ -119,6 +119,7 @@ class ManagerAlertCard extends StatelessWidget {
 class InventoryDistributionCard extends StatelessWidget {
   final String selectedLine;
   final List<String> lines;
+  final int total;
   final List<Map<String, dynamic>> items;
   final ValueChanged<String?> onChanged;
 
@@ -126,6 +127,7 @@ class InventoryDistributionCard extends StatelessWidget {
     super.key,
     required this.selectedLine,
     required this.lines,
+    required this.total,
     required this.items,
     required this.onChanged,
   });
@@ -192,10 +194,20 @@ class InventoryDistributionCard extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CustomText(text: '1.2k', fontsize: 28.sp,
-                            fontWeight: FontWeight.w700, color: AppColors.primaryTextColor, textAlign: TextAlign.center),
-                        CustomText(text: 'Items', fontsize: 12.sp,
-                            fontWeight: FontWeight.w400, color: AppColors.secondaryTextColor, textAlign: TextAlign.center),
+                        CustomText(
+                          text: '$total',
+                          fontsize: 28.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryTextColor,
+                          textAlign: TextAlign.center,
+                        ),
+                        CustomText(
+                          text: 'Items',
+                          fontsize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.secondaryTextColor,
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   ),
@@ -206,37 +218,69 @@ class InventoryDistributionCard extends StatelessWidget {
 
           SizedBox(height: 20.h),
 
-          ...items.map((item) => Padding(
-            padding: EdgeInsets.only(bottom: 12.h),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(children: [
-                      Container(width: 8.r, height: 8.r, decoration: BoxDecoration(
-                          shape: BoxShape.circle, color: Color(item['color'] as int))),
-                      SizedBox(width: 8.w),
-                      CustomText(text: item['name'] as String, fontsize: 13.sp,
-                          fontWeight: FontWeight.w400, color: AppColors.primaryTextColor, textAlign: TextAlign.start),
-                    ]),
-                    CustomText(text: '${item['percent']}%', fontsize: 13.sp,
-                        fontWeight: FontWeight.w600, color: AppColors.primaryTextColor, textAlign: TextAlign.end),
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4.r),
-                  child: LinearProgressIndicator(
-                    value: (item['percent'] as int) / 100,
-                    minHeight: 4.h,
-                    backgroundColor: const Color(0xFF2A2A2A),
-                    valueColor: AlwaysStoppedAnimation<Color>(Color(item['color'] as int)),
+          if (items.isEmpty)
+            Center(
+              child: CustomText(
+                text: 'No distribution data.',
+                fontsize: 12.sp,
+                color: AppColors.secondaryTextColor,
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            ...items.map((item) => Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(children: [
+                        Container(
+                          width: 8.r,
+                          height: 8.r,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(item['color'] as int),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        SizedBox(
+                          width: 160.w,
+                          child: CustomText(
+                            text: item['name'] as String,
+                            fontsize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.primaryTextColor,
+                            textAlign: TextAlign.start,
+                            maxline: 1,
+                            textOverflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ]),
+                      CustomText(
+                        text: '${item['percent']}%',
+                        fontsize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryTextColor,
+                        textAlign: TextAlign.end,
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          )),
+                  SizedBox(height: 4.h),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4.r),
+                    child: LinearProgressIndicator(
+                      value: (item['percent'] as int) / 100,
+                      minHeight: 4.h,
+                      backgroundColor: const Color(0xFF2A2A2A),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(item['color'] as int)),
+                    ),
+                  ),
+                ],
+              ),
+            )),
         ],
       ),
     );

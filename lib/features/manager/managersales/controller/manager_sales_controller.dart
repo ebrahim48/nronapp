@@ -27,6 +27,8 @@ class ManagerSaleController extends GetxController {
   // ── Misc ──────────────────────────────────────────────────────────────────
   final billVerification = true.obs;
   final feedbackController = TextEditingController();
+  final isApprovingCommission = false.obs;
+  final isSendingFeedback = false.obs;
 
   @override
   void onInit() {
@@ -107,19 +109,52 @@ class ManagerSaleController extends GetxController {
 
   void toggleBillVerification() => billVerification.toggle();
 
-  void sendFeedback() {
-    if (feedbackController.text.trim().isEmpty) return;
-    ToastMessageHelper.showSuccessMessage('Feedback sent to rep');
-    feedbackController.clear();
+  Future<void> sendFeedback() async {
+    final note = feedbackController.text.trim();
+    if (note.isEmpty) return;
+    final id = saleDetailObs.value.id;
+    if (id.isEmpty) return;
+    try {
+      isSendingFeedback.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.updateSalesNotes(token, id, note);
+      feedbackController.clear();
+      ToastMessageHelper.showSuccessMessage('Feedback sent successfully');
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to send feedback');
+    } finally {
+      isSendingFeedback.value = false;
+    }
   }
 
-  void saveNote(String text) {
+  Future<void> saveNote(String text) async {
     if (text.isEmpty) return;
-    ToastMessageHelper.showSuccessMessage('Note saved successfully');
+    final id = saleDetailObs.value.id;
+    if (id.isEmpty) return;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.updateSalesNotes(token, id, text);
+      ToastMessageHelper.showSuccessMessage('Note saved successfully');
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to save note');
+    }
   }
 
-  void approveCommission() {
-    ToastMessageHelper.showSuccessMessage('Commission approved successfully');
+  Future<void> approveCommission() async {
+    final id = saleDetailObs.value.id;
+    if (id.isEmpty) return;
+    try {
+      isApprovingCommission.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.approveCommission(token, id);
+      // Refresh detail to reflect new status
+      await fetchSaleDetail(id);
+      ToastMessageHelper.showSuccessMessage('Commission approved successfully');
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to approve commission');
+    } finally {
+      isApprovingCommission.value = false;
+    }
   }
 
   List<dynamic> _asList(dynamic data) {

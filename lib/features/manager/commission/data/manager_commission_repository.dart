@@ -97,12 +97,27 @@ class ManagerCommissionRepository {
   Future<Map<String, dynamic>> updateCommissionRate(
     String token,
     String id, {
+    required String representativeId,
     required double rate,
   }) async {
     await _connectivity.checkConnectivity();
     final res = await _api.patch(
       ApiConstants.updateCommissionRate(id),
-      data: {'commissionRate': rate},
+      data: {
+        'representative': representativeId,
+        'commissionRate': rate,
+      },
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
+  /// PATCH /commission/mark-as-paid/:id
+  Future<Map<String, dynamic>> markPaid(String token, String id) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.patch(
+      ApiConstants.markPaid(id),
+      data: {},
       options: _auth(token),
     );
     return res.data as Map<String, dynamic>;

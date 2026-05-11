@@ -112,46 +112,6 @@ class CommissionListScreen extends StatelessWidget {
 
           SizedBox(height: 8.h),
 
-          // ── Table header ─────────────────────────────────────────────
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 52.w,
-                  child: CustomText(
-                      text: 'Sale ID',
-                      fontsize: 10.sp,
-                      color: AppColors.secondaryTextColor,
-                      textAlign: TextAlign.start),
-                ),
-                Expanded(
-                  child: CustomText(
-                      text: 'Rep',
-                      fontsize: 10.sp,
-                      color: AppColors.secondaryTextColor,
-                      textAlign: TextAlign.start),
-                ),
-                SizedBox(
-                  width: 80.w,
-                  child: CustomText(
-                      text: 'Area',
-                      fontsize: 10.sp,
-                      color: AppColors.secondaryTextColor,
-                      textAlign: TextAlign.start),
-                ),
-                SizedBox(
-                  width: 56.w,
-                  child: CustomText(
-                      text: 'Bill Status',
-                      fontsize: 10.sp,
-                      color: AppColors.secondaryTextColor,
-                      textAlign: TextAlign.end),
-                ),
-              ],
-            ),
-          ),
-
           // ── List ─────────────────────────────────────────────────────
           Expanded(
             child: Obx(() {
@@ -161,13 +121,13 @@ class CommissionListScreen extends StatelessWidget {
                   highlightColor: const Color(0xFF3A3A3A),
                   child: ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    itemCount: 8,
+                    itemCount: 5,
                     itemBuilder: (_, __) => Container(
-                      margin: EdgeInsets.only(bottom: 10.h),
-                      height: 44.h,
+                      margin: EdgeInsets.only(bottom: 12.h),
+                      height: 160.h,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(6.r),
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
                     ),
                   ),

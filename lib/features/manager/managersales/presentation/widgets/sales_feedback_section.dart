@@ -6,11 +6,13 @@ import '../../../../../core/custom_widgets/custom_text.dart';
 class SaleFeedbackSection extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
+  final bool isSending;
 
   const SaleFeedbackSection({
     super.key,
     required this.controller,
     required this.onSend,
+    this.isSending = false,
   });
 
   @override
@@ -69,31 +71,42 @@ class SaleFeedbackSection extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: GestureDetector(
-              onTap: onSend,
+              onTap: isSending ? null : onSend,
               child: Container(
                 padding: EdgeInsets.symmetric(
                     horizontal: 18.w, vertical: 10.h),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
+                  color: isSending
+                      ? AppColors.primaryColor.withValues(alpha: 0.5)
+                      : AppColors.primaryColor,
                   borderRadius: BorderRadius.circular(30.r),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Send Feedback',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.blackColor,
+                child: isSending
+                    ? SizedBox(
+                        width: 18.r,
+                        height: 18.r,
+                        child: CircularProgressIndicator(
+                          color: AppColors.blackColor,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Send Feedback',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.blackColor,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Icon(Icons.arrow_forward,
+                              color: AppColors.blackColor, size: 14.r),
+                        ],
                       ),
-                    ),
-                    SizedBox(width: 6.w),
-                    Icon(Icons.arrow_forward,
-                        color: AppColors.blackColor, size: 14.r),
-                  ],
-                ),
               ),
             ),
           ),

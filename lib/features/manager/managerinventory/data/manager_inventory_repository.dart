@@ -95,4 +95,20 @@ class ManagerInventoryRepository {
     );
     return res.data as Map<String, dynamic>;
   }
+
+  /// PATCH /meta/inventory/update-transfer-request/:id
+  /// [status] must be either "approved" or "rejected"
+  Future<Map<String, dynamic>> updateTransferRequestStatus(
+    String token,
+    String id,
+    String status,
+  ) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.patch(
+      ApiConstants.inventoryUpdateTransferRequest(id),
+      data: {'status': status},
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
 }
