@@ -155,10 +155,17 @@ class ApiConstants {
   static String getManagerSinglePurchaseOrder(String id) => '/purchase-order/find/$id';
   static String managerSendVendorMail(String id) => '/purchase-order/send-to-mail/$id';
 
+/// ==================================== Driver =============================
 
+  static String getDriverHome = '/shipment/driver-meta';
+  static String getAllJob = '/shipment/my-jobs';
+  static String getAllSingleJob(String id) => '/shipment/find/$id';
+  static String acceptJob(String id) => '/shipment/accept/$id';
+  static String changeStatus(String id) => '/shipment/change-status/$id';
+  static String getMapSingleJob(String id) => '/shipment/find/$id';
 
-
-
+  static String getEarningsSummary = '/earnings/my-summary';
+  static String getEarningsHistory = '/earnings/history';
 
 
 

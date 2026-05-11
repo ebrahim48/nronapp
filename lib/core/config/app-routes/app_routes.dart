@@ -740,7 +740,9 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: driverMapScreen,
         name: driverMapScreen,
-        builder: (context, state) => const DriverMapScreen(),
+        builder: (context, state) => DriverMapScreen(
+          jobId: state.extra as String?,
+        ),
       ),
       GoRoute(
         path: completeDeliveryScreen,

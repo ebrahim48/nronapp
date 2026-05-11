@@ -1,45 +1,31 @@
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import '../model/new_delivery_model.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../data/driver_job_repository.dart';
 
-class NewDeliveryController extends ChangeNotifier {
-  bool isLoading = false;
+class NewDeliveryController extends GetxController {
+  final _repo = DriverJobRepository();
 
-  final NewDeliveryModel delivery = const NewDeliveryModel(
-    shipmentId: 'SH-1847',
-    isUrgent: true,
-    earnings: 18,
-    distanceKm: 4.2,
-    pickupName: 'City Medical Center',
-    pickupAddress: '123 Medical Plaza, Downtown',
-    pickupContact: 'Dr. Sarah Johnson',
-    pickupPhone: '+1 555-0123',
-    dropoffName: 'Hope Clinic',
-    dropoffAddress: '456 Hope Avenue, Westside',
-    dropoffContact: 'Nurse Mike Chen',
-    dropoffPhone: '+1 555-0456',
-    servicesType: 'FedEx',
-    weight: '5 kg',
-    dimensions: '12*10*6',
-    specialInstructions:
-    'Temperature controlled items - handle with care',
-  );
+  final isLoading = false.obs;
 
-  Future<bool> acceptJob() async {
-    isLoading = true;
-    notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 800));
-    isLoading = false;
-    notifyListeners();
-    return true;
+  Future<bool> acceptJob(String id) async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.acceptJob(token, id);
+      ToastMessageHelper.showSuccessMessage('Job accepted successfully');
+      return true;
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<bool> declineJob() async {
-    isLoading = true;
-    notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 500));
-    isLoading = false;
-    notifyListeners();
     return true;
   }
 }

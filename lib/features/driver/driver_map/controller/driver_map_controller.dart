@@ -6,10 +6,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../driverjob/data/driver_job_repository.dart';
 import '../model/driver_map_model.dart';
 
-
 class DriverMapController extends GetxController {
+  final _repo = DriverJobRepository();
+
   GoogleMapController? mapController;
   final Completer<GoogleMapController> mapCompleter = Completer();
 
@@ -20,47 +24,125 @@ class DriverMapController extends GetxController {
   final deliveryPhotoPath = ''.obs;
   final deliveryNotes = TextEditingController();
 
-  final mapJob = const MapJobModel(
-    shipmentId: 'SH-2847',
-    status: 'En Route to Pickup',
-    etaToPickup: '0 mins',
-    distanceMi: '2.4 mi',
-    pickup: RouteStopModel(
-      name: 'Main Warehouse',
-      address: '2847 Industrial Ave',
-      eta: '8 min',
-      position: LatLng(37.7749, -122.4194),
-    ),
-    intermediate: RouteStopModel(
-      name: 'City Hospital',
-      address: '4521 Medical Plaza',
-      eta: '32 min',
-      position: LatLng(37.7849, -122.4094),
-    ),
-    destination: RouteStopModel(
-      name: 'Valley Medical Center',
-      address: '',
-      eta: '',
-      position: LatLng(37.7649, -122.4294),
-    ),
-  );
+  final isLoading = false.obs;
+  final mapJob = Rxn<MapJobModel>();
 
-  final pickupDetail = const PickupDetailModel(
-    location: 'Main Warehouse',
-    recipient: 'Sarah Johnson',
-    items: '3 containers',
-  );
-
+  // Fallback static camera — updated once real coords load
   static const CameraPosition initialCamera = CameraPosition(
-    target: LatLng(37.7749, -122.4194),
+    target: LatLng(23.7776, 90.4055),
     zoom: 13,
   );
 
   @override
   void onInit() {
     super.onInit();
-    _buildMarkers();
-    _buildRoute();
+    // jobId is passed via DriverMapScreen constructor and fetchJobForMap is called from there
+    _buildDefaultMarkers();
+    _buildDefaultRoute();
+  }
+
+  Future<void> fetchJobForMap(String id) async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final response = await _repo.getSingleJob(token, id);
+      final data = response['data'] as Map<String, dynamic>?;
+      if (data == null) return;
+
+      // Pickup coords — GeoJSON [lng, lat]
+      final pickupCoords =
+          data['pickupInfo']?['location']?['coordinates'] as List<dynamic>?;
+      final pickupLng = (pickupCoords != null && pickupCoords.length >= 2)
+          ? (pickupCoords[0] as num).toDouble()
+          : 90.4055;
+      final pickupLat = (pickupCoords != null && pickupCoords.length >= 2)
+          ? (pickupCoords[1] as num).toDouble()
+          : 23.7776;
+
+      // Dropoff coords
+      final dropoffCoords =
+          data['dropoffInfo']?['location']?['coordinates'] as List<dynamic>?;
+      final dropoffLng = (dropoffCoords != null && dropoffCoords.length >= 2)
+          ? (dropoffCoords[0] as num).toDouble()
+          : 90.4498;
+      final dropoffLat = (dropoffCoords != null && dropoffCoords.length >= 2)
+          ? (dropoffCoords[1] as num).toDouble()
+          : 23.7980;
+
+      final pickupAddress =
+          data['pickupInfo']?['address']?.toString() ?? 'Pickup';
+      final dropoffAddress =
+          data['dropoffInfo']?['address']?.toString() ?? 'Dropoff';
+
+      final facilityRaw = data['dropoffInfo']?['facility'];
+      String facilityName = dropoffAddress;
+      if (facilityRaw is Map) {
+        facilityName = facilityRaw['name']?.toString() ?? dropoffAddress;
+      }
+
+      final shipmentStatus =
+          _formatStatus(data['shipmentStatus']?.toString() ?? '');
+      final totalDistance =
+          data['totalDistance']?.toString() ?? '';
+
+      mapJob.value = MapJobModel(
+        id: data['_id']?.toString() ?? id,
+        shipmentId: data['shipmentId']?.toString() ?? '',
+        status: shipmentStatus,
+        pickup: RouteStopModel(
+          name: pickupAddress,
+          address: pickupAddress,
+          eta: '',
+          position: LatLng(pickupLat, pickupLng),
+        ),
+        intermediate: RouteStopModel(
+          name: dropoffAddress,
+          address: dropoffAddress,
+          eta: '',
+          position: LatLng(dropoffLat, dropoffLng),
+        ),
+        destination: RouteStopModel(
+          name: facilityName,
+          address: dropoffAddress,
+          eta: '',
+          position: LatLng(dropoffLat, dropoffLng),
+        ),
+        etaToPickup: '',
+        distanceMi: totalDistance,
+      );
+
+      _buildMarkers();
+      _buildRoute();
+
+      // Move camera to pickup location
+      if (mapController != null) {
+        mapController!.animateCamera(
+          CameraUpdate.newLatLngZoom(LatLng(pickupLat, pickupLng), 13),
+        );
+      }
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  String _formatStatus(String raw) {
+    switch (raw) {
+      case 'pending_approval':
+        return 'Pending Approval';
+      case 'accepted':
+        return 'Accepted';
+      case 'picked_up':
+        return 'Picked Up';
+      case 'in_transit':
+        return 'In Transit';
+      case 'delivered':
+        return 'Delivered';
+      default:
+        return raw;
+    }
   }
 
   void onMapCreated(GoogleMapController controller) {
@@ -84,57 +166,111 @@ class DriverMapController extends GetxController {
   }
 
   void _buildMarkers() {
+    final job = mapJob.value;
+    if (job == null) return;
     markers.assignAll({
       Marker(
         markerId: const MarkerId('pickup'),
-        position: mapJob.pickup.position,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: InfoWindow(title: mapJob.pickup.name),
+        position: job.pickup.position,
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        infoWindow: InfoWindow(title: job.pickup.name),
       ),
       Marker(
         markerId: const MarkerId('intermediate'),
-        position: mapJob.intermediate.position,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        infoWindow: InfoWindow(title: mapJob.intermediate.name),
+        position: job.intermediate.position,
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        infoWindow: InfoWindow(title: job.intermediate.name),
       ),
       Marker(
         markerId: const MarkerId('destination'),
-        position: mapJob.destination.position,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: mapJob.destination.name),
+        position: job.destination.position,
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(title: job.destination.name),
+      ),
+    });
+  }
+
+  void _buildDefaultMarkers() {
+    markers.assignAll({
+      Marker(
+        markerId: const MarkerId('pickup'),
+        position: const LatLng(23.7776, 90.4055),
+        icon:
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
       ),
     });
   }
 
   void _buildRoute() {
+    final job = mapJob.value;
+    if (job == null) return;
     polylines.assignAll({
       Polyline(
         polylineId: const PolylineId('route'),
         color: const Color(0xFFEC0101),
         width: 4,
         points: [
-          mapJob.pickup.position,
-          const LatLng(37.7789, -122.4144),
-          const LatLng(37.7719, -122.4244),
-          mapJob.destination.position,
+          job.pickup.position,
+          job.destination.position,
         ],
       ),
     });
   }
 
-  void arrivedAtDestination() {
-    currentProgress.value = DeliveryProgressStatus.delivered;
-    Get.snackbar('Arrived', 'Marked as arrived at destination',
-        snackPosition: SnackPosition.BOTTOM);
+  void _buildDefaultRoute() {
+    polylines.assignAll({
+      Polyline(
+        polylineId: const PolylineId('route'),
+        color: const Color(0xFFEC0101),
+        width: 4,
+        points: const [
+          LatLng(23.7776, 90.4055),
+          LatLng(23.7980, 90.4498),
+        ],
+      ),
+    });
   }
 
-  void markAsDelivered(BuildContext context) {
-    context.push(AppRoutes.completeDeliveryScreen);
+  Future<void> arrivedAtDestination() async {
+    final job = mapJob.value;
+    if (job == null) return;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.changeStatus(token, job.id, 'picked_up');
+      currentProgress.value = DeliveryProgressStatus.pickedUp;
+      ToastMessageHelper.showSuccessMessage(
+          'Marked as arrived at destination');
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  Future<void> markAsDelivered(BuildContext context) async {
+    final job = mapJob.value;
+    if (job == null) {
+      context.push(AppRoutes.completeDeliveryScreen);
+      return;
+    }
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.changeStatus(token, job.id, 'delivered');
+      currentProgress.value = DeliveryProgressStatus.delivered;
+      if (context.mounted) {
+        context.push(AppRoutes.completeDeliveryScreen);
+      }
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    }
   }
 
   Future<void> pickDeliveryPhoto() async {
-    final picked = await ImagePicker()
-        .pickImage(source: ImageSource.camera);
+    final picked =
+        await ImagePicker().pickImage(source: ImageSource.camera);
     if (picked != null) deliveryPhotoPath.value = picked.path;
   }
 
@@ -143,7 +279,7 @@ class DriverMapController extends GetxController {
   }
 
   void callDestination() {
-    Get.snackbar('Calling', 'Calling Valley Medical Center...',
+    Get.snackbar('Calling', 'Calling destination...',
         snackPosition: SnackPosition.BOTTOM);
   }
 

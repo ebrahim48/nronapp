@@ -21,6 +21,29 @@ class JobDetailsScreen extends StatelessWidget {
     final c = Get.find<DriverHomeController>();
     final job = c.jobDetail;
 
+    if (job == null) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: AppColors.backgroundColor,
+          elevation: 0,
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.arrow_back_ios,
+                color: AppColors.primaryTextColor, size: 18.r),
+          ),
+        ),
+        body: Center(
+          child: CustomText(
+            text: 'Job not found.',
+            fontsize: 14.sp,
+            color: AppColors.secondaryTextColor,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(

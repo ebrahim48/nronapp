@@ -1,117 +1,201 @@
 import 'package:get/get.dart';
 
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../data/driver_job_repository.dart';
 import '../model/driver_job_model.dart';
 
-
 class DriverJobController extends GetxController {
+  final _repo = DriverJobRepository();
+
   final selectedTab = DriverJobTab.newJobs.obs;
   final selectedPeriod = CompletedPeriod.today.obs;
 
-  final newJobs = <NewJobModel>[
-    NewJobModel(
-      shipmentId: 'SH-1847',
-      priority: JobPriority.urgent,
-      timeAway: '25 min away',
-      pickup: 'City Medical Center',
-      dropoff: 'Hope Clinic',
-      distanceKm: 4.2,
-      earnings: 18,
-    ),
-    NewJobModel(
-      shipmentId: 'SH-1848',
-      priority: JobPriority.standard,
-      timeAway: '35 min away',
-      pickup: 'MedSupply Warehouse',
-      dropoff: 'East Hospital',
-      distanceKm: 6.8,
-      earnings: 22,
-    ),
-    NewJobModel(
-      shipmentId: 'SH-1849',
-      priority: JobPriority.urgent,
-      timeAway: '20 min away',
-      pickup: 'Central Clinic',
-      dropoff: 'North Medical',
-      distanceKm: 3.5,
-      earnings: 15,
-    ),
-  ].obs;
+  final isLoading = false.obs;
+  final isDetailLoading = false.obs;
 
-  final activeJobs = <ActiveJobModel>[
-    ActiveJobModel(
-      shipmentId: 'SH-1845',
-      status: ActiveJobStatus.pickedUp,
-      from: 'Metro Hospital',
-      to: 'Valley Medical',
-      eta: '15 min',
-      earnings: 28,
-    ),
-    ActiveJobModel(
-      shipmentId: 'SH-1846',
-      status: ActiveJobStatus.inTransit,
-      from: 'West Clinic',
-      to: 'Regional Hospital',
-      eta: '22 min',
-      earnings: 32,
-    ),
-  ].obs;
+  final newJobs = <NewJobModel>[].obs;
+  final activeJobs = <ActiveJobModel>[].obs;
+  final completedJobs = <CompletedJobModel>[].obs;
 
-  final completedJobs = <CompletedJobModel>[
-    CompletedJobModel(
-      shipmentId: 'SH-2845',
-      type: 'Implants',
-      pickup: 'Main Warehouse',
-      dropoff: 'Valley Medical',
-      earnings: 42,
-      completedAt: '2:45 PM',
-    ),
-  ].obs;
+  final selectedJobDetail = Rxn<JobDetailFullModel>();
 
-  final jobDetail = const JobDetailFullModel(
-    shipmentId: 'SH-1585',
-    title: 'Job Details',
-    status: 'Picked Up',
-    eta: '15 min',
-    shipmentSummaryId: 'SH-1845',
-    type: 'Implant',
-    priority: JobPriority.urgent,
-    pickupLocation: 'Metro Hospital',
-    pickupAddress: '789 Medical Drive, Central District',
-    pickupContact: 'Dr. Emily Watson',
-    pickupPhone: '+1 555-0789',
-    pickupDate: '12/12/2026',
-    pickupInstructions: 'Use the loading dock at the rear entrance',
-    dropoffLocation: 'Valley Medical Center',
-    dropoffAddress: '321 Valley Road, South District',
-    dropoffFacility: 'abcd',
-    dropoffContact: 'Pharmacy Manager',
-    dropoffPhone: '+1 555-0321',
-    dropoffInstructions: 'Deliver to Pharmacy Department on 2nd floor',
-    serviceType: 'FedEx',
-    weight: '5 kg',
-    dimensions: '12*10*6',
-    specialInstructions: 'Temperature controlled items - handle with care',
-    attachedFiles: [
-      AttachedFile(name: 'Shipment Manifest.pdf', size: '245 KB'),
-      AttachedFile(name: 'Delivery Instructions.pdf', size: '180 KB'),
-    ],
-    deliveryFee: 35.00,
-    yourPayout: 28.00,
-  );
-
-  void onTabSelected(DriverJobTab tab) => selectedTab.value = tab;
-  void onPeriodSelected(CompletedPeriod period) => selectedPeriod.value = period;
-
-  void navigateJob() {
-    Get.snackbar('Navigate', 'Opening navigation', snackPosition: SnackPosition.BOTTOM);
+  @override
+  void onInit() {
+    super.onInit();
+    fetchNewJobs();
   }
 
-  void acceptNewJob() {
-    Get.snackbar('Accepted', 'Job accepted successfully', snackPosition: SnackPosition.BOTTOM);
+  void onTabSelected(DriverJobTab tab) {
+    selectedTab.value = tab;
+    // Fetch data for the selected tab on demand
+    switch (tab) {
+      case DriverJobTab.newJobs:
+        fetchNewJobs();
+        break;
+      case DriverJobTab.active:
+        fetchActiveJobs();
+        break;
+      case DriverJobTab.completed:
+        fetchCompletedJobs();
+        break;
+    }
   }
 
-  void declineNewJob() => Get.back();
+  void onPeriodSelected(CompletedPeriod period) =>
+      selectedPeriod.value = period;
 
   int get newJobCount => newJobs.length;
   int get activeJobCount => activeJobs.length;
+
+  // ── Fetch new jobs (pending_approval / no status filter) ─────────────────
+
+  Future<void> fetchNewJobs() async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final response = await _repo.getAllJobs(token);
+      final results = _parseResults(response);
+      newJobs.assignAll(
+        results
+            .where((json) {
+              final s = ShipmentStatusX.fromString(
+                  _effectiveStatus(json));
+              return s.isNew;
+            })
+            .map((json) => NewJobModel.fromJson(json))
+            .toList(),
+      );
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ── Fetch active jobs ─────────────────────────────────────────────────────
+
+  Future<void> fetchActiveJobs() async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final response = await _repo.getAllJobs(token, status: 'active');
+      final results = _parseResults(response);
+      activeJobs.assignAll(
+        results.map((json) => ActiveJobModel.fromJson(json)).toList(),
+      );
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ── Fetch completed jobs ──────────────────────────────────────────────────
+
+  Future<void> fetchCompletedJobs() async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final response = await _repo.getAllJobs(token, status: 'completed');
+      final results = _parseResults(response);
+      completedJobs.assignAll(
+        results.map((json) => CompletedJobModel.fromJson(json)).toList(),
+      );
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ── Refresh current tab ───────────────────────────────────────────────────
+
+  Future<void> fetchJobs() async {
+    switch (selectedTab.value) {
+      case DriverJobTab.newJobs:
+        await fetchNewJobs();
+        break;
+      case DriverJobTab.active:
+        await fetchActiveJobs();
+        break;
+      case DriverJobTab.completed:
+        await fetchCompletedJobs();
+        break;
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  List<Map<String, dynamic>> _parseResults(Map<String, dynamic> response) {
+    final raw = response['data']?['results'];
+    if (raw is List) {
+      return raw.cast<Map<String, dynamic>>();
+    }
+    return [];
+  }
+
+  String _effectiveStatus(Map<String, dynamic> json) {
+    final shipmentStatus = json['shipmentStatus']?.toString() ?? '';
+    if (shipmentStatus.isNotEmpty) return shipmentStatus;
+    // fallback to `status` field
+    switch ((json['status'] ?? '').toString().toLowerCase()) {
+      case 'active':    return 'accepted';
+      case 'completed': return 'delivered';
+      case 'pending':   return 'pending_approval';
+      default:          return '';
+    }
+  }
+
+  Future<void> fetchJobDetail(String id) async {
+    try {
+      isDetailLoading.value = true;
+      selectedJobDetail.value = null;
+      final token = await PrefsHelper.getString('auth_token');
+      final response = await _repo.getSingleJob(token, id);
+      final data = response['data'] as Map<String, dynamic>?;
+      if (data != null) {
+        selectedJobDetail.value = JobDetailFullModel.fromJson(data);
+      }
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isDetailLoading.value = false;
+    }
+  }
+
+  Future<void> acceptJob(String id) async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.acceptJob(token, id);
+      ToastMessageHelper.showSuccessMessage('Job accepted successfully');
+      await fetchJobs();
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> changeStatus(String id, String status) async {
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.changeStatus(token, id, status);
+      await fetchJobs();
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  void navigateJob() {
+    // Navigation is handled in the screen using go_router with context
+    // This is kept for backward compatibility with ActiveJobCard's onNavigate
+  }
 }

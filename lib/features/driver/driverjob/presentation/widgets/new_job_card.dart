@@ -172,60 +172,6 @@ class NewJobCard extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: 10.h),
-
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onDecline,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.redColorFF1D1D.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(
-                            color: AppColors.redColorFF1D1D.withValues(alpha: 0.4),
-                            width: 0.8),
-                      ),
-                      child: Text(
-                        'Decline',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.redColorFF1D1D,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onAccept,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Text(
-                        'Accept',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.blackColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

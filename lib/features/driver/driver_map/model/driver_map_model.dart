@@ -17,6 +17,7 @@ class RouteStopModel {
 }
 
 class MapJobModel {
+  final String id;
   final String shipmentId;
   final String status;
   final RouteStopModel pickup;
@@ -26,6 +27,7 @@ class MapJobModel {
   final String distanceMi;
 
   const MapJobModel({
+    required this.id,
     required this.shipmentId,
     required this.status,
     required this.pickup,

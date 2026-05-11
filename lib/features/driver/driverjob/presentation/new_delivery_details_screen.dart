@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/earnings_card.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/location_card.dart';
 import 'package:nron_app/features/driver/driverjob/presentation/widgets/packages_details_card.dart';
@@ -7,30 +9,17 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../driver_home/presentation/widgets/special_instructions_card.dart';
+import '../controller/driver_job_controller.dart';
 import '../controller/new_delivery_controller.dart';
+import '../model/driver_job_model.dart';
 
-
-class NewDeliveryDetailsScreen extends StatefulWidget {
+class NewDeliveryDetailsScreen extends StatelessWidget {
   const NewDeliveryDetailsScreen({super.key});
 
   @override
-  State<NewDeliveryDetailsScreen> createState() =>
-      _NewDeliveryDetailsScreenState();
-}
-
-class _NewDeliveryDetailsScreenState
-    extends State<NewDeliveryDetailsScreen> {
-  final _ctrl = NewDeliveryController();
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final d = _ctrl.delivery;
+    final jobCtrl = Get.find<DriverJobController>();
+    final ctrl = Get.put(NewDeliveryController());
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -75,160 +64,189 @@ class _NewDeliveryDetailsScreenState
           ],
         ),
       ),
-      body: ListenableBuilder(
-        listenable: _ctrl,
-        builder: (context, _) {
-          return Stack(
-            children: [
-              SingleChildScrollView(
-                padding:
-                EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 100.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Shipment ID + Urgent badge ─────────────────────
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16.w, vertical: 14.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E2427),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: const Color(0xFF3A3A3A),
-                          width: 0.6,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-                              CustomText(
-                                text: 'Shipment ID',
-                                fontsize: 11.sp,
-                                color: AppColors.secondaryTextColor,
-                                textAlign: TextAlign.start,
-                              ),
-                              SizedBox(height: 3.h),
-                              CustomText(
-                                text: d.shipmentId,
-                                fontsize: 20.sp,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primaryTextColor,
-                                textAlign: TextAlign.start,
-                              ),
-                            ],
-                          ),
-                          if (d.isUrgent) _UrgentBadge(),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 12.h),
+      body: Obx(() {
+        // Loading state
+        if (jobCtrl.isDetailLoading.value) {
+          return _buildShimmer();
+        }
 
-                    // ── Earnings card ──────────────────────────────────
-                    EarningsCard(
-                      earnings: d.earnings,
-                      distanceKm: d.distanceKm,
-                    ),
-                    SizedBox(height: 12.h),
+        final d = jobCtrl.selectedJobDetail.value;
 
-                    // ── Location card ──────────────────────────────────
-                    LocationCard(
-                      pickupName: d.pickupName,
-                      pickupAddress: d.pickupAddress,
-                      pickupContact: d.pickupContact,
-                      pickupPhone: d.pickupPhone,
-                      dropoffName: d.dropoffName,
-                      dropoffAddress: d.dropoffAddress,
-                      dropoffContact: d.dropoffContact,
-                      dropoffPhone: d.dropoffPhone,
-                    ),
-                    SizedBox(height: 12.h),
-
-                    // ── Package details ────────────────────────────────
-                    PackageDetailsCard(
-                      servicesType: d.servicesType,
-                      weight: d.weight,
-                      dimensions: d.dimensions,
-                    ),
-                    SizedBox(height: 12.h),
-
-                    // ── Special instructions ───────────────────────────
-                    if (d.specialInstructions != null &&
-                        d.specialInstructions!.isNotEmpty)
-                      SpecialInstructionsCard(
-                        instructions: d.specialInstructions!,
-                      ),
-                  ],
-                ),
-              ),
-
-              // ── Sticky bottom: Decline | Accept ───────────────────────
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: AppColors.backgroundColor,
-                  padding: EdgeInsets.fromLTRB(
-                      16.w, 10.h, 16.w, 24.h),
-                  child: Row(
-                    children: [
-                      // Decline
-                      Expanded(
-                        child: CustomButton(
-                          title: 'Decline',
-                          color: const Color(0xFF252525),
-                          borderColor: const Color(0xFF3A3A3A),
-                          titlecolor: AppColors.primaryTextColor,
-                          loading: _ctrl.isLoading,
-                          onpress: () async {
-                            final ok = await _ctrl.declineJob();
-                            if (ok && context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          },
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      // Accept
-                      Expanded(
-                        child: CustomButton(
-                          title: 'Accept Job',
-                          prefixIcon: Icon(
-                            Icons.send_outlined,
-                            color: AppColors.primaryTextColor,
-                            size: 16.r,
-                          ),
-                          loading: _ctrl.isLoading,
-                          onpress: () async {
-                            final ok = await _ctrl.acceptJob();
-                            if (ok && context.mounted) {
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                      'Job accepted successfully!'),
-                                  backgroundColor:
-                                  AppColors.primaryColor,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+        // No data
+        if (d == null) {
+          return Center(
+            child: CustomText(
+              text: 'Job details not available',
+              fontsize: 14.sp,
+              color: AppColors.secondaryTextColor,
+            ),
           );
-        },
+        }
+
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 100.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Shipment ID + priority badge ──────────────────
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 16.w, vertical: 14.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E2427),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: const Color(0xFF3A3A3A),
+                        width: 0.6,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomText(
+                              text: 'Shipment ID',
+                              fontsize: 11.sp,
+                              color: AppColors.secondaryTextColor,
+                              textAlign: TextAlign.start,
+                            ),
+                            SizedBox(height: 3.h),
+                            CustomText(
+                              text: d.shipmentId,
+                              fontsize: 20.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryTextColor,
+                              textAlign: TextAlign.start,
+                            ),
+                          ],
+                        ),
+                        if (d.priority.name == 'urgent') _UrgentBadge(),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+
+                  // ── Earnings card ─────────────────────────────────
+                  EarningsCard(
+                    earnings: d.deliveryFee,
+                    distanceKm: 0,
+                  ),
+                  SizedBox(height: 12.h),
+
+                  // ── Location card ─────────────────────────────────
+                  LocationCard(
+                    pickupName: d.pickupLocation,
+                    pickupAddress: d.pickupAddress,
+                    pickupContact: d.pickupContact,
+                    pickupPhone: d.pickupPhone,
+                    dropoffName: d.dropoffLocation,
+                    dropoffAddress: d.dropoffAddress,
+                    dropoffContact: d.dropoffContact,
+                    dropoffPhone: d.dropoffPhone,
+                  ),
+                  SizedBox(height: 12.h),
+
+                  // ── Package details ───────────────────────────────
+                  PackageDetailsCard(
+                    servicesType: d.serviceType,
+                    weight: d.weight,
+                    dimensions: d.dimensions,
+                  ),
+                  SizedBox(height: 12.h),
+
+                  // ── Special instructions ──────────────────────────
+                  if (d.specialInstructions.isNotEmpty)
+                    SpecialInstructionsCard(
+                      instructions: d.specialInstructions,
+                    ),
+                ],
+              ),
+            ),
+
+            // ── Sticky bottom: Decline | Accept ──────────────────────
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                color: AppColors.backgroundColor,
+                padding:
+                    EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+                child: Obx(() => Row(
+                      children: [
+                        // Decline
+                        Expanded(
+                          child: CustomButton(
+                            title: 'Decline',
+                            color: const Color(0xFF252525),
+                            borderColor: const Color(0xFF3A3A3A),
+                            titlecolor: AppColors.primaryTextColor,
+                            loading: ctrl.isLoading.value,
+                            onpress: () async {
+                              await ctrl.declineJob();
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        // Accept
+                        Expanded(
+                          child: CustomButton(
+                            title: 'Accept Job',
+                            prefixIcon: Icon(
+                              Icons.send_outlined,
+                              color: AppColors.primaryTextColor,
+                              size: 16.r,
+                            ),
+                            loading: ctrl.isLoading.value,
+                            onpress: () async {
+                              final ok =
+                                  await ctrl.acceptJob(d.id);
+                              if (ok && context.mounted) {
+                                Navigator.pop(context);
+                                // Switch to Active tab — triggers fetchActiveJobs()
+                                final jobC = Get.find<DriverJobController>();
+                                jobC.onTabSelected(DriverJobTab.active);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    )),
+              ),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildShimmer() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: Padding(
+        padding: EdgeInsets.all(16.r),
+        child: Column(
+          children: List.generate(
+            5,
+            (_) => Container(
+              margin: EdgeInsets.only(bottom: 12.h),
+              height: 80.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2A2A2A),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -240,8 +258,7 @@ class _UrgentBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-      EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
       decoration: BoxDecoration(
         color: const Color(0xFF4A1010),
         borderRadius: BorderRadius.circular(20.r),

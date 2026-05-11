@@ -16,8 +16,7 @@ class ActiveJobCard extends StatelessWidget {
     this.onTap,
   });
 
-  String _statusLabel(ActiveJobStatus s) =>
-      s == ActiveJobStatus.pickedUp ? 'Picked Up' : 'In Transit';
+  String _statusLabel(ActiveJobStatus s) => s.label;
 
   @override
   Widget build(BuildContext context) {
