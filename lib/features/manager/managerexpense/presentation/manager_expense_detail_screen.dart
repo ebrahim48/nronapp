@@ -8,6 +8,7 @@ import 'package:nron_app/features/manager/managerexpense/presentation/widgets/re
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_expense_controller.dart';
+import '../model/manager_expense_model.dart';
 import 'widgets/expense_rep_card.dart';
 import 'widgets/expense_total_amount_card.dart';
 import 'widgets/expense_detail_table.dart';
@@ -183,28 +184,45 @@ class ManagerExpenseDetailScreen extends StatelessWidget {
               ),
             ),
 
-            // Bottom action buttons
-            Container(
-              padding:
-                  EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2427),
-                border: Border(
-                  top: BorderSide(
-                      color: const Color(0xFF3A3A3A), width: 0.5),
+            // Bottom action buttons — only shown for pending expenses
+            Obx(() {
+              final status = c.expenseDetail.value.status;
+              final isPending = status == ManagerExpenseStatus.pending;
+              final isUpdating = c.isUpdatingStatus.value;
+
+              if (!isPending) return const SizedBox.shrink();
+
+              return Container(
+                padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E2427),
+                  border: Border(
+                    top: BorderSide(
+                        color: const Color(0xFF3A3A3A), width: 0.5),
+                  ),
                 ),
-              ),
-              child: ExpenseActionButtons(
-                onReject: () => RejectDialog.show(
-                  context,
-                  onSubmit: () => c.rejectExpense(context),
-                ),
-                onApprove: () => ApproveDialog.show(
-                  context,
-                  onConfirm: () => c.approveExpense(context),
-                ),
-              ),
-            ),
+                child: isUpdating
+                    ? Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryColor,
+                            strokeWidth: 2.5,
+                          ),
+                        ),
+                      )
+                    : ExpenseActionButtons(
+                        onReject: () => RejectDialog.show(
+                          context,
+                          onSubmit: () => c.rejectExpense(context),
+                        ),
+                        onApprove: () => ApproveDialog.show(
+                          context,
+                          onConfirm: () => c.approveExpense(context),
+                        ),
+                      ),
+              );
+            }),
           ],
         );
       }),

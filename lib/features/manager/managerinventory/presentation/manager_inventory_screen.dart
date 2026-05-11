@@ -92,29 +92,29 @@ class ManagerInventoryScreen extends StatelessWidget {
                   Row(children: [
                     ManagerStatCard(
                       iconPath: 'assets/icons/managerinventory.svg',
-                      label: 'Total Inventory',
-                      value: '${c.totalInventory.value}',
+                      label: 'Serialized Implants',
+                      value: '${c.serializedImplants.value}',
                     ),
                     SizedBox(width: 12.w),
                     ManagerStatCard(
                       iconPath: 'assets/icons/managerinventory.svg',
-                      label: 'Available',
-                      value: '${c.totalAvailable.value}',
+                      label: 'Total Trays',
+                      value: '${c.totalTrays.value}',
                     ),
                   ]),
                   SizedBox(height: 12.h),
                   Row(children: [
                     ManagerStatCard(
                       iconPath: 'assets/icons/managerinventory.svg',
-                      label: 'This Month',
-                      value: '${c.thisMonthInventory.value}',
+                      label: 'Bio Inventory',
+                      value: '${c.bioInventory.value}',
                     ),
                     SizedBox(width: 12.w),
                     ManagerStatCard(
                       iconPath: 'assets/icons/managerinventory.svg',
                       label: 'Low Stock Alert',
                       value: '${c.lowStockAlert.value}',
-                      valueColor: c.isLowStock.value
+                      valueColor: c.lowStockAlert.value > 0
                           ? const Color(0xFFEC0101)
                           : Colors.white,
                     ),
@@ -123,7 +123,7 @@ class ManagerInventoryScreen extends StatelessWidget {
                   Row(children: [
                     ManagerAlertCard(
                       iconPath: 'assets/icons/missingandtransfer.svg',
-                      count: c.missingCount.value,
+                      count: c.missingInstruments.value,
                       title: 'Missing Instrument',
                       subtitle:
                           'Inter-hospital logistics requiring manager approval to proceed.',
@@ -133,7 +133,7 @@ class ManagerInventoryScreen extends StatelessWidget {
                     SizedBox(width: 12.w),
                     ManagerAlertCard(
                       iconPath: 'assets/icons/transferrequests.svg',
-                      count: c.missingTotal.value,
+                      count: c.pendingTransferRequests.value,
                       title: 'Pending Transfer Requests',
                       subtitle:
                           'Inter-hospital logistics requiring manager approval to proceed.',
@@ -147,25 +147,56 @@ class ManagerInventoryScreen extends StatelessWidget {
 
             SizedBox(height: 16.h),
 
-            // ── Distribution card (static UI) ────────────────────────────
-            Obx(() => InventoryDistributionCard(
-                  selectedLine: c.selectedProductLine.value,
-                  lines: c.productLines,
-                  items: c.distributionItems.cast<Map<String, dynamic>>(),
-                  onChanged: (v) {
-                    if (v != null) c.selectProductLine(v);
-                  },
-                )),
+            // ── Distribution card (dynamic) ──────────────────────────────
+            Obx(() {
+              if (c.isLoadingStats.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Container(
+                    height: 280.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                  ),
+                );
+              }
+              return InventoryDistributionCard(
+                selectedLine: c.selectedProductLine.value,
+                lines: c.productLines,
+                total: c.distributionTotal.value,
+                items: c.distributionItems.cast<Map<String, dynamic>>(),
+                onChanged: (v) {
+                  if (v != null) c.selectProductLine(v);
+                },
+              );
+            }),
 
             SizedBox(height: 16.h),
 
-            // ── Recent movement card (static UI) ─────────────────────────
-            Obx(() => RecentMovementCard(
-                  activeTab: c.movementTab.value,
-                  data: c.weeklyData,
-                  days: c.weekDays,
-                  onTabChange: c.selectMovementTab,
-                )),
+            // ── Recent movement card (dynamic) ───────────────────────────
+            Obx(() {
+              if (c.isLoadingStats.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: Container(
+                    height: 200.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                  ),
+                );
+              }
+              return RecentMovementCard(
+                activeTab: c.movementTab.value,
+                data: c.activeChartData,
+                days: c.activeChartLabels,
+                onTabChange: c.selectMovementTab,
+              );
+            }),
           ],
         ),
       ),

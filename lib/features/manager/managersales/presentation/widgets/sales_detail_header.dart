@@ -7,17 +7,17 @@ import '../../../../../core/custom_widgets/custom_text.dart';
 class SaleDetailHeader extends StatelessWidget {
   final String saleNumber;
   final String repName;
-  final VoidCallback onViewLogistic;
   final VoidCallback onAddNote;
   final VoidCallback onApproveCommission;
+  final bool isApproving;
 
   const SaleDetailHeader({
     super.key,
     required this.saleNumber,
     required this.repName,
-    required this.onViewLogistic,
     required this.onAddNote,
     required this.onApproveCommission,
+    this.isApproving = false,
   });
 
   @override
@@ -60,7 +60,6 @@ class SaleDetailHeader extends StatelessWidget {
                 ),
               ],
             ),
-            // Copy icon
             Icon(Icons.copy_outlined,
                 color: AppColors.secondaryTextColor, size: 20.r),
           ],
@@ -68,125 +67,94 @@ class SaleDetailHeader extends StatelessWidget {
 
         SizedBox(height: 12.h),
 
-        // View Logistic + Add Note row
-        Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: onViewLogistic,
-                child: Container(
-                  height: 40.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                        color: AppColors.primaryColor.withValues(alpha: 0.4)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/viewlogistic.svg',
-                        width: 16.r,
-                        height: 16.r,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.primaryColor,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        'View Logistic',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primaryColor,
-                        ),
-                      ),
-                    ],
+        // Add Note button (full width)
+        GestureDetector(
+          onTap: onAddNote,
+          child: Container(
+            width: double.infinity,
+            height: 40.h,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A2200),
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                  color: AppColors.warningColor.withValues(alpha: 0.4)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  'assets/icons/addnote.svg',
+                  width: 16.r,
+                  height: 16.r,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.warningColor,
+                    BlendMode.srcIn,
                   ),
                 ),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: GestureDetector(
-                onTap: onAddNote,
-                child: Container(
-                  height: 40.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2A2200),
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                        color: AppColors.warningColor.withValues(alpha: 0.4)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/addnote.svg',
-                        width: 16.r,
-                        height: 16.r,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.warningColor,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        'Add Note',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.warningColor,
-                        ),
-                      ),
-                    ],
+                SizedBox(width: 6.w),
+                Text(
+                  'Add Note',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.warningColor,
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
 
         SizedBox(height: 10.h),
 
         // Approve Commission button
         GestureDetector(
-          onTap: onApproveCommission,
+          onTap: isApproving ? null : onApproveCommission,
           child: Container(
             width: double.infinity,
             height: 48.h,
             decoration: BoxDecoration(
-              color: AppColors.primaryColor,
+              color: isApproving
+                  ? AppColors.primaryColor.withValues(alpha: 0.5)
+                  : AppColors.primaryColor,
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.asset(
-                  'assets/icons/salecheck.svg',
-                  width: 18.r,
-                  height: 18.r,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.blackColor,
-                    BlendMode.srcIn,
+            child: isApproving
+                ? Center(
+                    child: SizedBox(
+                      width: 22.r,
+                      height: 22.r,
+                      child: CircularProgressIndicator(
+                        color: AppColors.blackColor,
+                        strokeWidth: 2.5,
+                      ),
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/salecheck.svg',
+                        width: 18.r,
+                        height: 18.r,
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.blackColor,
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        'Approve Commission',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.blackColor,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'Approve Commission',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.blackColor,
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ],

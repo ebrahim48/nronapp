@@ -10,101 +10,187 @@ class CommissionTableRow extends StatelessWidget {
 
   const CommissionTableRow({super.key, required this.item, this.onTap});
 
+  bool get _isPaid => item.status.toLowerCase() == 'paid';
+
   @override
   Widget build(BuildContext context) {
-    final isClosed = item.billStatus == CommissionBillStatus.closed;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
-        decoration: const BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Color(0xFF2A2A2A), width: 0.5),
-          ),
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(14.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1E1E),
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(color: const Color(0xFF2A2A2A)),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: 52.w,
-              child: CustomText(
-                text: item.saleId,
-                fontsize: 11.sp,
-                color: AppColors.secondaryTextColor,
-                textAlign: TextAlign.start,
-              ),
-            ),
-            Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    width: 28.r,
-                    height: 28.r,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2A3A4A),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        item.repInitials,
-                        style: TextStyle(
-                          fontSize: 9.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primaryTextColor,
-                        ),
+            // ── Top row: Sale ID label + status badge ──────────────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sale ID',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.warningColor,
                       ),
                     ),
-                  ),
-                  SizedBox(width: 6.w),
-                  Expanded(
-                    child: CustomText(
-                      text: item.repName,
-                      fontsize: 10.sp,
-                      color: AppColors.primaryTextColor,
-                      textAlign: TextAlign.start,
-                      maxline: 2,
+                    SizedBox(height: 2.h),
+                    Text(
+                      item.saleId.isNotEmpty ? '#${item.saleId}' : '—',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+                // Status badge
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    color: _isPaid
+                        ? const Color(0xFF00C853).withValues(alpha: 0.15)
+                        : const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(
+                      color: _isPaid
+                          ? const Color(0xFF00C853).withValues(alpha: 0.5)
+                          : const Color(0xFFFF6D00).withValues(alpha: 0.5),
                     ),
                   ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: 80.w,
-              child: CustomText(
-                text: item.area,
-                fontsize: 9.sp,
-                color: AppColors.secondaryTextColor,
-                textAlign: TextAlign.start,
-                maxline: 2,
-              ),
-            ),
-            SizedBox(
-              width: 56.w,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  padding:
-                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: isClosed
-                        ? const Color(0xFF5A4A00)
-                        : const Color(0xFF003A00),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
                   child: Text(
-                    isClosed ? 'Closed' : 'Open',
+                    _isPaid ? 'PAID' : 'UNPAID',
                     style: TextStyle(
-                      fontSize: 9.sp,
+                      fontSize: 10.sp,
                       fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      color: isClosed
-                          ? const Color(0xFFFFD700)
-                          : const Color(0xFF00D500),
+                      fontWeight: FontWeight.w700,
+                      color: _isPaid
+                          ? const Color(0xFF00C853)
+                          : const Color(0xFFFF6D00),
                     ),
                   ),
                 ),
-              ),
+              ],
+            ),
+
+            SizedBox(height: 10.h),
+
+            // ── Rep name ───────────────────────────────────────────
+            Row(
+              children: [
+                Icon(Icons.person_outline,
+                    color: AppColors.secondaryTextColor, size: 14.r),
+                SizedBox(width: 6.w),
+                Expanded(
+                  child: CustomText(
+                    text: item.repName.isNotEmpty ? item.repName : '—',
+                    fontsize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 6.h),
+
+            // ── Facility ───────────────────────────────────────────
+            Row(
+              children: [
+                Icon(Icons.business_outlined,
+                    color: AppColors.secondaryTextColor, size: 14.r),
+                SizedBox(width: 6.w),
+                Expanded(
+                  child: CustomText(
+                    text: item.facilityName.isNotEmpty
+                        ? item.facilityName
+                        : '—',
+                    fontsize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 12.h),
+
+            Divider(
+                height: 1, thickness: 0.5, color: const Color(0xFF2A2A2A)),
+
+            SizedBox(height: 10.h),
+
+            // ── Bottom row: sale info + commission amount ──────────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.saleAmount > 0
+                          ? 'Sale: \$${item.saleAmount.toStringAsFixed(0)} (${item.commissionRate}%)'
+                          : '—',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondaryTextColor,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      item.date.isNotEmpty ? item.date : '—',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondaryTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Commission',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondaryTextColor,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      '\$${item.commissionAmount.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

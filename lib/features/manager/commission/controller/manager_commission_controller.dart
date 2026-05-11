@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
@@ -37,6 +39,9 @@ class ManagerCommissionController extends GetxController {
   final selectedTerritory = ''.obs;
   final repSearchQuery = ''.obs;
   final selectedReps = <String>[].obs;
+
+  // ── Mark paid loading ─────────────────────────────────────────────────────
+  final isMarkingPaid = false.obs;
 
   final territories = ['Northeast', 'Southeast', 'West', 'Midwest', 'Southwest', 'Pacific'];
 
@@ -117,7 +122,13 @@ class ManagerCommissionController extends GetxController {
     try {
       isLoadingList.value = true;
       final token = await PrefsHelper.getString('auth_token');
-      final res = await _repo.getAll(token);
+      // Pass payment status filter to API when not 'all'
+      final statusParam = selectedPaymentStatus.value == CommissionPaymentStatus.all
+          ? null
+          : selectedPaymentStatus.value == CommissionPaymentStatus.paid
+              ? 'paid'
+              : 'unpaid';
+      final res = await _repo.getAll(token, status: statusParam);
       final results = _asList(res['data']);
       allListItems.assignAll(
         results.map((e) => CommissionListItem.fromJson(e as Map<String, dynamic>)),
@@ -193,17 +204,21 @@ class ManagerCommissionController extends GetxController {
 
   // ── Update rate ───────────────────────────────────────────────────────────
 
-  Future<void> updateRate(int index) async {
-    final rateText = newRateController.text.trim();
-    final rate = double.tryParse(rateText);
+  Future<void> updateRate(int index, {double? newRate}) async {
+    final rate = newRate ?? double.tryParse(newRateController.text.trim());
     if (rate == null) {
       ToastMessageHelper.showErrorMessage('Enter a valid rate');
       return;
     }
     try {
       final token = await PrefsHelper.getString('auth_token');
-      final id = repRates[index].id;
-      await _repo.updateCommissionRate(token, id, rate: rate);
+      final rep = repRates[index];
+      await _repo.updateCommissionRate(
+        token,
+        rep.id,
+        representativeId: rep.representativeId,
+        rate: rate,
+      );
       ToastMessageHelper.showSuccessMessage('Commission rate updated');
       newRateController.clear();
       fetchManageList();
@@ -212,20 +227,147 @@ class ManagerCommissionController extends GetxController {
     }
   }
 
-  void markPaid(BuildContext context) {
-    Navigator.pop(context);
-    ToastMessageHelper.showSuccessMessage('Commission marked as paid');
+
+  Future<void> markPaid(BuildContext context) async {
+    final id = commissionDetail.value.id;
+    if (id.isEmpty) return;
+    try {
+      isMarkingPaid.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.markPaid(token, id);
+      // Reflect locally
+      commissionDetail.value = CommissionDetailModel(
+        id: commissionDetail.value.id,
+        repName: commissionDetail.value.repName,
+        repRole: commissionDetail.value.repRole,
+        repAvatarUrl: commissionDetail.value.repAvatarUrl,
+        paymentStatus: CommissionPaymentStatus.paid,
+        totalCommissionDue: commissionDetail.value.totalCommissionDue,
+        saleAmount: commissionDetail.value.saleAmount,
+        rate: commissionDetail.value.rate,
+        date: commissionDetail.value.date,
+        saleId: commissionDetail.value.saleId,
+        facility: commissionDetail.value.facility,
+        territory: commissionDetail.value.territory,
+        bills: commissionDetail.value.bills,
+        splits: commissionDetail.value.splits,
+        totalCommissionPool: commissionDetail.value.totalCommissionPool,
+      );
+      fetchList();
+      _showViewTransactionPopup(context);
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to mark commission as paid');
+    } finally {
+      isMarkingPaid.value = false;
+    }
+  }
+
+  void _showViewTransactionPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: const Color(0xFF1E2427),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF34D399).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(9999),
+                  border: Border.all(
+                      color: const Color(0xFF34D399).withValues(alpha: 0.4)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle, color: Color(0xFF34D399), size: 16),
+                    SizedBox(width: 8),
+                    Text('Paid',
+                        style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF34D399))),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Commission marked as paid successfully.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                    height: 1.5),
+              ),
+              const SizedBox(height: 24),
+              // View Transaction button
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  // Navigate to transaction detail screen
+                  final router = GoRouter.of(context);
+                  router.push(AppRoutes.transactionDetailScreen);
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEC5B13),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text('View Transaction',
+                      style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white)),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Done button
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF3A3A3A)),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text('Done',
+                      style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white54)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // ── Filter helpers ────────────────────────────────────────────────────────
 
-  void applyFilters() {}
+  void applyFilters() {
+    fetchList();
+  }
+
   void resetFilters() {
     selectedBillStatus.value = CommissionBillStatus.all;
     selectedPaymentStatus.value = CommissionPaymentStatus.all;
     selectedTerritory.value = '';
     repSearchQuery.value = '';
     selectedReps.clear();
+    fetchList();
   }
 
   void toggleTerritory(String t) {

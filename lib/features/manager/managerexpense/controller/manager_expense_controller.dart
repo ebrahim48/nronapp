@@ -26,6 +26,9 @@ class ManagerExpenseController extends GetxController {
   final syncCount = 0.obs;
   final isSyncing = false.obs;
 
+  // ── Status update ─────────────────────────────────────────────────────────
+  final isUpdatingStatus = false.obs;
+
   // ── Reject form ───────────────────────────────────────────────────────────
   final rejectCommentController = TextEditingController();
 
@@ -101,15 +104,48 @@ class ManagerExpenseController extends GetxController {
 
   // ── Approve / Reject ──────────────────────────────────────────────────────
 
-  void approveExpense(BuildContext context) {
-    Navigator.pop(context);
-    ToastMessageHelper.showSuccessMessage(
-        'Expense approved and synced with QuickBooks');
+  Future<void> approveExpense(BuildContext context) async {
+    final id = expenseDetail.value.id;
+    if (id.isEmpty) return;
+    try {
+      isUpdatingStatus.value = true;
+      Navigator.pop(context); // close confirm dialog
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.updateExpenseStatus(token, id, 'approved');
+      fetchExpenses();
+      // Go back to the expense list
+      if (context.mounted) Navigator.pop(context);
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to approve expense');
+    } finally {
+      isUpdatingStatus.value = false;
+    }
   }
 
-  void rejectExpense(BuildContext context) {
-    Navigator.pop(context);
-    ToastMessageHelper.showErrorMessage('Expense has been rejected');
+  Future<void> rejectExpense(BuildContext context) async {
+    final id = expenseDetail.value.id;
+    if (id.isEmpty) return;
+
+    final note = rejectCommentController.text.trim();
+    if (note.isEmpty) {
+      ToastMessageHelper.showErrorMessage('Please provide a rejection note');
+      return;
+    }
+
+    try {
+      isUpdatingStatus.value = true;
+      Navigator.pop(context); // close bottom sheet
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.updateExpenseStatus(token, id, 'rejected', rejectionNote: note);
+      fetchExpenses();
+      rejectCommentController.clear();
+      // Go back to the expense list
+      if (context.mounted) Navigator.pop(context);
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to reject expense');
+    } finally {
+      isUpdatingStatus.value = false;
+    }
   }
 
   // ── Sync ──────────────────────────────────────────────────────────────────

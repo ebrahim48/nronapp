@@ -40,7 +40,11 @@ class CommissionListItem {
   final String saleId;
   final String repName;
   final String repInitials;
-  final String area;
+  final String facilityName;
+  final double saleAmount;
+  final double commissionAmount;
+  final int commissionRate;
+  final String date;
   final CommissionBillStatus billStatus;
   final String status; // 'paid' | 'unpaid'
 
@@ -49,7 +53,11 @@ class CommissionListItem {
     required this.saleId,
     required this.repName,
     required this.repInitials,
-    required this.area,
+    required this.facilityName,
+    required this.saleAmount,
+    required this.commissionAmount,
+    required this.commissionRate,
+    required this.date,
     required this.billStatus,
     required this.status,
   });
@@ -60,20 +68,51 @@ class CommissionListItem {
     return name.isNotEmpty ? name[0].toUpperCase() : '?';
   }
 
+  static String _formatDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(raw);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    } catch (_) {
+      return raw ?? '';
+    }
+  }
+
   factory CommissionListItem.fromJson(Map<String, dynamic> e) {
     final saleMap = e['sale'] is Map ? e['sale'] as Map<String, dynamic> : <String, dynamic>{};
     final facilityMap = saleMap['facility'] is Map ? saleMap['facility'] as Map<String, dynamic> : <String, dynamic>{};
+    final billingMap = saleMap['billing'] is Map ? saleMap['billing'] as Map<String, dynamic> : <String, dynamic>{};
+    final repsMap = saleMap['representatives'] is Map ? saleMap['representatives'] as Map<String, dynamic> : <String, dynamic>{};
+    final repUsers = repsMap['users'] is List ? repsMap['users'] as List : [];
+    final invoiceMap = saleMap['invoice'] is Map ? saleMap['invoice'] as Map<String, dynamic> : <String, dynamic>{};
+
     final status = e['status']?.toString() ?? 'unpaid';
-    final invoiceStatus = (saleMap['invoice'] is Map)
-        ? (saleMap['invoice'] as Map)['status']?.toString() ?? ''
-        : '';
+    final invoiceStatus = invoiceMap['status']?.toString() ?? '';
+
+    // Rep name from representativeName field or createdBy
+    final repName = e['representativeName']?.toString() ?? '';
+
+    // Commission amount & rate from representatives
+    final myCommission = (repsMap['myCommission'] as num?)?.toDouble() ?? 0.0;
+    final totalCommission = (repsMap['totalCommission'] as num?)?.toDouble() ?? 0.0;
+    final commissionAmount = myCommission > 0 ? myCommission : totalCommission;
+
+    final commissionRate = repUsers.isNotEmpty && repUsers.first is Map
+        ? ((repUsers.first as Map)['commissionRate'] as num?)?.toInt() ?? 0
+        : 0;
 
     return CommissionListItem(
       id: e['_id']?.toString() ?? '',
       saleId: saleMap['saleId']?.toString() ?? '',
-      repName: '',
-      repInitials: '??',
-      area: facilityMap['address']?.toString() ?? '',
+      repName: repName,
+      repInitials: _initials(repName),
+      facilityName: facilityMap['facilityName']?.toString() ??
+          facilityMap['name']?.toString() ?? '',
+      saleAmount: (billingMap['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      commissionAmount: commissionAmount,
+      commissionRate: commissionRate,
+      date: _formatDate(saleMap['procedureDate']?.toString()),
       billStatus: invoiceStatus == 'paid'
           ? CommissionBillStatus.closed
           : CommissionBillStatus.open,
@@ -266,7 +305,8 @@ class TransactionDetailModel {
 // ── Commission manage (rep rate) ──────────────────────────────────────────────
 
 class CommissionRepRate {
-  final String id;
+  final String id;             // commission-manage document _id
+  final String representativeId; // representative user _id
   final String name;
   final String role;
   final String? avatarUrl;
@@ -276,6 +316,7 @@ class CommissionRepRate {
 
   const CommissionRepRate({
     required this.id,
+    required this.representativeId,
     required this.name,
     required this.role,
     this.avatarUrl,
@@ -294,11 +335,20 @@ class CommissionRepRate {
   }
 
   factory CommissionRepRate.fromJson(Map<String, dynamic> e) {
+    // representative field can be a Map (populated) or a String (ID only)
+    final repMap = e['representative'] is Map
+        ? e['representative'] as Map<String, dynamic>
+        : <String, dynamic>{};
+    final representativeId = repMap.isNotEmpty
+        ? repMap['_id']?.toString() ?? ''
+        : e['representative']?.toString() ?? '';
+
     return CommissionRepRate(
       id: e['_id']?.toString() ?? '',
-      name: '',
-      role: 'Representative',
-      avatarUrl: null,
+      representativeId: representativeId,
+      name: repMap['fullName']?.toString() ?? '',
+      role: repMap['role']?.toString() ?? 'Representative',
+      avatarUrl: repMap['profileUrl']?.toString(),
       updatedDate: _formatDate(e['updatedAt']?.toString()),
       currentRate: (e['commissionRate'] as num?)?.toDouble() ?? 0.0,
       commissionAmount: (e['commissionAmount'] as num?)?.toDouble() ?? 0.0,

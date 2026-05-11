@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
@@ -51,6 +52,18 @@ class TransferRequestItem {
           facilityMap['name']?.toString() ?? '',
     );
   }
+
+  TransferRequestItem copyWith({String? status}) => TransferRequestItem(
+        id: id,
+        serialNumber: serialNumber,
+        systemType: systemType,
+        from: from,
+        to: to,
+        reason: reason,
+        status: status ?? this.status,
+        date: date,
+        facilityName: facilityName,
+      );
 }
 
 // ── Controller ────────────────────────────────────────────────────────────────
@@ -65,6 +78,9 @@ class ManagerTransferRequestsController extends GetxController {
   final selectedFilter = 'All'.obs;
   final isLoading = true.obs;
   final requests = <TransferRequestItem>[].obs;
+
+  // Tracks which item IDs are currently being updated
+  final loadingIds = <String>{}.obs;
 
   @override
   void onInit() {
@@ -114,13 +130,31 @@ class ManagerTransferRequestsController extends GetxController {
     fetchRequests();
   }
 
-  void approve(String id) {
-    ToastMessageHelper.showSuccessMessage('Approved');
-    requests.removeWhere((r) => r.id == id);
+  Future<void> approve(BuildContext context, String id) async {
+    await _updateStatus(id, 'approved');
   }
 
-  void reject(String id) {
-    ToastMessageHelper.showSuccessMessage('Rejected');
-    requests.removeWhere((r) => r.id == id);
+  Future<void> reject(BuildContext context, String id) async {
+    await _updateStatus(id, 'rejected');
+  }
+
+  Future<void> _updateStatus(String id, String status) async {
+    if (loadingIds.contains(id)) return;
+    try {
+      loadingIds.add(id);
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.updateTransferRequestStatus(token, id, status);
+      // Update the item in the list locally
+      final idx = requests.indexWhere((r) => r.id == id);
+      if (idx != -1) {
+        requests[idx] = requests[idx].copyWith(status: status);
+        requests.refresh();
+      }
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage(
+          'Failed to ${status == 'approved' ? 'approve' : 'reject'} request');
+    } finally {
+      loadingIds.remove(id);
+    }
   }
 }

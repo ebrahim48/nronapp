@@ -46,4 +46,26 @@ class ManagerExpenseRepository {
     );
     return res.data as Map<String, dynamic>;
   }
+
+  /// PATCH /expense/status-update/:id
+  /// [status] must be either "approved" or "rejected"
+  /// [rejectionNote] is required when status is "rejected"
+  Future<Map<String, dynamic>> updateExpenseStatus(
+    String token,
+    String id,
+    String status, {
+    String? rejectionNote,
+  }) async {
+    await _connectivity.checkConnectivity();
+    final body = <String, dynamic>{'status': status};
+    if (status == 'rejected' && rejectionNote != null && rejectionNote.isNotEmpty) {
+      body['rejectionNote'] = rejectionNote;
+    }
+    final res = await _api.patch(
+      ApiConstants.expenseStatusUpdate(id),
+      data: body,
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
 }

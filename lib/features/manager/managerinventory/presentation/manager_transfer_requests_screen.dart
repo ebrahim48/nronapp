@@ -130,8 +130,9 @@ class ManagerTransferRequestsScreen extends StatelessWidget {
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: _TransferCard(
                             item: r,
-                            onApprove: () => c.approve(r.id),
-                            onReject: () => c.reject(r.id),
+                            isLoading: c.loadingIds.contains(r.id),
+                            onApprove: () => c.approve(context, r.id),
+                            onReject: () => c.reject(context, r.id),
                           ),
                         ))
                     .toList(),
@@ -148,11 +149,13 @@ class ManagerTransferRequestsScreen extends StatelessWidget {
 
 class _TransferCard extends StatelessWidget {
   final TransferRequestItem item;
+  final bool isLoading;
   final VoidCallback onApprove;
   final VoidCallback onReject;
 
   const _TransferCard(
       {required this.item,
+      required this.isLoading,
       required this.onApprove,
       required this.onReject});
 
@@ -305,66 +308,80 @@ class _TransferCard extends StatelessWidget {
           // ── Action buttons (only for pending) ───────────────────────
           if (item.status.toLowerCase() == 'pending') ...[
             SizedBox(height: 14.h),
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onApprove,
-                    child: Container(
-                      height: 44.h,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        borderRadius: BorderRadius.circular(10.r),
+            isLoading
+                ? Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      child: SizedBox(
+                        height: 24.r,
+                        width: 24.r,
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryColor,
+                          strokeWidth: 2.5,
+                        ),
                       ),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.check_circle_outline,
-                                color: Colors.black, size: 16.r),
-                            SizedBox(width: 6.w),
-                            CustomText(
-                              text: 'Approve',
-                              fontsize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                              textAlign: TextAlign.center,
-                            ),
-                          ]),
                     ),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: onReject,
-                    child: Container(
-                      height: 44.h,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(10.r),
-                        border:
-                            Border.all(color: const Color(0xFFEC0101)),
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: onApprove,
+                          child: Container(
+                            height: 44.h,
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryColor,
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.check_circle_outline,
+                                      color: Colors.black, size: 16.r),
+                                  SizedBox(width: 6.w),
+                                  CustomText(
+                                    text: 'Approve',
+                                    fontsize: 13.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ]),
+                          ),
+                        ),
                       ),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.cancel_outlined,
-                                color: const Color(0xFFEC0101),
-                                size: 16.r),
-                            SizedBox(width: 6.w),
-                            CustomText(
-                              text: 'Reject',
-                              fontsize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFFEC0101),
-                              textAlign: TextAlign.center,
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: onReject,
+                          child: Container(
+                            height: 44.h,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(
+                                  color: const Color(0xFFEC0101)),
                             ),
-                          ]),
-                    ),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.cancel_outlined,
+                                      color: const Color(0xFFEC0101),
+                                      size: 16.r),
+                                  SizedBox(width: 6.w),
+                                  CustomText(
+                                    text: 'Reject',
+                                    fontsize: 13.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFFEC0101),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ]),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ],
         ],
       ),

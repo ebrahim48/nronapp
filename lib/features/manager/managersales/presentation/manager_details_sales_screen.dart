@@ -21,6 +21,8 @@ class ManagerSaleDetailScreen extends StatelessWidget {
 
   void _showAddNoteDialog(BuildContext context, ManagerSaleController c) {
     final noteController = TextEditingController();
+    final isSaving = false.obs;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -95,39 +97,58 @@ class ManagerSaleDetailScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 16.h),
-              GestureDetector(
-                onTap: () {
-                  c.saveNote(noteController.text.trim());
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  width: double.infinity,
-                  height: 48.h,
-                  decoration: BoxDecoration(
-                    color: AppColors.warningColor,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        'assets/icons/note.svg',
-                        width: 18.r,
-                        height: 18.r,
-                        colorFilter: const ColorFilter.mode(
-                            AppColors.blackColor, BlendMode.srcIn),
+              Obx(() => GestureDetector(
+                    onTap: isSaving.value
+                        ? null
+                        : () async {
+                            final text = noteController.text.trim();
+                            if (text.isEmpty) return;
+                            isSaving.value = true;
+                            await c.saveNote(text);
+                            isSaving.value = false;
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                    child: Container(
+                      width: double.infinity,
+                      height: 48.h,
+                      decoration: BoxDecoration(
+                        color: isSaving.value
+                            ? AppColors.warningColor.withValues(alpha: 0.5)
+                            : AppColors.warningColor,
+                        borderRadius: BorderRadius.circular(10.r),
                       ),
-                      SizedBox(width: 8.w),
-                      Text('Save Note',
-                          style: TextStyle(
-                              fontSize: 14.sp,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.blackColor)),
-                    ],
-                  ),
-                ),
-              ),
+                      child: isSaving.value
+                          ? Center(
+                              child: SizedBox(
+                                width: 22.r,
+                                height: 22.r,
+                                child: CircularProgressIndicator(
+                                  color: AppColors.blackColor,
+                                  strokeWidth: 2.5,
+                                ),
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/icons/note.svg',
+                                  width: 18.r,
+                                  height: 18.r,
+                                  colorFilter: const ColorFilter.mode(
+                                      AppColors.blackColor, BlendMode.srcIn),
+                                ),
+                                SizedBox(width: 8.w),
+                                Text('Save Note',
+                                    style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.blackColor)),
+                              ],
+                            ),
+                    ),
+                  )),
             ],
           ),
         ),
@@ -192,13 +213,13 @@ class ManagerSaleDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Header ─────────────────────────────────────────────
-              SaleDetailHeader(
+              Obx(() => SaleDetailHeader(
                 saleNumber: d.saleNumber,
                 repName: d.repName,
-                onViewLogistic: () {},
                 onAddNote: () => _showAddNoteDialog(context, c),
                 onApproveCommission: c.approveCommission,
-              ),
+                isApproving: c.isApprovingCommission.value,
+              )),
 
               SizedBox(height: 14.h),
 
@@ -301,10 +322,11 @@ class ManagerSaleDetailScreen extends StatelessWidget {
               SizedBox(height: 16.h),
 
               // ── Feedback ────────────────────────────────────────────
-              SaleFeedbackSection(
+              Obx(() => SaleFeedbackSection(
                 controller: c.feedbackController,
                 onSend: c.sendFeedback,
-              ),
+                isSending: c.isSendingFeedback.value,
+              )),
 
               SizedBox(height: 30.h),
             ],

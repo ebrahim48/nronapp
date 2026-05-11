@@ -46,4 +46,29 @@ class ManagerSalesRepository {
     );
     return res.data as Map<String, dynamic>;
   }
+
+  /// PATCH /sales/status-update/:id  — approve commission
+  Future<Map<String, dynamic>> approveCommission(
+      String token, String id) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.patch(
+      ApiConstants.approveCommissionById(id),
+      data: {'status': 'approved'},
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
+  /// PATCH /sales/update/:id  — save feedback notes (form-data)
+  Future<Map<String, dynamic>> updateSalesNotes(
+      String token, String id, String feedbackNotes) async {
+    await _connectivity.checkConnectivity();
+    final formData = FormData.fromMap({'feedbackNotes': feedbackNotes});
+    final res = await _api.patch(
+      ApiConstants.updateSalesNotes(id),
+      data: formData,
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return res.data as Map<String, dynamic>;
+  }
 }
