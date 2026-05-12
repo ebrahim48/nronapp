@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nron_app/core/config/app-routes/app_routes.dart';
 import 'package:nron_app/features/driver/driverprofile/presentation/widgets/document_list_tile.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -11,7 +13,9 @@ import 'nid_rax_id_screen.dart';
 
 
 class DocumentsScreen extends StatefulWidget {
-  const DocumentsScreen({super.key});
+  final bool isSetupMode;
+
+  const DocumentsScreen({super.key, this.isSetupMode = false});
 
   @override
   State<DocumentsScreen> createState() => _DocumentsScreenState();
@@ -43,8 +47,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => DrivingLicenseScreen(
-              onSubmitted: () =>
-                  _ctrl.markUploaded('driving_license'),
+              onSubmitted: () => _ctrl.markUploaded('driving_license'),
             ),
           ),
         );
@@ -54,8 +57,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => CarPicturesScreen(
-              onSubmitted: () =>
-                  _ctrl.markUploaded('driver_car'),
+              onSubmitted: () => _ctrl.markUploaded('driver_car'),
             ),
           ),
         );
@@ -92,8 +94,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
             child: Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      24.w, 50.h, 24.w, 110.h),
+                  padding: EdgeInsets.fromLTRB(24.w, 50.h, 24.w, 110.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -106,7 +107,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                       SizedBox(height: 8.h),
                       CustomText(
                         text:
-                        'Please upload the required documents to complete your application process',
+                            'Please upload the required documents to complete your application process',
                         fontsize: 12.sp,
                         color: AppColors.secondaryTextColor,
                         textHeight: 1.5,
@@ -136,10 +137,11 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                         horizontal: 16.w, vertical: 12.h),
                     child: CustomButton(
                       title: 'Submit',
-                      loading: _ctrl.isLoading,
-                      onpress: () async {
-                        await _ctrl.submit();
-                        if (context.mounted) {
+                      loading: false,
+                      onpress: () {
+                        if (widget.isSetupMode) {
+                          context.go(AppRoutes.signInScreen);
+                        } else {
                           Navigator.pop(context);
                         }
                       },

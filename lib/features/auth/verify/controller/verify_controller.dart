@@ -87,8 +87,15 @@ class VerifyController extends GetxController {
       );
 
       if (res['success'] == true) {
+        final role = AuthTempData.selectedRole;
         AuthTempData.clear();
-        if (context.mounted) context.go(AppRoutes.signInScreen);
+        if (context.mounted) {
+          if (role == 'driver') {
+            context.go(AppRoutes.personalInfoScreen, extra: true);
+          } else {
+            context.go(AppRoutes.signInScreen);
+          }
+        }
       } else {
         otpError.value = res['message']?.toString() ?? 'Invalid code. Please try again.';
       }

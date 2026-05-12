@@ -58,12 +58,13 @@ class SignInController extends GetxController {
         final token = (data['accessToken'] ?? data['token'] ?? '').toString();
         await PrefsHelper.setString('auth_token', token);
         await PrefsHelper.setString('auth_refresh_token', data['refreshToken'] ?? '');
-        final role = (data['results']?['role'] ?? 'representative').toString();
+        final results = (data['results'] as Map<String, dynamic>?) ?? {};
+        final role = (results['role'] ?? 'representative').toString();
         await PrefsHelper.setString('user_role', role);
-        final userId = (data['results']?['_id'] ?? data['results']?['id'] ?? '').toString();
+        final userId = (results['_id'] ?? results['id'] ?? '').toString();
         await PrefsHelper.setString('user_id', userId);
 
-        if (context.mounted) _navigateByRole(context, role);
+        if (context.mounted) _navigateByRole(context, role, results);
       } else {
         generalError.value = res['message']?.toString() ?? 'Login failed. Please try again.';
       }
@@ -78,13 +79,23 @@ class SignInController extends GetxController {
     }
   }
 
-  void _navigateByRole(BuildContext context, String role) {
+  void _navigateByRole(
+    BuildContext context,
+    String role,
+    Map<String, dynamic> results,
+  ) {
     switch (role) {
       case 'manager':
         context.go(AppRoutes.managerBottomNavBar);
         break;
       case 'driver':
-        context.go(AppRoutes.driverBottomNavBar);
+        final isSetupCompleted =
+            results['isProfileSetupCompleted'] as bool? ?? true;
+        if (!isSetupCompleted) {
+          context.go(AppRoutes.personalInfoScreen, extra: true);
+        } else {
+          context.go(AppRoutes.driverBottomNavBar);
+        }
         break;
       case 'representative':
       default:

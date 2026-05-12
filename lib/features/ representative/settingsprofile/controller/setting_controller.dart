@@ -227,7 +227,7 @@ class SettingsController extends GetxController {
   }
 
   // ── Contact support ───────────────────────────────────────────────────────
-  Future<void> submitContactSupport() async {
+  Future<bool> submitContactSupport() async {
     final subject = subjectController.text.trim();
     final message = messageController.text.trim();
     if (subject.isEmpty || message.isEmpty) {
@@ -235,7 +235,7 @@ class SettingsController extends GetxController {
         'Subject and message are required.',
         title: 'Warning',
       );
-      return;
+      return false;
     }
     try {
       isSubmittingSupport.value = true;
@@ -248,19 +248,23 @@ class SettingsController extends GetxController {
       if (res['success'] == true) {
         subjectController.clear();
         messageController.clear();
-        ToastMessageHelper.showToastMessage('Message sent successfully.');
+        return true;
       } else {
         ToastMessageHelper.showToastMessage(
           res['message']?.toString() ?? 'Failed to send message.',
           title: 'Error',
         );
+        return false;
       }
     } on NoInternetException {
       ToastMessageHelper.showToastMessage('No internet connection.', title: 'Error');
+      return false;
     } on ServerException catch (e) {
       ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+      return false;
     } catch (_) {
       ToastMessageHelper.showToastMessage('Something went wrong.', title: 'Error');
+      return false;
     } finally {
       isSubmittingSupport.value = false;
     }
