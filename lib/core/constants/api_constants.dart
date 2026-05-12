@@ -167,6 +167,10 @@ class ApiConstants {
   static String getEarningsSummary = '/earnings/my-summary';
   static String getEarningsHistory = '/earnings/history';
 
+  static String userMyProfile = '/user/get-my-profile';
+  static String userUpdateMyProfile = '/user/update-my-profile';
+  static String supportSendMessage = '/support/send-message';
+
 
 
 }

@@ -10,14 +10,23 @@ import 'documents_screen.dart';
 
 
 class PersonalInfoScreen extends StatefulWidget {
-  const PersonalInfoScreen({super.key});
+  final bool isSetupMode;
+
+  const PersonalInfoScreen({super.key, this.isSetupMode = false});
 
   @override
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
 }
 
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
-  final _ctrl = PersonalInfoController();
+  late final PersonalInfoController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = PersonalInfoController();
+    _ctrl.loadProfile();
+  }
 
   @override
   void dispose() {
@@ -64,7 +73,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 },
                 items: _ctrl.genders
                     .map((g) =>
-                    DropdownMenuItem(value: g, child: Text(g)))
+                        DropdownMenuItem(value: g, child: Text(g)))
                     .toList(),
               ),
             ),
@@ -105,10 +114,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               children: [
                 SingleChildScrollView(
                   padding:
-                  EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 110.h),
+                      EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 110.h),
                   child: Column(
                     children: [
-                      // ── Avatar ──────────────────────────────────────
+                      // Avatar
                       Center(
                         child: GestureDetector(
                           onTap: _ctrl.pickProfileImage,
@@ -131,11 +140,25 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                           File(_ctrl.profileImagePath!),
                                           fit: BoxFit.cover,
                                         )
-                                      : Icon(
-                                          Icons.person_outline,
-                                          color: AppColors.primaryColor,
-                                          size: 40.r,
-                                        ),
+                                      : (_ctrl.existingProfileUrl != null &&
+                                              _ctrl.existingProfileUrl!
+                                                  .isNotEmpty)
+                                          ? Image.network(
+                                              _ctrl.existingProfileUrl!,
+                                              fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (_, __, ___) => Icon(
+                                                Icons.person_outline,
+                                                color:
+                                                    AppColors.primaryColor,
+                                                size: 40.r,
+                                              ),
+                                            )
+                                          : Icon(
+                                              Icons.person_outline,
+                                              color: AppColors.primaryColor,
+                                              size: 40.r,
+                                            ),
                                 ),
                               ),
                               Positioned(
@@ -159,15 +182,14 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       ),
                       SizedBox(height: 28.h),
 
-                      // ── Fields ──────────────────────────────────────
                       CustomTextField(
                         controller: _ctrl.fullNameController,
-                        labelText: 'Address*',
+                        labelText: 'Full Name*',
                         hintText: 'Full Name',
                       ),
                       CustomTextField(
                         controller: _ctrl.addressController,
-                        labelText: 'Address*',
+                        labelText: 'Address',
                         hintText: 'Street address',
                       ),
                       CustomTextField(
@@ -194,7 +216,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                   surface: const Color(0xFF242424),
                                   onSurface: AppColors.primaryTextColor,
                                 ),
-                                dialogBackgroundColor: const Color(0xFF1E2427),
+                                dialogBackgroundColor:
+                                    const Color(0xFF1E2427),
                               ),
                               child: child!,
                             ),
@@ -209,76 +232,73 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             color: AppColors.secondaryTextColor),
                       ),
 
-                      // Gender dropdown
                       _dropdownField(),
 
-                      // Documents row
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 12.h),
-                        child: Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                          children: [
-                            CustomText(
-                              text: 'Documents',
-                              fontsize: 12.sp,
-                              color: AppColors.primaryTextColor,
-                              textAlign: TextAlign.start,
-                              left: 2.w,
-                              bottom: 6.h,
-                            ),
-                            GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                  const DocumentsScreen(),
-                                ),
+                      // Documents row — only in edit mode
+                      if (!widget.isSetupMode)
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CustomText(
+                                text: 'Documents',
+                                fontsize: 12.sp,
+                                color: AppColors.primaryTextColor,
+                                textAlign: TextAlign.start,
+                                left: 2.w,
+                                bottom: 6.h,
                               ),
-                              child: Container(
-                                height: 50.h,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 14.w),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x1A4A4A4A),
-                                  borderRadius:
-                                  BorderRadius.circular(8.r),
-                                  border: Border.all(
-                                      color:
-                                      AppColors.dotButtonInactiveColor,
-                                      width: 0.8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.description_outlined,
-                                      color:
-                                      AppColors.secondaryTextColor,
-                                      size: 16.r,
+                              GestureDetector(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const DocumentsScreen(
+                                      isSetupMode: false,
                                     ),
-                                    SizedBox(width: 10.w),
-                                    Expanded(
-                                      child: CustomText(
-                                        text: 'My Documents',
-                                        fontsize: 13.sp,
+                                  ),
+                                ),
+                                child: Container(
+                                  height: 50.h,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 14.w),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0x1A4A4A4A),
+                                    borderRadius:
+                                        BorderRadius.circular(8.r),
+                                    border: Border.all(
                                         color:
-                                        AppColors.primaryTextColor,
-                                        textAlign: TextAlign.start,
+                                            AppColors.dotButtonInactiveColor,
+                                        width: 0.8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.description_outlined,
+                                        color: AppColors.secondaryTextColor,
+                                        size: 16.r,
                                       ),
-                                    ),
-                                    Icon(Icons.chevron_right,
-                                        color:
-                                        AppColors.secondaryTextColor,
-                                        size: 18.r),
-                                  ],
+                                      SizedBox(width: 10.w),
+                                      Expanded(
+                                        child: CustomText(
+                                          text: 'My Documents',
+                                          fontsize: 13.sp,
+                                          color: AppColors.primaryTextColor,
+                                          textAlign: TextAlign.start,
+                                        ),
+                                      ),
+                                      Icon(Icons.chevron_right,
+                                          color:
+                                              AppColors.secondaryTextColor,
+                                          size: 18.r),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
 
-                      // Bio
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -293,7 +313,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             alignment: Alignment.centerRight,
                             child: CustomText(
                               text:
-                              '${_ctrl.bioCharCount}/40 caracteres',
+                                  '${_ctrl.bioCharCount}/40 caracteres',
                               fontsize: 10.sp,
                               color: AppColors.secondaryTextColor,
                               right: 2.w,
@@ -301,6 +321,16 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           ),
                         ],
                       ),
+
+                      if (_ctrl.errorMessage.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(top: 8.h),
+                          child: CustomText(
+                            text: _ctrl.errorMessage,
+                            fontsize: 12.sp,
+                            color: Colors.redAccent,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -315,12 +345,23 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     padding: EdgeInsets.symmetric(
                         horizontal: 16.w, vertical: 12.h),
                     child: CustomButton(
-                      title: 'Edit Profile',
+                      title: widget.isSetupMode ? 'Next' : 'Update Profile',
                       loading: _ctrl.isLoading,
                       onpress: () async {
                         final ok = await _ctrl.saveProfile();
                         if (ok && context.mounted) {
-                          Navigator.pop(context);
+                          if (widget.isSetupMode) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const DocumentsScreen(
+                                  isSetupMode: true,
+                                ),
+                              ),
+                            );
+                          } else {
+                            Navigator.pop(context);
+                          }
                         }
                       },
                     ),

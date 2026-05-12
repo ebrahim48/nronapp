@@ -777,7 +777,9 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: personalInfoScreen,
         name: personalInfoScreen,
-        builder: (context, state) => const PersonalInfoScreen(),
+        builder: (context, state) => PersonalInfoScreen(
+          isSetupMode: state.extra as bool? ?? false,
+        ),
       ),
       GoRoute(
         path: changePasswordScreen,
@@ -797,7 +799,9 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: documentsScreen,
         name: documentsScreen,
-        builder: (context, state) => const DocumentsScreen(),
+        builder: (context, state) => DocumentsScreen(
+          isSetupMode: state.extra as bool? ?? false,
+        ),
       ),
       GoRoute(
         path: carPicturesScreen,
