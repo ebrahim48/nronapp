@@ -68,7 +68,9 @@ class OthersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<SettingsController>();
+    final c = Get.isRegistered<SettingsController>()
+        ? Get.find<SettingsController>()
+        : Get.put(SettingsController());
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,

@@ -84,12 +84,13 @@ class CompleteDeliveryScreen extends StatelessWidget {
               ),
             ),
 
-            Padding(
+            Obx(() => Padding(
               padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
               child: CompleteDeliveryButton(
+                isLoading: c.isCompleting.value,
                 onTap: () => c.completeDelivery(context),
               ),
-            ),
+            )),
           ],
         ),
       );

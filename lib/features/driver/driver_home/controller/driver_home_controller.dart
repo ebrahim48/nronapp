@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
@@ -12,17 +13,16 @@ class DriverHomeController extends GetxController {
     apiService: ApiService(),
   );
 
-  // ── State ─────────────────────────────────────────────────────────────────
   final isLoading = true.obs;
   final driverName = ''.obs;
   final isOnline = true.obs;
   final showLocationPrompt = false.obs;
   final homeData = DriverHomeData.empty.obs;
 
-  // ── Selected job for detail screen ────────────────────────────────────────
   final selectedJob = Rxn<JobRequestModel>();
+  final isAccepting = false.obs;
 
-  // ── Stat cards ────────────────────────────────────────────────────────────
+
   List<DriverStatModel> get stats => [
         DriverStatModel(
           iconPath: 'assets/icons/pendingpickups.svg',
@@ -60,7 +60,6 @@ class DriverHomeController extends GetxController {
     driverName.value = name.isNotEmpty ? name : 'Driver';
   }
 
-  // ── Fetch home data ───────────────────────────────────────────────────────
 
   Future<void> fetchHome() async {
     try {
@@ -78,7 +77,6 @@ class DriverHomeController extends GetxController {
     }
   }
 
-  // ── Job detail ────────────────────────────────────────────────────────────
 
   JobDetailModel? get jobDetail {
     final job = selectedJob.value;
@@ -90,7 +88,6 @@ class DriverHomeController extends GetxController {
     selectedJob.value = job;
   }
 
-  // ── Online toggle ─────────────────────────────────────────────────────────
 
   void toggleOnlineStatus() {
     isOnline.value = !isOnline.value;
@@ -108,16 +105,37 @@ class DriverHomeController extends GetxController {
     showLocationPrompt.value = false;
   }
 
-  // ── Job actions ───────────────────────────────────────────────────────────
 
-  void acceptJob() {
-    Get.snackbar('Accepted', 'Job accepted successfully',
-        snackPosition: SnackPosition.BOTTOM);
+
+  Future<void> acceptJob() async {
+    final job = selectedJob.value;
+    if (job == null || isAccepting.value) return;
+
+    try {
+      isAccepting.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.acceptJob(job.id, token);
+      if (res['success'] == true) {
+        Get.back();
+        fetchHome();
+        ToastMessageHelper.showSuccessMessage('Job accepted successfully');
+      } else {
+        ToastMessageHelper.showErrorMessage(
+            res['message']?.toString() ?? 'Failed to accept job');
+      }
+    } catch (e) {
+      final msg = e is ServerException ? e.message : 'Failed to accept job';
+      ToastMessageHelper.showErrorMessage(msg);
+    } finally {
+      isAccepting.value = false;
+    }
   }
 
   void declineJob() {
     Get.back();
   }
 
-  void onNavTap(int index) {}
+  void onNavTap(int index) {
+
+  }
 }

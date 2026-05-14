@@ -5,11 +5,13 @@ import '../../../../../core/utils/app_colors.dart';
 class JobDetailActionButtons extends StatelessWidget {
   final VoidCallback onDecline;
   final VoidCallback onAccept;
+  final bool isAccepting;
 
   const JobDetailActionButtons({
     super.key,
     required this.onDecline,
     required this.onAccept,
+    this.isAccepting = false,
   });
 
   @override
@@ -58,23 +60,34 @@ class JobDetailActionButtons extends StatelessWidget {
                   color: AppColors.primaryColor,
                   borderRadius: BorderRadius.circular(30.r),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.navigation_outlined,
-                        color: AppColors.blackColor, size: 18.r),
-                    SizedBox(width: 6.w),
-                    Text(
-                      'Accept Job',
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.blackColor,
+                child: isAccepting
+                    ? Center(
+                        child: SizedBox(
+                          width: 20.r,
+                          height: 20.r,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.blackColor,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.navigation_outlined,
+                              color: AppColors.blackColor, size: 18.r),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'Accept Job',
+                            style: TextStyle(
+                              fontSize: 15.sp,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.blackColor,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),

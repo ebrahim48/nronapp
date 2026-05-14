@@ -6,12 +6,15 @@ import '../../model/driver_job_model.dart';
 
 class CompletedJobCard extends StatelessWidget {
   final CompletedJobModel job;
+  final VoidCallback? onTap;
 
-  const CompletedJobCard({super.key, required this.job});
+  const CompletedJobCard({super.key, required this.job, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
@@ -166,6 +169,7 @@ class CompletedJobCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

@@ -185,59 +185,62 @@ class DriverMapScreen extends StatelessWidget {
 
                                   SizedBox(height: 14.h),
 
-                                  GestureDetector(
-                                    onTap: c.arrivedAtDestination,
+                                  // Arrived at Destination
+                                  Obx(() => GestureDetector(
+                                    onTap: c.isArrivingAtDestination.value
+                                        ? null
+                                        : c.arrivedAtDestination,
                                     child: Container(
                                       width: double.infinity,
                                       height: 50.h,
                                       decoration: BoxDecoration(
                                         color: AppColors.primaryColor,
-                                        borderRadius:
-                                            BorderRadius.circular(30.r),
+                                        borderRadius: BorderRadius.circular(30.r),
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                              Icons
-                                                  .location_on_outlined,
-                                              color:
-                                                  AppColors.blackColor,
-                                              size: 18.r),
-                                          SizedBox(width: 8.w),
-                                          Text(
-                                            'Arrived at Destination',
-                                            style: TextStyle(
-                                              fontSize: 14.sp,
-                                              fontFamily: 'Poppins',
-                                              fontWeight:
-                                                  FontWeight.w700,
-                                              color:
-                                                  AppColors.blackColor,
+                                      child: c.isArrivingAtDestination.value
+                                          ? Center(
+                                              child: SizedBox(
+                                                width: 20.r,
+                                                height: 20.r,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: AppColors.blackColor,
+                                                ),
+                                              ),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Icon(Icons.location_on_outlined,
+                                                    color: AppColors.blackColor,
+                                                    size: 18.r),
+                                                SizedBox(width: 8.w),
+                                                Text(
+                                                  'Arrived at Destination',
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w700,
+                                                    color: AppColors.blackColor,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                        ],
-                                      ),
                                     ),
-                                  ),
+                                  )),
 
                                   SizedBox(height: 10.h),
 
+                                  // Mark as Delivered — navigate only, no loader
                                   GestureDetector(
-                                    onTap: () =>
-                                        c.markAsDelivered(context),
+                                    onTap: () => c.markAsDelivered(context),
                                     child: Container(
                                       width: double.infinity,
                                       height: 50.h,
                                       decoration: BoxDecoration(
-                                        color:
-                                            const Color(0xFF2A2A2A),
-                                        borderRadius:
-                                            BorderRadius.circular(30.r),
-                                        border: Border.all(
-                                            color: const Color(
-                                                0xFF3A3A3A)),
+                                        color: const Color(0xFF2A2A2A),
+                                        borderRadius: BorderRadius.circular(30.r),
+                                        border: Border.all(color: const Color(0xFF3A3A3A)),
                                       ),
                                       child: Center(
                                         child: Text(
@@ -246,8 +249,7 @@ class DriverMapScreen extends StatelessWidget {
                                             fontSize: 14.sp,
                                             fontFamily: 'Poppins',
                                             fontWeight: FontWeight.w600,
-                                            color: AppColors
-                                                .primaryTextColor,
+                                            color: AppColors.primaryTextColor,
                                           ),
                                         ),
                                       ),

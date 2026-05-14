@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/config/app-routes/app_routes.dart';
+import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../../driver_bottomnavbar/controller/driver_man-nav_controller.dart';
 
 
 class DeliveryCompletedScreen extends StatelessWidget {
@@ -49,11 +54,23 @@ class DeliveryCompletedScreen extends StatelessWidget {
                 fontsize: 13.sp,
                 color: AppColors.secondaryTextColor,
               ),
+
+              SizedBox(height: 36.h),
+
+              CustomButton(
+                title: 'View Earnings',
+                loading: false,
+                onpress: () {
+                  Get.find<DriverMainNavController>().changePage(3);
+                  context.go(AppRoutes.driverBottomNavBar);
+                },
+                titlecolor: AppColors.blackColor,
+                fontWeight: FontWeight.w600,
+              ),
             ],
           ),
         ),
       ),
-
     );
   }
 }
