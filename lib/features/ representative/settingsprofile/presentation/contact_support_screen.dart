@@ -52,7 +52,7 @@ class _ContactSupportScreenState extends State<ContactSupportScreen> {
   }
 
   Widget _buildForm() {
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         children: [

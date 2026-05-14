@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../driverjob/controller/driver_job_controller.dart';
 import '../../driverjob/data/driver_job_repository.dart';
 import '../model/driver_map_model.dart';
 
@@ -25,6 +26,8 @@ class DriverMapController extends GetxController {
   final deliveryNotes = TextEditingController();
 
   final isLoading = false.obs;
+  final isArrivingAtDestination = false.obs;
+  final isCompleting = false.obs;
   final mapJob = Rxn<MapJobModel>();
 
   // Fallback static camera — updated once real coords load
@@ -236,35 +239,59 @@ class DriverMapController extends GetxController {
 
   Future<void> arrivedAtDestination() async {
     final job = mapJob.value;
-    if (job == null) return;
+    if (job == null || isArrivingAtDestination.value) return;
     try {
+      isArrivingAtDestination.value = true;
       final token = await PrefsHelper.getString('auth_token');
-      await _repo.changeStatus(token, job.id, 'picked_up');
-      currentProgress.value = DeliveryProgressStatus.pickedUp;
-      ToastMessageHelper.showSuccessMessage(
-          'Marked as arrived at destination');
+      await _repo.changeStatus(token, job.id, 'in_transit');
+      currentProgress.value = DeliveryProgressStatus.inTransit;
+      ToastMessageHelper.showSuccessMessage('Marked as arrived at destination');
     } catch (e) {
       ToastMessageHelper.showErrorMessage(
           e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isArrivingAtDestination.value = false;
     }
   }
 
-  Future<void> markAsDelivered(BuildContext context) async {
+  void markAsDelivered(BuildContext context) {
+    context.push(AppRoutes.completeDeliveryScreen);
+  }
+
+  Future<void> completeDelivery(BuildContext context) async {
     final job = mapJob.value;
-    if (job == null) {
-      context.push(AppRoutes.completeDeliveryScreen);
-      return;
-    }
+    if (isCompleting.value) return;
     try {
+      isCompleting.value = true;
       final token = await PrefsHelper.getString('auth_token');
-      await _repo.changeStatus(token, job.id, 'delivered');
+      if (job != null) {
+        // Step 1: picked_up with photo proof + notes
+        await _repo.submitDelivery(
+          token: token,
+          id: job.id,
+          notes: deliveryNotes.text.trim(),
+          photoPath: deliveryPhotoPath.value.isNotEmpty
+              ? deliveryPhotoPath.value
+              : null,
+        );
+        // Step 2: mark as delivered to move job to Completed tab
+        await _repo.changeStatus(token, job.id, 'delivered');
+      }
       currentProgress.value = DeliveryProgressStatus.delivered;
+      // Refresh job lists so Active tab is up-to-date when user navigates back
+      if (Get.isRegistered<DriverJobController>()) {
+        final jobCtrl = Get.find<DriverJobController>();
+        jobCtrl.fetchActiveJobs();
+        jobCtrl.fetchCompletedJobs();
+      }
       if (context.mounted) {
-        context.push(AppRoutes.completeDeliveryScreen);
+        context.go(AppRoutes.deliveryCompletedScreen);
       }
     } catch (e) {
       ToastMessageHelper.showErrorMessage(
           e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      isCompleting.value = false;
     }
   }
 
@@ -272,10 +299,6 @@ class DriverMapController extends GetxController {
     final picked =
         await ImagePicker().pickImage(source: ImageSource.camera);
     if (picked != null) deliveryPhotoPath.value = picked.path;
-  }
-
-  void completeDelivery(BuildContext context) {
-    context.go(AppRoutes.deliveryCompletedScreen);
   }
 
   void callDestination() {

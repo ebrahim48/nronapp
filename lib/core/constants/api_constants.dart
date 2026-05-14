@@ -172,6 +172,11 @@ class ApiConstants {
   static String supportSendMessage = '/support/send-message';
 
 
+  static String messageChatBot = '/chatbot/message';
+  static String getActiveLog = '/active-log/get-all';
+  static String getActiveLogModel = '/active-log/get-model';
+
+
 
 }
 

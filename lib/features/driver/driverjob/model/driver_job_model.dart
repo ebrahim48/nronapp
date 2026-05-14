@@ -226,6 +226,7 @@ class JobDetailFullModel {
   final List<AttachedFile> attachedFiles;
   final double deliveryFee;
   final double yourPayout;
+  final String deliveryNotes;
 
   const JobDetailFullModel({
     required this.id,
@@ -259,6 +260,7 @@ class JobDetailFullModel {
     required this.attachedFiles,
     required this.deliveryFee,
     required this.yourPayout,
+    this.deliveryNotes = '',
   });
 
   factory JobDetailFullModel.fromJson(Map<String, dynamic> json) {
@@ -371,6 +373,7 @@ class JobDetailFullModel {
       attachedFiles: attachedFiles,
       deliveryFee: totalPrice,
       yourPayout: totalPrice,
+      deliveryNotes: json['notes']?.toString() ?? '',
     );
   }
 

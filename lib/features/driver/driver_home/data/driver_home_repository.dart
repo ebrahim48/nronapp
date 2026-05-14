@@ -25,4 +25,14 @@ class DriverHomeRepository {
     );
     return res.data as Map<String, dynamic>;
   }
+
+  /// PATCH /shipment/accept/:id
+  Future<Map<String, dynamic>> acceptJob(String id, String token) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.patch(
+      ApiConstants.acceptJob(id),
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
 }

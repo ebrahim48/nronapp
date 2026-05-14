@@ -12,6 +12,8 @@ class DriverJobController extends GetxController {
   final selectedPeriod = CompletedPeriod.today.obs;
 
   final isLoading = false.obs;
+  final isActiveLoading = false.obs;
+  final isCompletedLoading = false.obs;
   final isDetailLoading = false.obs;
 
   final newJobs = <NewJobModel>[].obs;
@@ -78,18 +80,24 @@ class DriverJobController extends GetxController {
 
   Future<void> fetchActiveJobs() async {
     try {
-      isLoading.value = true;
+      isActiveLoading.value = true;
       final token = await PrefsHelper.getString('auth_token');
       final response = await _repo.getAllJobs(token, status: 'active');
       final results = _parseResults(response);
       activeJobs.assignAll(
-        results.map((json) => ActiveJobModel.fromJson(json)).toList(),
+        results
+            .where((json) {
+              final s = ShipmentStatusX.fromString(_effectiveStatus(json));
+              return s.isActive;
+            })
+            .map((json) => ActiveJobModel.fromJson(json))
+            .toList(),
       );
     } catch (e) {
       ToastMessageHelper.showErrorMessage(
           e.toString().replaceAll('Exception: ', ''));
     } finally {
-      isLoading.value = false;
+      isActiveLoading.value = false;
     }
   }
 
@@ -97,18 +105,24 @@ class DriverJobController extends GetxController {
 
   Future<void> fetchCompletedJobs() async {
     try {
-      isLoading.value = true;
+      isCompletedLoading.value = true;
       final token = await PrefsHelper.getString('auth_token');
       final response = await _repo.getAllJobs(token, status: 'completed');
       final results = _parseResults(response);
       completedJobs.assignAll(
-        results.map((json) => CompletedJobModel.fromJson(json)).toList(),
+        results
+            .where((json) {
+              final s = ShipmentStatusX.fromString(_effectiveStatus(json));
+              return s.isCompleted;
+            })
+            .map((json) => CompletedJobModel.fromJson(json))
+            .toList(),
       );
     } catch (e) {
       ToastMessageHelper.showErrorMessage(
           e.toString().replaceAll('Exception: ', ''));
     } finally {
-      isLoading.value = false;
+      isCompletedLoading.value = false;
     }
   }
 

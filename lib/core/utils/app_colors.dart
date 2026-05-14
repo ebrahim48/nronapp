@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 
 class AppColors {
   static const Color backgroundColor = Color(0xff1B1B1B);
-  static const Color primaryColor = Color(0xff00D5ED);
+  static const Color primaryColor = Color(0xff00C5DA);
   static const Color primaryTextColor = Color(0xffFFFFFF);
   static const Color secondaryTextColor = Color(0xffC9C9C9);
   static const Color dotButtonActiveColor = Color(0xff00C5DA);

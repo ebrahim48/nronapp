@@ -110,13 +110,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         builder: (context, _) {
           return Form(
             key: _ctrl.formKey,
-            child: Stack(
-              children: [
-                SingleChildScrollView(
-                  padding:
-                      EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 110.h),
-                  child: Column(
-                    children: [
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 24.h),
+              child: Column(
+                children: [
                       // Avatar
                       Center(
                         child: GestureDetector(
@@ -331,43 +328,33 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             color: Colors.redAccent,
                           ),
                         ),
+
+                      SizedBox(height: 24.h),
+
+                      CustomButton(
+                        title: widget.isSetupMode ? 'Next' : 'Update Profile',
+                        loading: _ctrl.isLoading,
+                        onpress: () async {
+                          final ok = await _ctrl.saveProfile();
+                          if (ok && context.mounted) {
+                            if (widget.isSetupMode) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const DocumentsScreen(
+                                    isSetupMode: true,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                      ),
+                  SizedBox(height: 60.h),
                     ],
                   ),
-                ),
-
-                // Sticky button
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    color: AppColors.backgroundColor,
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 16.w, vertical: 12.h),
-                    child: CustomButton(
-                      title: widget.isSetupMode ? 'Next' : 'Update Profile',
-                      loading: _ctrl.isLoading,
-                      onpress: () async {
-                        final ok = await _ctrl.saveProfile();
-                        if (ok && context.mounted) {
-                          if (widget.isSetupMode) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const DocumentsScreen(
-                                  isSetupMode: true,
-                                ),
-                              ),
-                            );
-                          } else {
-                            Navigator.pop(context);
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
             ),
           );
         },

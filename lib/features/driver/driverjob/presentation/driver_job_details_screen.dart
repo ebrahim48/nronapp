@@ -126,6 +126,11 @@ class DriverJobDetailsScreen extends StatelessWidget {
 
                     AttachedFilesSection(files: job.attachedFiles),
 
+                    if (job.deliveryNotes.isNotEmpty) ...[
+                      SizedBox(height: 12.h),
+                      _DeliveryNotesCard(notes: job.deliveryNotes),
+                    ],
+
                     SizedBox(height: 12.h),
 
                     JobDetailEarningsCard(
@@ -139,20 +144,21 @@ class DriverJobDetailsScreen extends StatelessWidget {
               ),
             ),
 
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
-              child: NavigateButton(
-                onTap: () {
-                  final detail = c.selectedJobDetail.value;
-                  if (detail != null) {
-                    context.pushNamed(
-                      AppRoutes.driverMapScreen,
-                      extra: detail.id,
-                    );
-                  }
-                },
+            if (job.status != 'Delivered')
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+                child: NavigateButton(
+                  onTap: () {
+                    final detail = c.selectedJobDetail.value;
+                    if (detail != null) {
+                      context.pushNamed(
+                        AppRoutes.driverMapScreen,
+                        extra: detail.id,
+                      );
+                    }
+                  },
+                ),
               ),
-            ),
           ],
         );
       }),
@@ -178,6 +184,43 @@ class DriverJobDetailsScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DeliveryNotesCard extends StatelessWidget {
+  final String notes;
+  const _DeliveryNotesCard({required this.notes});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(14.r),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E2121),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFF3A3A3A), width: 0.8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText(
+            text: 'Delivery Notes',
+            fontsize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.start,
+          ),
+          SizedBox(height: 8.h),
+          CustomText(
+            text: notes,
+            fontsize: 12.sp,
+            color: AppColors.secondaryTextColor,
+            textAlign: TextAlign.start,
+          ),
+        ],
       ),
     );
   }

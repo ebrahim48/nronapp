@@ -261,7 +261,7 @@ class _ActiveJobsBody extends StatelessWidget {
         SizedBox(height: 10.h),
         Expanded(
           child: Obx(() {
-            if (c.isLoading.value) return _buildShimmerList();
+            if (c.isActiveLoading.value) return _buildShimmerList();
             if (c.activeJobs.isEmpty) {
               return RefreshIndicator(
                 onRefresh: c.fetchJobs,
@@ -325,7 +325,7 @@ class _CompletedJobsBody extends StatelessWidget {
         SizedBox(height: 14.h),
         Expanded(
           child: Obx(() {
-            if (c.isLoading.value) return _buildShimmerList();
+            if (c.isCompletedLoading.value) return _buildShimmerList();
             if (c.completedJobs.isEmpty) {
               return RefreshIndicator(
                 onRefresh: c.fetchJobs,
@@ -344,8 +344,18 @@ class _CompletedJobsBody extends StatelessWidget {
               child: ListView.builder(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 itemCount: c.completedJobs.length,
-                itemBuilder: (ctx, i) =>
-                    CompletedJobCard(job: c.completedJobs[i]),
+                itemBuilder: (ctx, i) {
+                  final job = c.completedJobs[i];
+                  return CompletedJobCard(
+                    job: job,
+                    onTap: () async {
+                      await c.fetchJobDetail(job.id);
+                      if (context.mounted) {
+                        context.pushNamed(AppRoutes.driverJobDetailsScreen);
+                      }
+                    },
+                  );
+                },
               ),
             );
           }),

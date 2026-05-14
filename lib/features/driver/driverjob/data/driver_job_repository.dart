@@ -13,7 +13,7 @@ class DriverJobRepository {
     if (!isConnected) {
       throw Exception('No internet connection');
     }
-    final params = <String, dynamic>{'page': 1, 'limit': 50};
+    final params = <String, dynamic>{'page': 1, 'limit': 10};
     if (status != null && status.isNotEmpty) {
       params['status'] = status;
     }
@@ -58,6 +58,29 @@ class DriverJobRepository {
     final response = await _api.patch(
       ApiConstants.changeStatus(id),
       data: {'status': status},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> submitDelivery({
+    required String token,
+    required String id,
+    required String notes,
+    String? photoPath,
+  }) async {
+    final isConnected = await _connectivity.checkConnectivity();
+    if (!isConnected) throw Exception('No internet connection');
+
+    final fields = <String, dynamic>{'status': 'picked_up'};
+    if (notes.isNotEmpty) fields['notes'] = notes;
+    if (photoPath != null && photoPath.isNotEmpty) {
+      fields['files'] = await MultipartFile.fromFile(photoPath);
+    }
+
+    final response = await _api.patch(
+      ApiConstants.changeStatus(id),
+      data: FormData.fromMap(fields),
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return response.data as Map<String, dynamic>;

@@ -128,10 +128,11 @@ class JobDetailsScreen extends StatelessWidget {
             ),
           ),
 
-          JobDetailActionButtons(
+          Obx(() => JobDetailActionButtons(
             onDecline: c.declineJob,
-            onAccept: c.acceptJob,
-          ),
+            onAccept: c.isAccepting.value ? () {} : c.acceptJob,
+            isAccepting: c.isAccepting.value,
+          )),
         ],
       ),
     );
