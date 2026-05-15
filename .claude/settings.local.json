@@ -26,7 +26,8 @@
       "PowerShell(Out-File *)",
       "PowerShell($env:PATH = $env:PATH + \";$env:LOCALAPPDATA\\\\flutter\\\\bin;C:\\\\flutter\\\\bin;$env:USERPROFILE\\\\flutter\\\\bin\"; where.exe flutter 2>&1)",
       "PowerShell($env:PATH -split \";\" | Where-Object { $_ -match \"flutter|dart\" })",
-      "PowerShell($env:PATH; where.exe flutter 2>$null)"
+      "PowerShell($env:PATH; where.exe flutter 2>$null)",
+      "PowerShell(flutter analyze *)"
     ]
   }
 }

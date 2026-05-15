@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:nron_app/features/driver/earning/presentation/widgets/earnings_history_list.dart';
 import 'package:nron_app/features/driver/earning/presentation/widgets/request_pay_button.dart';
 import 'package:nron_app/features/driver/earning/presentation/widgets/total_balance_card.dart';
+import 'package:nron_app/features/driver/earning/presentation/widgets/withdrawal_popup.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/earnings_controller.dart';
@@ -14,7 +15,6 @@ class AllEarningScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Reuse existing controller if available, otherwise create
     final c = Get.put(EarningsController());
 
     return Scaffold(
@@ -47,7 +47,6 @@ class AllEarningScreen extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 110.h),
               child: Column(
                 children: [
-                  // ── Balance card ──────────────────────────────────
                   isLoading
                       ? Shimmer.fromColors(
                           baseColor: const Color(0xFF2A2A2A),
@@ -67,7 +66,6 @@ class AllEarningScreen extends StatelessWidget {
 
                   SizedBox(height: 14.h),
 
-                  // ── History list ──────────────────────────────────
                   Obx(() => c.isLoadingHistory.value
                       ? Shimmer.fromColors(
                           baseColor: const Color(0xFF2A2A2A),
@@ -99,7 +97,6 @@ class AllEarningScreen extends StatelessWidget {
             );
           }),
 
-          // ── Request Payout button ─────────────────────────────────
           Positioned(
             bottom: 0,
             left: 0,
@@ -107,7 +104,12 @@ class AllEarningScreen extends StatelessWidget {
             child: Obx(() => RequestPayoutButton(
                   amount: c.summary.value.pendingPayoutAmount,
                   loading: c.isRequestingPayout.value,
-                  onTap: () => c.requestPayout(),
+                  onTap: () => showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (_) => WithdrawalPopup(
+                        totalBalance: c.summary.value.totalBalance),
+                  ),
                 )),
           ),
         ],

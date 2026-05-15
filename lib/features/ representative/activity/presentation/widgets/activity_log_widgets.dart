@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../../../core/custom_widgets/app_network_image.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
+import '../../model/activity_log_model.dart';
 
 class ActivityFilterChip extends StatelessWidget {
   final String label;
@@ -613,6 +615,248 @@ class _BaseCard extends StatelessWidget {
         ],
       ),
       child: child,
+    );
+  }
+}
+
+// ── Unified API-driven activity card ─────────────────────────────────────────
+
+class ActivityLogCard extends StatelessWidget {
+  final ActivityLogModel log;
+  final VoidCallback? onTap;
+
+  const ActivityLogCard({super.key, required this.log, this.onTap});
+
+  Color get _actionColor {
+    switch (log.action.toLowerCase()) {
+      case 'create': return const Color(0xFF08AF40);
+      case 'update': return const Color(0xFF00C5DA);
+      case 'delete': return const Color(0xFFE53935);
+      case 'approve': return const Color(0xFF7B61FF);
+      default: return AppColors.secondaryTextColor;
+    }
+  }
+
+  IconData get _moduleIcon {
+    switch (log.module.toLowerCase()) {
+      case 'shipment': return Icons.local_shipping_outlined;
+      case 'sales':    return Icons.bar_chart_outlined;
+      case 'implant':  return Icons.medical_services_outlined;
+      case 'expense':  return Icons.receipt_long_outlined;
+      default:         return Icons.history_outlined;
+    }
+  }
+
+  List<_MetaChip> get _metaChips {
+    final m = log.metadata;
+    final chips = <_MetaChip>[];
+
+    void add(String label, dynamic val) {
+      if (val != null && val.toString().isNotEmpty) {
+        chips.add(_MetaChip(label: label, value: val.toString()));
+      }
+    }
+
+    switch (log.module.toLowerCase()) {
+      case 'shipment':
+        add('ID', m['shipmentId']);
+        add('From', m['pickupAddress']);
+        add('To', m['dropoffAddress']);
+        add('Price', m['totalPrice'] != null ? '\$${m['totalPrice']}' : null);
+        add('Distance', m['totalDistance']);
+        break;
+      case 'sales':
+        add('ID', m['saleId']);
+        add('Total', m['totalAmount'] != null ? '\$${m['totalAmount']}' : null);
+        add('Commission', m['myCommission'] != null ? '\$${m['myCommission']}' : null);
+        break;
+      default:
+        m.forEach((k, v) {
+          if (chips.length < 3 && v is! Map && v is! List) add(k, v);
+        });
+    }
+    return chips.take(3).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: _BaseCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+          // ── Header ────────────────────────────────────────────────────
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Module icon
+              Container(
+                width: 40.r,
+                height: 40.r,
+                decoration: BoxDecoration(
+                  color: _actionColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(_moduleIcon, color: _actionColor, size: 20.r),
+              ),
+              SizedBox(width: 10.w),
+
+              // Title + message
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomText(
+                            text: log.title,
+                            fontsize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryTextColor,
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        // Action badge
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: _actionColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(20.r),
+                            border: Border.all(
+                                color: _actionColor.withValues(alpha: 0.4),
+                                width: 0.6),
+                          ),
+                          child: CustomText(
+                            text: log.action.toUpperCase(),
+                            fontsize: 9.sp,
+                            fontWeight: FontWeight.w700,
+                            color: _actionColor,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 2.h),
+                    CustomText(
+                      text: log.message,
+                      fontsize: 11.sp,
+                      color: AppColors.secondaryTextColor,
+                      textAlign: TextAlign.start,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // ── Thumbnail ─────────────────────────────────────────────────
+          if (log.thumbnail.isNotEmpty) ...[
+            SizedBox(height: 10.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: AppNetworkImage(
+                imageUrl: log.thumbnail,
+                height: 110.h,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ],
+
+          // ── Metadata chips ─────────────────────────────────────────────
+          if (_metaChips.isNotEmpty) ...[
+            SizedBox(height: 10.h),
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 4.h,
+              children: _metaChips
+                  .map((c) => _MetaChipWidget(chip: c))
+                  .toList(),
+            ),
+          ],
+
+          SizedBox(height: 10.h),
+          Divider(
+              color: const Color(0xFF3A3A3A), thickness: 0.5, height: 1),
+          SizedBox(height: 8.h),
+
+          // ── Footer ───────────────────────────────────────────────────
+          Row(
+            children: [
+              Icon(Icons.person_outline,
+                  color: AppColors.secondaryTextColor, size: 12.r),
+              SizedBox(width: 4.w),
+              Expanded(
+                child: CustomText(
+                  text: log.actorEmail,
+                  fontsize: 10.sp,
+                  color: AppColors.secondaryTextColor,
+                  textAlign: TextAlign.start,
+                  textOverflow: TextOverflow.ellipsis,
+                  maxline: 1,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              CustomText(
+                text: log.formattedDate,
+                fontsize: 10.sp,
+                color: AppColors.secondaryTextColor,
+                textAlign: TextAlign.end,
+              ),
+            ],
+          ),
+        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MetaChip {
+  final String label;
+  final String value;
+  const _MetaChip({required this.label, required this.value});
+}
+
+class _MetaChipWidget extends StatelessWidget {
+  final _MetaChip chip;
+  const _MetaChipWidget({super.key, required this.chip});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '${chip.label}: ',
+              style: TextStyle(
+                fontSize: 10.sp,
+                color: AppColors.secondaryTextColor,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            TextSpan(
+              text: chip.value,
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryTextColor,
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

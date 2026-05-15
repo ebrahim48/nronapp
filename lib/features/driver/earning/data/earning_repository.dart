@@ -16,6 +16,29 @@ class EarningRepository {
   Options _auth(String token) =>
       Options(headers: {'Authorization': 'Bearer $token'});
 
+  /// POST /withdrawal/send-request
+  Future<Map<String, dynamic>> sendWithdrawalRequest({
+    required String token,
+    required int amount,
+    required String accountName,
+    required int cardNumber,
+  }) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.post(
+      ApiConstants.sendWithdrawalRequest,
+      data: {
+        'amount': amount,
+        'accountName': accountName,
+        'cardNumber': cardNumber,
+      },
+      options: Options(
+        contentType: 'application/json',
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
   /// GET /earnings/my-summary
   Future<Map<String, dynamic>> getSummary(String token) async {
     await _connectivity.checkConnectivity();

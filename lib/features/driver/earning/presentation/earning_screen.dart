@@ -8,6 +8,7 @@ import 'package:nron_app/features/driver/earning/presentation/widgets/earnings_s
 import 'package:nron_app/features/driver/earning/presentation/widgets/request_pay_button.dart';
 import 'package:nron_app/features/driver/earning/presentation/widgets/total_balance_card.dart';
 import 'package:nron_app/features/driver/earning/presentation/widgets/weekly_overview_chart.dart';
+import 'package:nron_app/features/driver/earning/presentation/widgets/withdrawal_popup.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
@@ -215,7 +216,12 @@ class EarningsScreen extends StatelessWidget {
               child: Obx(() => RequestPayoutButton(
                     amount: c.summary.value.pendingPayoutAmount,
                     loading: c.isRequestingPayout.value,
-                    onTap: () => c.requestPayout(),
+                    onTap: () => showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (_) => WithdrawalPopup(
+                          totalBalance: c.summary.value.totalBalance),
+                    ),
                   )),
             ),
           ],

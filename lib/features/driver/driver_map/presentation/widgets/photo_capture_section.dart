@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 import '../../controller/driver_map_controller.dart';
@@ -76,7 +77,7 @@ class PhotoCaptureSection extends StatelessWidget {
           SizedBox(height: 8.h),
 
           Obx(() => GestureDetector(
-            onTap: c.pickDeliveryPhoto,
+            onTap: () => _showSourcePicker(context, c),
             child: c.deliveryPhotoPath.value.isNotEmpty
                 ? ClipRRect(
               borderRadius: BorderRadius.circular(10.r),
@@ -122,6 +123,54 @@ class PhotoCaptureSection extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showSourcePicker(BuildContext context, DriverMapController c) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: const Color(0xFF1E2121),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+    ),
+    builder: (_) => SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.camera_alt_outlined,
+                  color: AppColors.primaryColor, size: 22.r),
+              title: CustomText(
+                text: 'Camera',
+                fontsize: 14.sp,
+                color: AppColors.primaryTextColor,
+                textAlign: TextAlign.start,
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                c.pickDeliveryPhoto(source: ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_library_outlined,
+                  color: AppColors.primaryColor, size: 22.r),
+              title: CustomText(
+                text: 'Gallery',
+                fontsize: 14.sp,
+                color: AppColors.primaryTextColor,
+                textAlign: TextAlign.start,
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                c.pickDeliveryPhoto(source: ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _DottedBorderPainter extends CustomPainter {

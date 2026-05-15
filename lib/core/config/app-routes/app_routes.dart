@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../features/ representative/activity/presentation/activity-log_screen.dart';
+import '../../../features/ representative/activity/presentation/activity_log_detail_screen.dart';
+import '../../../features/ representative/activity/model/activity_log_model.dart';
 import '../../../features/ representative/all_surgeries/presentation/add_surgery_screen.dart';
 import '../../../features/ representative/all_surgeries/presentation/allsurgeries_screen.dart';
 import '../../../features/ representative/all_surgeries/presentation/surgery_details_screen.dart';
@@ -168,6 +170,7 @@ static const allSurgeriesScreen = '/all-surgeries';
 static const addSurgeryScreen = '/add-surgery';
 static const surgeryDetailScreen = '/surgery-detail';
 static const activityLogScreen = '/activityLogScreen';
+static const activityLogDetailScreen = '/activityLogDetailScreen';
 static const allActivitiesScreen = '/all-activities';
 
   static const settingProfileScreen = '/setting-profile';
@@ -503,6 +506,13 @@ static const allActivitiesScreen = '/all-activities';
         path: activityLogScreen,
         name: activityLogScreen,
         builder: (context, state) => const ActivityLogScreen(),
+      ),
+      GoRoute(
+        path: activityLogDetailScreen,
+        name: activityLogDetailScreen,
+        builder: (context, state) => ActivityLogDetailScreen(
+          log: state.extra as ActivityLogModel,
+        ),
       ),
       GoRoute(
         path: profileScreen ,

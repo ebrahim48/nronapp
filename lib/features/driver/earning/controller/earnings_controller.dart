@@ -30,7 +30,7 @@ class EarningsController extends GetxController {
     fetchHistory();
   }
 
-  // ── Fetch summary ─────────────────────────────────────────────────────────
+
 
   Future<void> fetchSummary() async {
     try {
@@ -48,7 +48,6 @@ class EarningsController extends GetxController {
     }
   }
 
-  // ── Fetch history ─────────────────────────────────────────────────────────
 
   Future<void> fetchHistory({String? status}) async {
     try {
@@ -84,11 +83,34 @@ class EarningsController extends GetxController {
 
   // ── Payout ────────────────────────────────────────────────────────────────
 
-  Future<void> requestPayout() async {
+  /// Returns true on success so the popup can close itself.
+  Future<bool> sendWithdrawalRequest({
+    required int amount,
+    required String accountName,
+    required int cardNumber,
+  }) async {
     try {
       isRequestingPayout.value = true;
-      await Future.delayed(const Duration(milliseconds: 800));
-      ToastMessageHelper.showSuccessMessage('Payout request submitted!');
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.sendWithdrawalRequest(
+        token: token,
+        amount: amount,
+        accountName: accountName,
+        cardNumber: cardNumber,
+      );
+      if (res['success'] == true) {
+        ToastMessageHelper.showSuccessMessage(
+            res['message'] ?? 'Withdrawal request sent successfully');
+        await fetchSummary();
+        return true;
+      } else {
+        ToastMessageHelper.showErrorMessage(
+            res['message'] ?? 'Failed to send request');
+        return false;
+      }
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to send withdrawal request');
+      return false;
     } finally {
       isRequestingPayout.value = false;
     }
