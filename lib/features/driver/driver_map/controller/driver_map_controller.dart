@@ -295,9 +295,8 @@ class DriverMapController extends GetxController {
     }
   }
 
-  Future<void> pickDeliveryPhoto() async {
-    final picked =
-        await ImagePicker().pickImage(source: ImageSource.camera);
+  Future<void> pickDeliveryPhoto({ImageSource source = ImageSource.camera}) async {
+    final picked = await ImagePicker().pickImage(source: source);
     if (picked != null) deliveryPhotoPath.value = picked.path;
   }
 

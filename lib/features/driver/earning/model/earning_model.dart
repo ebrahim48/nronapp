@@ -33,7 +33,7 @@ class EarningEntryModel {
   factory EarningEntryModel.fromSummaryJson(Map<String, dynamic> e) {
     return EarningEntryModel(
       id: e['id']?.toString() ?? '',
-      shipmentId: e['id']?.toString() ?? '',
+      shipmentId: e['shipmentId']?.toString() ?? e['id']?.toString() ?? '',
       date: _formatDate(e['date']?.toString()),
       amount: (e['amount'] as num?)?.toDouble() ?? 0.0,
       status: e['status']?.toString() ?? 'pending',

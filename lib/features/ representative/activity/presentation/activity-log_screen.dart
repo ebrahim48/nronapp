@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 
+import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
@@ -11,6 +14,46 @@ import 'widgets/activity_log_widgets.dart';
 
 class ActivityLogScreen extends StatelessWidget {
   const ActivityLogScreen({super.key});
+
+  Widget _buildShimmerCard() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFF2A2A2A),
+      highlightColor: const Color(0xFF3A3A3A),
+      child: Container(
+        width: double.infinity,
+        height: 130.h,
+        margin: EdgeInsets.only(bottom: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14.r),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Shimmer.fromColors(
+        baseColor: const Color(0xFF2A2A2A),
+        highlightColor: const Color(0xFF3A3A3A),
+        child: Row(
+          children: List.generate(
+            4,
+            (_) => Container(
+              width: 70.w,
+              height: 30.h,
+              margin: EdgeInsets.only(right: 8.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,137 +82,109 @@ class ActivityLogScreen extends StatelessWidget {
               padding: EdgeInsets.only(right: 24.w),
               child: GestureDetector(
                 onTap: () => Scaffold.of(ctx).openDrawer(),
-                child: SvgPicture.asset(
-                  'assets/icons/drawer.svg',
-                ),
+                child: SvgPicture.asset('assets/icons/drawer.svg'),
               ),
             ),
           ),
         ],
       ),
 
-      body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 40.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await c.fetchLogs();
+        },
+        color: AppColors.primaryColor,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 40.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Module filter ──────────────────────────────────────────
+              Row(
+                children: [
+                  CustomText(
+                    text: 'MODULE:',
+                    fontsize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Obx(() {
+                      if (c.isLoadingModules.value) {
+                        return _buildShimmerChips();
+                      }
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: c.modules.map((m) {
+                            return Padding(
+                              padding: EdgeInsets.only(right: 8.w),
+                              child: ActivityFilterChip(
+                                label: m,
+                                isActive: c.selectedModule.value == m,
+                                onTap: () => c.selectModule(m),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
 
-            Row(
-              children: [
-                CustomText(
-                  text: 'MODULE:',
-                  fontsize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.secondaryTextColor,
-                  textAlign: TextAlign.start,
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: Obx(() => SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: c.modules.map((m) {
-                        return Padding(
-                          padding: EdgeInsets.only(right: 8.w),
-                          child: ActivityFilterChip(
-                            label: m,
-                            isActive: c.selectedModule.value == m,
-                            onTap: () => c.selectModule(m),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  )),
-                ),
-              ],
-            ),
+              SizedBox(height: 16.h),
 
-            SizedBox(height: 12.h),
-
-            Row(
-              children: [
-                CustomText(
-                  text: 'RANGE:',
-                  fontsize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.secondaryTextColor,
-                  textAlign: TextAlign.start,
-                ),
-                SizedBox(width: 10.w),
-                Obx(() => Row(
-                  children: c.ranges.map((r) {
-                    return Padding(
-                      padding: EdgeInsets.only(right: 8.w),
-                      child: ActivityFilterChip(
-                        label: r,
-                        isActive: c.selectedRange.value == r,
-                        onTap: () => c.selectRange(r),
-                      ),
-                    );
-                  }).toList(),
-                )),
-              ],
-            ),
-
-            SizedBox(height: 16.h),
-
-            Obx(() => Column(
-              children: c.filtered.map((item) {
-                Widget card;
-
-                switch (item.type) {
-                  case ActivityType.inventory:
-                    card = ActivityInventoryCard(
-                      title: item.data['title'],
-                      subtitle: item.data['subtitle'],
-                      date: item.data['date'],
-                      facility: item.data['facility'],
-                      onDetails: () {},
-                    );
-                    break;
-
-                  case ActivityType.sale:
-                    card = ActivitySaleCard(
-                      date: item.data['date'],
-                      status: item.data['status'],
-                      serial: item.data['serial'],
-                      doctor: item.data['doctor'],
-                      facility: item.data['facility'],
-                      surgeryAmount: item.data['surgeryAmount'],
-                      totalAmount: item.data['totalAmount'],
-                    );
-                    break;
-
-                  case ActivityType.implant:
-                    card = ActivityImplantCard(
-                      name: item.data['name'],
-                      serial: item.data['serial'],
-                      material: item.data['material'],
-                      status: item.data['status'],
-                      facility: item.data['facility'],
-                      imagePath: item.data['imagePath'],
-                      onDetails: () {},
-                    );
-                    break;
-
-                  case ActivityType.billing:
-                    card = ActivityBillingCard(
-                      clinic: item.data['clinic'],
-                      type: item.data['type'],
-                      status: item.data['status'],
-                      surgeon: item.data['surgeon'],
-                      totalBill: item.data['totalBill'],
-                    );
-                    break;
+              // ── Log list ───────────────────────────────────────────────
+              Obx(() {
+                if (c.isLoading.value) {
+                  return Column(
+                    children: List.generate(5, (_) => _buildShimmerCard()),
+                  );
                 }
 
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: card,
+                if (c.logs.isEmpty) {
+                  return SizedBox(
+                    height: 300.h,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.history_outlined,
+                              color: AppColors.secondaryTextColor, size: 48.r),
+                          SizedBox(height: 12.h),
+                          CustomText(
+                            text: 'No activity found',
+                            fontsize: 14.sp,
+                            color: AppColors.secondaryTextColor,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: c.logs
+                      .map((log) => Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: ActivityLogCard(
+                              log: log,
+                              onTap: () => context.pushNamed(
+                                AppRoutes.activityLogDetailScreen,
+                                extra: log,
+                              ),
+                            ),
+                          ))
+                      .toList(),
                 );
-              }).toList(),
-            )),
-          ],
+              }),
+            ],
+          ),
         ),
       ),
     );

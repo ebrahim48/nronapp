@@ -166,6 +166,7 @@ class ApiConstants {
 
   static String getEarningsSummary = '/earnings/my-summary';
   static String getEarningsHistory = '/earnings/history';
+  static String sendWithdrawalRequest = '/withdrawal/send-request';
 
   static String userMyProfile = '/user/get-my-profile';
   static String userUpdateMyProfile = '/user/update-my-profile';
@@ -173,8 +174,11 @@ class ApiConstants {
 
 
   static String messageChatBot = '/chatbot/message';
+
   static String getActiveLog = '/active-log/get-all';
   static String getActiveLogModel = '/active-log/get-model';
+
+  static String getNotificationAll = '/notification/get-all';
 
 
 

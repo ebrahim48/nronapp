@@ -1,91 +1,86 @@
 import 'package:get/get.dart';
-
-enum ActivityType { inventory, sale, implant, billing }
-
-class ActivityItem {
-  final String id;
-  final ActivityType type;
-  final Map<String, dynamic> data;
-
-  const ActivityItem({
-    required this.id,
-    required this.type,
-    required this.data,
-  });
-}
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
+import '../data/activity_log_repository.dart';
+import '../model/activity_log_model.dart';
 
 class ActivityLogController extends GetxController {
-  final modules = ['All', 'Sales', 'Inventory', 'Shipping'];
+  final _repo = ActivityLogRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
+
+  final isLoadingModules = true.obs;
+  final isLoading = true.obs;
+
+  final modules = <String>['All'].obs;
   final selectedModule = 'All'.obs;
 
-  final ranges = ['Last 7 Days', 'Last 30 Days'];
-  final selectedRange = 'Last 7 Days'.obs;
+  final logs = <ActivityLogModel>[].obs;
 
-  final allItems = <ActivityItem>[
-    ActivityItem(
-      id: '1',
-      type: ActivityType.inventory,
-      data: {
-        'title': 'Reagent A',
-        'subtitle': 'Lot-1234',
-        'date': '12/12/2026',
-        'facility': 'Joint Rehabilitation Center',
-      },
-    ),
-    ActivityItem(
-      id: '2',
-      type: ActivityType.sale,
-      data: {
-        'date': 'Mar 15, 2026',
-        'status': 'Complete',
-        'serial': 'SN: DEF98765',
-        'doctor': 'Dr. Michael Lee',
-        'facility': 'Downtown Medical Center',
-        'surgeryAmount': '\$1,200.00',
-        'totalAmount': '\$7,200.00',
-      },
-    ),
-    // Implant card
-    ActivityItem(
-      id: '3',
-      type: ActivityType.implant,
-      data: {
-        'name': 'Knee Replacement',
-        'serial': '#KNE789',
-        'material': 'Titanium',
-        'status': 'In Stock',
-        'facility': 'Ortho Health Center',
-        'imagePath': 'assets/images/implant.png',
-      },
-    ),
-    // Billing card
-    ActivityItem(
-      id: '4',
-      type: ActivityType.billing,
-      data: {
-        'clinic': 'City Otho Clinic',
-        'type': 'Implant',
-        'status': 'Paid',
-        'surgeon': 'Dr. Robert Chen',
-        'totalBill': '\$12,450.00',
-      },
-    ),
-  ].obs;
-
-  List<ActivityItem> get filtered {
-    var items = allItems.toList();
-    if (selectedModule.value != 'All') {
-      items = items.where((e) {
-        switch (selectedModule.value) {
-          case 'Sales':     return e.type == ActivityType.sale;
-          case 'Inventory': return e.type == ActivityType.inventory || e.type == ActivityType.implant;
-          default:          return true;
-        }
-      }).toList();
-    }
-    return items;
+  @override
+  void onInit() {
+    super.onInit();
+    _loadModules();
+    fetchLogs();
   }
 
-  void selectModule(String m) => selectedModule.value = m;
-  void selectRange(String r) => selectedRange.value = r;
+  Future<void> _loadModules() async {
+    try {
+      isLoadingModules.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final raw = await _repo.getModels(token);
+      final seen = <String>{};
+      final result = <String>['All'];
+      for (final item in raw) {
+        if (item is Map) {
+          final m = item['module']?.toString() ?? '';
+          if (m.isNotEmpty && seen.add(m)) {
+            result.add(_capitalize(m));
+          }
+        }
+      }
+      modules.assignAll(result);
+    } catch (_) {
+      // keep default ['All'] on error
+    } finally {
+      isLoadingModules.value = false;
+    }
+  }
+
+  Future<void> fetchLogs({String? module}) async {
+    try {
+      isLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final filter = module ?? selectedModule.value;
+      final res = await _repo.getAll(
+        token,
+        module: filter == 'All' ? null : filter.toLowerCase(),
+      );
+      final data = res['data'];
+      List<dynamic> raw = [];
+      if (data is Map && data['results'] is List) {
+        raw = data['results'] as List;
+      } else if (data is List) {
+        raw = data;
+      }
+      logs.assignAll(
+        raw.map((e) => ActivityLogModel.fromJson(e as Map<String, dynamic>)),
+      );
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to load activity log');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void selectModule(String m) {
+    selectedModule.value = m;
+    fetchLogs(module: m);
+  }
+
+  String _capitalize(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }
