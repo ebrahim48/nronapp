@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../../core/config/app-routes/app_routes.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
+import '../../../../../core/services/socket_service.dart';
 import '../../controller/rep_header_controller.dart';
 
 class RepHeader extends StatelessWidget {
@@ -83,43 +86,51 @@ class RepHeader extends StatelessWidget {
           Row(
             children: [
               // Notification icon with red dot badge
-              SizedBox(
-                width: 42.r,
-                height: 42.r,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/notification.svg',
-                        width: 26.r,
-                        height: 26.r,
-                      ),
-                    ),
-                    Positioned(
-                      top: 6.h,
-                      right: 6.w,
-                      child: Container(
-                        width: 7.r,
-                        height: 7.r,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF2828),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.backgroundColor,
-                            width: 1,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x1A000000),
-                              blurRadius: 3,
-                              offset: Offset(1, 2),
-                            ),
-                          ],
+              GestureDetector(
+                onTap: () => context.pushNamed(AppRoutes.notificationScreen),
+                child: SizedBox(
+                  width: 42.r,
+                  height: 42.r,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Center(
+                        child: SvgPicture.asset(
+                          'assets/icons/notification.svg',
+                          width: 26.r,
+                          height: 26.r,
                         ),
                       ),
-                    ),
-                  ],
+                      Obx(() {
+                        final show = Get.isRegistered<SocketService>() &&
+                            SocketService.instance.hasUnread.value;
+                        if (!show) return const SizedBox.shrink();
+                        return Positioned(
+                          top: 6.h,
+                          right: 6.w,
+                          child: Container(
+                            width: 7.r,
+                            height: 7.r,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF2828),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.backgroundColor,
+                                width: 1,
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x1A000000),
+                                  blurRadius: 3,
+                                  offset: Offset(1, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
                 ),
               ),
 

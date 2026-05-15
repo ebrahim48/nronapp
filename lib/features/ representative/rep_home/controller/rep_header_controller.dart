@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/services/api_service.dart';
+import '../../../../core/services/socket_service.dart';
 
 class RepHeaderController extends GetxController {
   final _api = ApiService();
@@ -14,7 +15,17 @@ class RepHeaderController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Register synchronously so Obx tracks hasUnread from the first build
+    if (!Get.isRegistered<SocketService>()) {
+      Get.put(SocketService(), permanent: true);
+    }
     _fetchProfile();
+    _connectSocket();
+  }
+
+  Future<void> _connectSocket() async {
+    final token = await PrefsHelper.getString('auth_token');
+    await SocketService.instance.connect(token);
   }
 
   Future<void> _fetchProfile() async {
