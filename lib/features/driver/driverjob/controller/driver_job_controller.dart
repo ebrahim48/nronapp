@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../data/driver_job_repository.dart';
@@ -190,8 +191,8 @@ class DriverJobController extends GetxController {
       ToastMessageHelper.showSuccessMessage('Job accepted successfully');
       await fetchJobs();
     } catch (e) {
-      ToastMessageHelper.showErrorMessage(
-          e.toString().replaceAll('Exception: ', ''));
+      final msg = e is ServerException ? e.message : 'Failed to accept job';
+      ToastMessageHelper.showErrorMessage(msg);
     } finally {
       isLoading.value = false;
     }

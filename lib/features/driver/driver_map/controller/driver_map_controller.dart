@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart' as geo;
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,6 +12,7 @@ import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../driverjob/controller/driver_job_controller.dart';
 import '../../driverjob/data/driver_job_repository.dart';
+import '../helpers/marker_helper.dart';
 import '../model/driver_map_model.dart';
 
 class DriverMapController extends GetxController {
@@ -30,6 +33,20 @@ class DriverMapController extends GetxController {
   final isCompleting = false.obs;
   final mapJob = Rxn<MapJobModel>();
 
+  // Live location
+  final currentPosition = Rxn<LatLng>();
+  final distanceToPickup = '-- km'.obs;
+  final etaToPickup = '-- min'.obs;
+  final locationStatus = 'Locating...'.obs;
+  StreamSubscription<Position>? _locationSubscription;
+  DateTime? _lastServerUpdate;
+
+  // Cached custom marker icons
+  BitmapDescriptor? _pickupIcon;
+  BitmapDescriptor? _dropoffIcon;
+  BitmapDescriptor? _waypointIcon;
+  Future<void>? _markerIconsFuture;
+
   // Fallback static camera — updated once real coords load
   static const CameraPosition initialCamera = CameraPosition(
     target: LatLng(23.7776, 90.4055),
@@ -39,14 +56,27 @@ class DriverMapController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // jobId is passed via DriverMapScreen constructor and fetchJobForMap is called from there
+    _markerIconsFuture = _loadMarkerIcons();
     _buildDefaultMarkers();
     _buildDefaultRoute();
+    _startLocationTracking();
+  }
+
+  Future<void> _loadMarkerIcons() async {
+    final results = await Future.wait([
+      MarkerHelper.pickup(),
+      MarkerHelper.dropoff(),
+      MarkerHelper.waypoint(),
+    ]);
+    _pickupIcon = results[0];
+    _dropoffIcon = results[1];
+    _waypointIcon = results[2];
   }
 
   Future<void> fetchJobForMap(String id) async {
     try {
       isLoading.value = true;
+      await _markerIconsFuture; // ensure custom icons are ready
       final token = await PrefsHelper.getString('auth_token');
       final response = await _repo.getSingleJob(token, id);
       final data = response['data'] as Map<String, dynamic>?;
@@ -123,6 +153,13 @@ class DriverMapController extends GetxController {
           CameraUpdate.newLatLngZoom(LatLng(pickupLat, pickupLng), 13),
         );
       }
+
+      // If we already have current position, recalculate distance to new pickup
+      final pos = currentPosition.value;
+      if (pos != null) {
+        _updateCurrentToPickupPolyline(pos);
+        _calculateDistanceToPickup(pos);
+      }
     } catch (e) {
       ToastMessageHelper.showErrorMessage(
           e.toString().replaceAll('Exception: ', ''));
@@ -175,23 +212,35 @@ class DriverMapController extends GetxController {
       Marker(
         markerId: const MarkerId('pickup'),
         position: job.pickup.position,
-        icon:
+        icon: _pickupIcon ??
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: InfoWindow(title: job.pickup.name),
+        infoWindow: InfoWindow(
+          title: 'Pickup',
+          snippet: job.pickup.address,
+        ),
+        zIndex: 2,
       ),
       Marker(
         markerId: const MarkerId('intermediate'),
         position: job.intermediate.position,
-        icon:
-            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        infoWindow: InfoWindow(title: job.intermediate.name),
+        icon: _waypointIcon ??
+            BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        infoWindow: InfoWindow(
+          title: 'Waypoint',
+          snippet: job.intermediate.address,
+        ),
+        zIndex: 1,
       ),
       Marker(
         markerId: const MarkerId('destination'),
         position: job.destination.position,
-        icon:
+        icon: _dropoffIcon ??
             BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: job.destination.name),
+        infoWindow: InfoWindow(
+          title: 'Dropoff',
+          snippet: job.destination.address,
+        ),
+        zIndex: 2,
       ),
     });
   }
@@ -308,8 +357,119 @@ class DriverMapController extends GetxController {
   void toggleBottomSheet() =>
       isBottomSheetExpanded.value = !isBottomSheetExpanded.value;
 
+
+  Future<void> _startLocationTracking() async {
+    if (!await _checkLocationPermission()) return;
+
+    // One-shot initial position
+    try {
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+      _onPositionUpdate(pos);
+    } catch (_) {}
+
+    // Continuous stream — updates every ≥30 m
+    _locationSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 30,
+      ),
+    ).listen(_onPositionUpdate);
+  }
+
+  Future<bool> _checkLocationPermission() async {
+    if (!await Geolocator.isLocationServiceEnabled()) return false;
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    return permission != LocationPermission.denied &&
+        permission != LocationPermission.deniedForever;
+  }
+
+  void _onPositionUpdate(Position pos) {
+    final latLng = LatLng(pos.latitude, pos.longitude);
+    currentPosition.value = latLng;
+    locationStatus.value = 'Live';
+    _updateCurrentToPickupPolyline(latLng);
+    _calculateDistanceToPickup(latLng);
+
+    // Server update throttled to once per minute
+    final now = DateTime.now();
+    if (_lastServerUpdate == null ||
+        now.difference(_lastServerUpdate!).inSeconds >= 60) {
+      _lastServerUpdate = now;
+      _updateLocationToServer(pos);
+    }
+  }
+
+  void _updateCurrentToPickupPolyline(LatLng current) {
+    final job = mapJob.value;
+    if (job == null) return;
+    final updated = Set<Polyline>.from(polylines);
+    updated.removeWhere((p) => p.polylineId.value == 'current_to_pickup');
+    updated.add(Polyline(
+      polylineId: const PolylineId('current_to_pickup'),
+      color: const Color(0xFF4A90E2),
+      width: 3,
+      points: [current, job.pickup.position],
+      patterns: [PatternItem.dash(15), PatternItem.gap(10)],
+    ));
+    polylines.assignAll(updated);
+  }
+
+  void _calculateDistanceToPickup(LatLng current) {
+    final job = mapJob.value;
+    if (job == null) return;
+    final meters = Geolocator.distanceBetween(
+      current.latitude,
+      current.longitude,
+      job.pickup.position.latitude,
+      job.pickup.position.longitude,
+    );
+    final km = meters / 1000;
+    distanceToPickup.value = '${km.toStringAsFixed(1)} km';
+    final etaMins = (km / 30 * 60).round();
+    etaToPickup.value = '$etaMins min';
+  }
+
+  Future<void> _updateLocationToServer(Position pos) async {
+    try {
+      String address = '';
+      try {
+        final placemarks = await geo.placemarkFromCoordinates(
+            pos.latitude, pos.longitude);
+        if (placemarks.isNotEmpty) {
+          final p = placemarks.first;
+          final parts = <String>[];
+          if (p.subLocality != null && p.subLocality!.isNotEmpty) {
+            parts.add(p.subLocality!);
+          }
+          if (p.locality != null && p.locality!.isNotEmpty) {
+            parts.add(p.locality!);
+          }
+          address = parts.join(', ');
+        }
+      } catch (_) {}
+
+      final token = await PrefsHelper.getString('auth_token');
+      // GeoJSON order: [longitude, latitude]
+      await _repo.updateLocation(token, pos.longitude, pos.latitude, address);
+      locationStatus.value = 'Updated ✓';
+      // revert back to "Live" after 3 seconds
+      Future.delayed(const Duration(seconds: 3), () {
+        if (currentPosition.value != null) locationStatus.value = 'Live';
+      });
+    } catch (_) {}
+  }
+
+
   @override
   void onClose() {
+    _locationSubscription?.cancel();
     mapController?.dispose();
     deliveryNotes.dispose();
     super.onClose();

@@ -55,13 +55,18 @@ class DriverMapScreen extends StatelessWidget {
                     SafeArea(
                       child: Padding(
                         padding: EdgeInsets.all(12.r),
-                        child: EtaDistanceBar(
-                          eta: job.etaToPickup.isEmpty
-                              ? '0 mins'
-                              : job.etaToPickup,
-                          distance: job.distanceMi.isEmpty
-                              ? '0 km'
-                              : job.distanceMi,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Obx(() => EtaDistanceBar(
+                                  eta: c.etaToPickup.value,
+                                  distance: c.distanceToPickup.value,
+                                )),
+                            SizedBox(height: 8.h),
+                            Obx(() => _LocationBadge(
+                                  status: c.locationStatus.value,
+                                )),
+                          ],
                         ),
                       ),
                     ),
@@ -295,6 +300,117 @@ class DriverMapScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12.r),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LocationBadge extends StatelessWidget {
+  final String status;
+  const _LocationBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final isLive = status == 'Live';
+    final isUpdated = status.startsWith('Updated');
+    final color = isUpdated
+        ? const Color(0xFF22C55E)
+        : isLive
+            ? const Color(0xFF3B82F6)
+            : const Color(0xFFF59E0B);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A).withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _PulseDot(color: color, animate: isLive),
+          SizedBox(width: 6.w),
+          Text(
+            status,
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PulseDot extends StatefulWidget {
+  final Color color;
+  final bool animate;
+  const _PulseDot({required this.color, required this.animate});
+
+  @override
+  State<_PulseDot> createState() => _PulseDotState();
+}
+
+class _PulseDotState extends State<_PulseDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _scale = Tween(begin: 0.7, end: 1.3).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+    if (widget.animate) _ctrl.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(_PulseDot old) {
+    super.didUpdateWidget(old);
+    if (widget.animate && !_ctrl.isAnimating) {
+      _ctrl.repeat(reverse: true);
+    } else if (!widget.animate) {
+      _ctrl.stop();
+      _ctrl.value = 1.0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scale,
+      builder: (_, __) => Transform.scale(
+        scale: widget.animate ? _scale.value : 1.0,
+        child: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: widget.color,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withValues(alpha: 0.5),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
           ),
         ),
       ),

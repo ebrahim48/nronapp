@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
+import '../../../../%20representative/rep_home/controller/scan_session_controller.dart';
 import '../../../../%20representative/rep_home/presentation/widgets/po_scan_item_card.dart';
 import '../controller/rep_qr_scan_controller.dart';
 
@@ -17,8 +18,8 @@ class QrResultPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.find<QrScanController>();
 
-    // Truncate serial if too long
-    final serial = 'S/N: ${value.length > 24 ? '${value.substring(0, 24)}...' : value}';
+    final serial =
+        'S/N: ${value.length > 24 ? '${value.substring(0, 24)}...' : value}';
 
     return Positioned(
       bottom: 0,
@@ -80,13 +81,34 @@ class QrResultPanel extends StatelessWidget {
 
             SizedBox(height: 16.h),
 
-            // Scanned product card
-            PoScannedItemCard(
-              imagePath: 'assets/images/order.jpg',
-              itemName: 'Titanium Bone Screw',
-              serialNo: serial,
-              price: '\$850.00',
-            ),
+            // Scanned product card — loading shimmer or real data
+            Obx(() {
+              if (c.isLoadingProduct.value) {
+                return Container(
+                  height: 108.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0x1A4A4A4A),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border:
+                        Border.all(color: const Color(0xFF3A3A3A), width: 0.8),
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                        color: Color(0xFF00C5DA), strokeWidth: 2),
+                  ),
+                );
+              }
+              return PoScannedItemCard(
+                imagePath: 'assets/images/order.jpg',
+                itemName: c.productName.value.isNotEmpty
+                    ? c.productName.value
+                    : value,
+                serialNo: serial,
+                price: c.productPrice.value.isNotEmpty
+                    ? c.productPrice.value
+                    : 'N/A',
+              );
+            }),
 
             SizedBox(height: 16.h),
 
@@ -121,24 +143,49 @@ class QrResultPanel extends StatelessWidget {
                 SizedBox(width: 12.w),
 
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      height: 48.h,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF00C5DA),
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      child: Center(
-                        child: CustomText(
-                          text: 'Add to PO',
-                          fontsize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1E2121),
+                  child: Obx(() {
+                    final loading = c.isLoadingProduct.value;
+                    final pid = c.productId.value;
+                    final name = c.productName.value.isNotEmpty
+                        ? c.productName.value
+                        : value;
+                    final price = c.productPrice.value.isNotEmpty
+                        ? c.productPrice.value
+                        : 'N/A';
+                    return GestureDetector(
+                      onTap: loading
+                          ? null
+                          : () {
+                              if (Get.isRegistered<ScanSessionController>()) {
+                                Get.find<ScanSessionController>().add(
+                                  ScannedItem(
+                                      productId: pid,
+                                      name: name,
+                                      price: price,
+                                      serial: value),
+                                );
+                              }
+                              context.pop();
+                            },
+                      child: Container(
+                        height: 48.h,
+                        decoration: BoxDecoration(
+                          color: loading
+                              ? const Color(0xFF008fa0)
+                              : const Color(0xFF00C5DA),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Center(
+                          child: CustomText(
+                            text: 'Add to PO',
+                            fontsize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1E2121),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ),
               ],
             ),
