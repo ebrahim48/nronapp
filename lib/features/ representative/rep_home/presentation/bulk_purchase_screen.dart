@@ -29,6 +29,12 @@ class _BulkPurchaseScreenState extends State<BulkPurchaseScreen> {
   }
 
   @override
+  void dispose() {
+    Get.delete<BulkPurchaseController>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
     return Scaffold(

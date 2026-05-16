@@ -180,6 +180,9 @@ class ApiConstants {
   static String getActiveLog = '/active-log/get-all';
   static String getActiveLogModel = '/active-log/get-model';
 
+
+  static String updateLocation = '/user/change-location';
+
   // static String getNotificationAll = '/notification/get-all';
 
 

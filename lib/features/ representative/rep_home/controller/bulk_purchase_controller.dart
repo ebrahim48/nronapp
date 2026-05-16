@@ -12,6 +12,7 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../purchaseorder/data/repositories/purchase_order_repository.dart';
 import '../../purchaseorder/model/purchase_order_model.dart';
+import 'scan_session_controller.dart';
 
 class BulkProductItem {
   final String iconPath;
@@ -78,7 +79,24 @@ class BulkPurchaseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    final session = Get.put(ScanSessionController());
+    ever(session.items, _onScannedItemsChanged);
     _fetchDropdowns();
+  }
+
+  void _onScannedItemsChanged(List<ScannedItem> items) {
+    bulkProducts.assignAll(
+      items.map((i) => BulkProductItem(
+        iconPath: 'assets/icons/medicalimplants.svg',
+        productId: i.productId.isNotEmpty ? i.productId : i.serial,
+        productName: i.name,
+        detail: i.serial.length > 18
+            ? 'S/N: ${i.serial.substring(0, 18)}...'
+            : 'S/N: ${i.serial}',
+        price: i.price,
+        listOfItems: [i.serial],
+      )),
+    );
   }
 
   Future<void> _fetchDropdowns() async {
@@ -196,11 +214,11 @@ class BulkPurchaseController extends GetxController {
     }
   }
 
-  Future<void> saveOrder(BuildContext context) => _submit(context, navigate: false);
+  Future<void> saveOrder(BuildContext context) => _submit(context);
 
-  Future<void> continueOrder(BuildContext context) => _submit(context, navigate: true);
+  Future<void> continueOrder(BuildContext context) => _submit(context);
 
-  Future<void> _submit(BuildContext context, {required bool navigate}) async {
+  Future<void> _submit(BuildContext context) async {
     if (!_validate()) return;
     isSubmitting.value = true;
     try {
@@ -228,20 +246,46 @@ class BulkPurchaseController extends GetxController {
         docs: attachedDocs.isNotEmpty ? attachedDocs : null,
       );
       if (res['success'] == true) {
-        if (navigate && context.mounted) {
-          context.pushNamed(AppRoutes.reviewSendPoScreen);
-        } else {
-          ToastMessageHelper.showToastMessage('Order saved successfully.',
-              title: 'Success');
+        _clearForm();
+        if (context.mounted) {
+          ToastMessageHelper.showSuccessMessage('Purchase order created successfully.');
+          context.go(AppRoutes.purchaseOrderScreen);
         }
+      } else {
+        final msg = res['message']?.toString() ?? 'Failed to create order';
+        ToastMessageHelper.showErrorMessage(msg);
       }
     } on NoInternetException {
-      ToastMessageHelper.showToastMessage('No internet connection.', title: 'Error');
+      ToastMessageHelper.showErrorMessage('No internet connection.');
     } on ServerException catch (e) {
-      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
-    } catch (_) {
+      ToastMessageHelper.showErrorMessage(e.message);
+    } catch (e) {
+      ToastMessageHelper.showErrorMessage(
+          e.toString().replaceAll('Exception: ', ''));
     } finally {
       isSubmitting.value = false;
+    }
+  }
+
+  void _clearForm() {
+    patientIdController.clear();
+    surgeonNameController.clear();
+    facilityController.clear();
+    facilityEmailController.clear();
+    procedureDateController.clear();
+    poNumberController.text = 'PO-0000';
+    vendorNameController.clear();
+    vendorEmailController.clear();
+    additionalNotesController.clear();
+    selectedStatus.value = 'open';
+    sendVendorEmail.value = true;
+    _selectedSurgeryId = '';
+    _selectedFacilityId = '';
+    _selectedVendorId = '';
+    attachedDocs.clear();
+    bulkProducts.clear();
+    if (Get.isRegistered<ScanSessionController>()) {
+      Get.find<ScanSessionController>().clear();
     }
   }
 
@@ -280,6 +324,10 @@ class BulkPurchaseController extends GetxController {
     vendorNameController.dispose();
     vendorEmailController.dispose();
     additionalNotesController.dispose();
+    // Clean up scan session when leaving purchase order creation
+    if (Get.isRegistered<ScanSessionController>()) {
+      Get.delete<ScanSessionController>();
+    }
     super.onClose();
   }
 }

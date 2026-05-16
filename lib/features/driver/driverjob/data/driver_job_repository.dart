@@ -63,6 +63,18 @@ class DriverJobRepository {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<void> updateLocation(
+      String token, double longitude, double latitude, String address) async {
+    await _api.patch(
+      ApiConstants.updateLocation,
+      data: {
+        'coordinates': [longitude, latitude],
+        'address': address,
+      },
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+  }
+
   Future<Map<String, dynamic>> submitDelivery({
     required String token,
     required String id,
