@@ -17,14 +17,12 @@ class SaleController extends GetxController {
     apiService: ApiService(),
   );
 
-  // ── Overview stats ──────────────────────────────────────────────────────────
   final implantSales = 0.obs;
   final bioSales = 0.obs;
   final totalRevenue = 0.obs;
   final commission = 0.obs;
   final isLoadingOverview = false.obs;
 
-  // ── Sales list (home recent) ────────────────────────────────────────────────
   final recentSales = <SaleModel>[].obs;
   final isLoadingSales = false.obs;
   final isLoadingMore = false.obs;
@@ -32,7 +30,6 @@ class SaleController extends GetxController {
   int _totalPage = 1;
   final scrollController = ScrollController();
 
-  // ── All sales list (View All screen) ────────────────────────────────────────
   final allSalesList = <SaleModel>[].obs;
   final isLoadingAllSales = false.obs;
   final isLoadingMoreAllSales = false.obs;
@@ -41,16 +38,13 @@ class SaleController extends GetxController {
   int _allSalesTotalPage = 1;
   final allSalesScrollController = ScrollController();
 
-  // ── Detail ──────────────────────────────────────────────────────────────────
   final detailObs = Rxn<SaleDetailModel>();
   final isLoadingDetail = false.obs;
 
-  // ── Delete / Convert ────────────────────────────────────────────────────────
   final isDeleting = false.obs;
   final isConverting = false.obs;
   final isSubmitting = false.obs;
 
-  // ── Dropdown data ────────────────────────────────────────────────────────────
   final physicianList = <VendorModel>[].obs;
   final facilityList = <FacilityDropdownModel>[].obs;
   final vendorList = <VendorModel>[].obs;
@@ -62,7 +56,6 @@ class SaleController extends GetxController {
   final isLoadingRepDropdown = false.obs;
   final isLoadingInventory = false.obs;
 
-  // ── Form ─────────────────────────────────────────────────────────────────────
   final selectedSaleType = SaleType.sold.obs;
   final selectedPhysician = ''.obs;       // stores physician ID
   final selectedPhysicianName = ''.obs;
@@ -80,19 +73,20 @@ class SaleController extends GetxController {
   final additionalNotesController = TextEditingController();
   final generatePackingSlip = true.obs;
 
-  // ── Representatives ──────────────────────────────────────────────────────────
   final addedRepresentatives = <RepresentativeModel>[].obs;
 
-  // ── Implants ─────────────────────────────────────────────────────────────────
   final selectedImplants = <ImplantItem>[].obs;
   final allImplants = <ImplantItem>[].obs;
   final implantSearchQuery = ''.obs;
 
-  // ── Attachments ──────────────────────────────────────────────────────────────
+  final allPoItems = <ImplantItem>[].obs;
+  final selectedPoItems = <ImplantItem>[].obs;
+  final poSearchQuery = ''.obs;
+  final inventoryModelFilter = ''.obs; // '' = All, 'Implant', 'Tray', 'Bio'
+
   final uploadedAttachments = <AttachmentFileModel>[].obs;
   final uploadedFiles = <File>[].obs;
 
-  // ── Packing slip ─────────────────────────────────────────────────────────────
   final packingSlipItems = const <PackingSlipItem>[
     PackingSlipItem(
         product: 'Neural Link Hub V2', serial: 'NL-882-991-A', qty: 1, price: 1250.00),
@@ -102,7 +96,6 @@ class SaleController extends GetxController {
         product: 'Fiber Optic Cable (5m)', serial: 'FO-5M-X9', qty: 5, price: 12.50),
   ];
 
-  // ── Derived ───────────────────────────────────────────────────────────────────
   List<String> get physicians => physicianList.map((p) => p.name).toList();
   List<String> get physicianIds => physicianList.map((p) => p.id).toList();
   List<String> get facilities => facilityList.map((f) => f.name).toList();
@@ -111,9 +104,23 @@ class SaleController extends GetxController {
   List<String> get vendorIds => vendorList.map((v) => v.id).toList();
 
   List<ImplantItem> get filteredImplants {
-    if (implantSearchQuery.value.isEmpty) return allImplants;
-    final q = implantSearchQuery.value.toLowerCase();
-    return allImplants
+    var list = allImplants.toList();
+    if (inventoryModelFilter.value.isNotEmpty) {
+      list = list.where((i) => i.productModel == inventoryModelFilter.value).toList();
+    }
+    if (implantSearchQuery.value.isNotEmpty) {
+      final q = implantSearchQuery.value.toLowerCase();
+      list = list.where((i) =>
+          i.name.toLowerCase().contains(q) ||
+          i.serial.toLowerCase().contains(q)).toList();
+    }
+    return list;
+  }
+
+  List<ImplantItem> get filteredPoItems {
+    if (poSearchQuery.value.isEmpty) return allPoItems;
+    final q = poSearchQuery.value.toLowerCase();
+    return allPoItems
         .where((i) =>
             i.name.toLowerCase().contains(q) ||
             i.serial.toLowerCase().contains(q))
@@ -122,6 +129,8 @@ class SaleController extends GetxController {
 
   int get selectedImplantCount =>
       allImplants.where((i) => i.isSelected).length;
+
+  int get selectedPoCount => allPoItems.where((i) => i.isSelected).length;
 
   int get totalCommissionPercent =>
       addedRepresentatives.fold(0, (sum, r) => sum + r.commissionPercent);
@@ -161,7 +170,6 @@ class SaleController extends GetxController {
     }
   }
 
-  // ── Overview ──────────────────────────────────────────────────────────────
   Future<void> fetchOverview() async {
     isLoadingOverview.value = true;
     try {
@@ -182,7 +190,6 @@ class SaleController extends GetxController {
     }
   }
 
-  // ── Sales list ────────────────────────────────────────────────────────────
   Future<void> fetchSales({bool reset = true}) async {
     if (reset) {
       _currentPage = 1;
@@ -222,7 +229,6 @@ class SaleController extends GetxController {
     fetchSales(reset: false);
   }
 
-  // ── All Sales (View All screen) ───────────────────────────────────────────
   Future<void> fetchAllSales({bool reset = true, String? filter}) async {
     if (reset) {
       _allSalesPage = 1;
@@ -268,7 +274,6 @@ class SaleController extends GetxController {
     }
   }
 
-  // ── Detail ────────────────────────────────────────────────────────────────
   Future<void> fetchDetail(String id) async {
     isLoadingDetail.value = true;
     detailObs.value = null;
@@ -293,7 +298,6 @@ class SaleController extends GetxController {
     }
   }
 
-  // ── Delete ────────────────────────────────────────────────────────────────
   Future<bool> deleteSale(String id) async {
     isDeleting.value = true;
     try {
@@ -315,7 +319,6 @@ class SaleController extends GetxController {
     return false;
   }
 
-  // ── Convert type ──────────────────────────────────────────────────────────
   Future<bool> convertSaleType(String id) async {
     isConverting.value = true;
     try {
@@ -338,7 +341,6 @@ class SaleController extends GetxController {
     return false;
   }
 
-  // ── Dropdown loaders ──────────────────────────────────────────────────────
   Future<void> fetchDropdowns() async {
     await Future.wait([
       fetchPhysicians(),
@@ -418,13 +420,24 @@ class SaleController extends GetxController {
     isLoadingInventory.value = true;
     try {
       final token = await PrefsHelper.getString('auth_token');
-      final res = await _repo.getInventory(token);
-      if (res['success'] == true) {
-        allImplants.assignAll(_parseList(res['data'])
+      final results = await Future.wait([
+        _repo.getInventory(token, type: 'inventory'),
+        _repo.getInventory(token, type: 'purchase'),
+      ]);
+      final invRes = results[0];
+      final poRes = results[1];
+      if (invRes['success'] == true) {
+        allImplants.assignAll(_parseList(invRes['data'])
             .map((e) => ImplantItem.fromJson(e as Map<String, dynamic>))
             .toList());
       }
-    } catch (_) {
+      if (poRes['success'] == true) {
+        allPoItems.assignAll(_parseList(poRes['data'])
+            .map((e) => ImplantItem.fromJson(e as Map<String, dynamic>))
+            .toList());
+      }
+    } catch (e, st) {
+      debugPrint('[Inventory] error: $e\n$st');
     } finally {
       isLoadingInventory.value = false;
     }
@@ -438,7 +451,6 @@ class SaleController extends GetxController {
     return [];
   }
 
-  // ── Implants ──────────────────────────────────────────────────────────────
   void toggleImplant(int index) {
     allImplants[index].isSelected = !allImplants[index].isSelected;
     allImplants.refresh();
@@ -448,7 +460,15 @@ class SaleController extends GetxController {
     selectedImplants.assignAll(allImplants.where((i) => i.isSelected));
   }
 
-  // ── Representatives ───────────────────────────────────────────────────────
+  void togglePoItem(int index) {
+    allPoItems[index].isSelected = !allPoItems[index].isSelected;
+    allPoItems.refresh();
+  }
+
+  void confirmSelectedPoItems() {
+    selectedPoItems.assignAll(allPoItems.where((i) => i.isSelected));
+  }
+
   void removeRepresentative(int index) {
     addedRepresentatives.removeAt(index);
   }
@@ -457,7 +477,6 @@ class SaleController extends GetxController {
     addedRepresentatives.add(rep);
   }
 
-  // ── Date picker ───────────────────────────────────────────────────────────
   void pickDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
@@ -486,7 +505,6 @@ class SaleController extends GetxController {
     }
   }
 
-  // ── File picker ───────────────────────────────────────────────────────────
   Future<void> attachFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -511,7 +529,6 @@ class SaleController extends GetxController {
     if (index < uploadedFiles.length) uploadedFiles.removeAt(index);
   }
 
-  // ── Prefill for edit ──────────────────────────────────────────────────────
   void prefillForEdit(SaleDetailModel d) {
     selectedSaleType.value = d.salesTypeRaw.toLowerCase() == 'consigned'
         ? SaleType.consigned
@@ -544,11 +561,16 @@ class SaleController extends GetxController {
     }
     allImplants.refresh();
     selectedImplants.clear();
+    for (final item in allPoItems) {
+      item.isSelected = false;
+    }
+    allPoItems.refresh();
+    selectedPoItems.clear();
     uploadedAttachments.clear();
     uploadedFiles.clear();
   }
 
-  // ── Clear form ────────────────────────────────────────────────────────────
+
   void clearForm() {
     selectedSaleType.value = SaleType.sold;
     selectedPhysician.value = '';
@@ -566,15 +588,20 @@ class SaleController extends GetxController {
     generatePackingSlip.value = true;
     addedRepresentatives.clear();
     selectedImplants.clear();
+    selectedPoItems.clear();
     uploadedAttachments.clear();
     uploadedFiles.clear();
     for (final item in allImplants) {
       item.isSelected = false;
     }
     allImplants.refresh();
+    for (final item in allPoItems) {
+      item.isSelected = false;
+    }
+    allPoItems.refresh();
   }
 
-  // ── Submit sale ───────────────────────────────────────────────────────────
+
   Future<bool> submitSale(BuildContext context, {String? saleId}) async {
     final physicianId = selectedPhysician.value;
     final facilityId = selectedFacility.value;
@@ -622,12 +649,18 @@ class SaleController extends GetxController {
             })
         .toList();
 
-    final inventory = selectedImplants
-        .map((item) => {
-              'product': item.id,
-              'productType': item.productType,
-            })
-        .toList();
+    final inventory = [
+      ...selectedImplants.map((item) => {
+            'product': item.id,
+            'productModel': item.productModel,
+            'productType': item.productType,
+          }),
+      ...selectedPoItems.map((item) => {
+            'product': item.id,
+            'productModel': item.productModel,
+            'productType': item.productType,
+          }),
+    ];
 
     isSubmitting.value = true;
     try {
