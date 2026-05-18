@@ -28,7 +28,11 @@
       "PowerShell($env:PATH -split \";\" | Where-Object { $_ -match \"flutter|dart\" })",
       "PowerShell($env:PATH; where.exe flutter 2>$null)",
       "PowerShell(flutter analyze *)",
-      "PowerShell($env:PATH -split ';' | Where-Object { $_ -ne '' } | Select-Object -First 30)"
+      "PowerShell($env:PATH -split ';' | Where-Object { $_ -ne '' } | Select-Object -First 30)",
+      "Bash(/c/Users/ebu/flutter/bin/flutter analyze *)",
+      "Bash(where flutter *)",
+      "Read(//c/Users/ebu/AppData/Local/flutter/bin/**)",
+      "Read(//c/Users/ebu/**)"
     ]
   }
 }

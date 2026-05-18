@@ -8,7 +8,6 @@ enum ImplantAvailability { available, inStock, backordered }
 
 enum AuditType { success, info, warning }
 
-// ── helpers ──────────────────────────────────────────────────────────────────
 
 SaleStatus _statusFromApi(String s) {
   switch (s.toLowerCase()) {
@@ -422,9 +421,12 @@ class ImplantItem {
   final String id;
   final String name;
   final String productType;
+  final String productModel;
   final String serial;
   final String material;
   final String location;
+  final String? imageUrl;
+  final double totalAmount;
   final ImplantAvailability availability;
   bool isSelected;
 
@@ -432,44 +434,91 @@ class ImplantItem {
     this.id = '',
     required this.name,
     this.productType = '',
+    this.productModel = '',
     required this.serial,
     required this.material,
     required this.location,
+    this.imageUrl,
+    this.totalAmount = 0,
     required this.availability,
     this.isSelected = false,
   });
 
   factory ImplantItem.fromJson(Map<String, dynamic> json) {
-    final statusStr =
-        json['productStatus']?.toString() ?? json['status']?.toString() ?? '';
+    final productModel = json['productModel']?.toString() ?? '';
+    final statusStr = json['productStatus']?.toString() ?? json['status']?.toString() ?? '';
+
     ImplantAvailability availability;
-    switch (statusStr.toLowerCase()) {
-      case 'available':
-        availability = ImplantAvailability.available;
-        break;
-      case 'in stock':
-      case 'instock':
-        availability = ImplantAvailability.inStock;
-        break;
-      default:
-        availability = ImplantAvailability.inStock;
+    if (productModel == 'PurchaseOrder') {
+      switch (statusStr.toLowerCase()) {
+        case 'open':
+          availability = ImplantAvailability.available;
+          break;
+        case 'complete':
+          availability = ImplantAvailability.inStock;
+          break;
+        case 'lost':
+          availability = ImplantAvailability.backordered;
+          break;
+        default:
+          availability = ImplantAvailability.available;
+      }
+    } else {
+      switch (statusStr.toLowerCase()) {
+        case 'available':
+          availability = ImplantAvailability.available;
+          break;
+        case 'in stock':
+        case 'instock':
+          availability = ImplantAvailability.inStock;
+          break;
+        default:
+          availability = ImplantAvailability.inStock;
+      }
     }
+
+    if (productModel == 'PurchaseOrder') {
+      final orderType = json['orderType']?.toString() ?? '';
+      final orderTypeLabel = orderType == 'standardPO'
+          ? 'Standard PO'
+          : orderType == 'bulkBioOrder'
+              ? 'Bulk Bio Order'
+              : orderType;
+      final products = json['products'] as List?;
+      final productCount = products?.length ?? 0;
+      return ImplantItem(
+        id: json['_id']?.toString() ?? '',
+        name: json['purchaseOrderNumber']?.toString() ?? '',
+        productType: 'purchase',
+        productModel: productModel,
+        serial: orderTypeLabel,
+        material: productCount > 0 ? '$productCount product${productCount > 1 ? 's' : ''}' : '',
+        location: _fmt(json['procedureDate']?.toString()),
+        imageUrl: json['thumbnail']?.toString(),
+        totalAmount: _toDouble(json['totalAmount']),
+        availability: availability,
+      );
+    }
+
+    // Bio → itemName, Tray → title, Implant → systemType
+    final name = json['itemName']?.toString().isNotEmpty == true
+        ? json['itemName'].toString()
+        : json['title']?.toString().isNotEmpty == true
+            ? json['title'].toString()
+            : json['systemType']?.toString() ?? '';
+    final serial = json['serialNumber']?.toString() ?? json['lotNumber']?.toString() ?? '';
+    final material = productModel == 'Bio'
+        ? json['quantity']?.toString() ?? json['systemType']?.toString() ?? ''
+        : json['systemType']?.toString() ?? '';
     return ImplantItem(
       id: json['_id']?.toString() ?? '',
-      name: json['itemName']?.toString() ??
-          json['title']?.toString() ??
-          json['name']?.toString() ??
-          '',
-      productType: json['productType']?.toString() ??
-          json['itemType']?.toString() ??
-          json['type']?.toString() ??
-          '',
-      serial: json['serialNumber']?.toString() ??
-          json['lotNumber']?.toString() ??
-          '',
-      material:
-          json['systemType']?.toString() ?? json['vendor']?.toString() ?? '',
+      name: name,
+      productType: json['productType']?.toString() ?? '',
+      productModel: productModel,
+      serial: serial,
+      material: material,
       location: json['location']?.toString() ?? '',
+      imageUrl: json['initialPhoto']?.toString(),
       availability: availability,
     );
   }

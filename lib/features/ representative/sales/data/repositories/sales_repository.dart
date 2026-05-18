@@ -99,6 +99,9 @@ class SalesRepository {
     for (var i = 0; i < inventoryProducts.length; i++) {
       final item = inventoryProducts[i];
       fields['inventoryProducts[$i][product]'] = item['product'];
+      if (item['productModel'] != null && (item['productModel'] as String).isNotEmpty) {
+        fields['inventoryProducts[$i][productModel]'] = item['productModel'];
+      }
       fields['inventoryProducts[$i][productType]'] = item['productType'];
     }
 
@@ -177,6 +180,9 @@ class SalesRepository {
       for (var i = 0; i < inventoryProducts.length; i++) {
         final item = inventoryProducts[i];
         fields['inventoryProducts[$i][product]'] = item['product'];
+        if (item['productModel'] != null && (item['productModel'] as String).isNotEmpty) {
+          fields['inventoryProducts[$i][productModel]'] = item['productModel'];
+        }
         fields['inventoryProducts[$i][productType]'] = item['productType'];
       }
     }
@@ -267,10 +273,11 @@ class SalesRepository {
     return res.data as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> getInventory(String token) async {
+  Future<Map<String, dynamic>> getInventory(String token, {String? type}) async {
     await _connectivity.checkConnectivity();
     final res = await _api.get(
       ApiConstants.commonAllInventory,
+      queryParameters: type != null ? {'type': type} : null,
       options: _auth(token),
     );
     return res.data as Map<String, dynamic>;
