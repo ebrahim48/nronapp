@@ -51,6 +51,15 @@ class ShipmentRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> getShipmentRate(String token) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.get(
+      ApiConstants.shipmentRate,
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> getFacilities(String token) async {
     await _connectivity.checkConnectivity();
     final res = await _api.get(
@@ -94,13 +103,12 @@ class ShipmentRepository {
     final body = <String, dynamic>{
       'shipmentInfo': {
         'company': company,
-        'jobName': jobName,
         'recipient': userId,
-        if (priority.isNotEmpty) 'priority': priority,
         if (type.isNotEmpty) 'type': type,
+        if (priority.isNotEmpty) 'priority': priority,
       },
       'packageInfo': {
-        if (serviceType.isNotEmpty) 'serviceType': serviceType,
+        'serviceType': serviceType,
         if (weight.isNotEmpty) 'weight': weight,
         if (dimensions.isNotEmpty) 'dimensions': dimensions,
         'spacialInstructions': specialInstructions,
@@ -126,12 +134,13 @@ class ShipmentRepository {
       'products': products
           .map((p) => {
                 if (p['product'] != null) 'product': p['product'],
-                if (p['productType'] != null)
-                  'productType': p['productType'],
+                if (p['productModel'] != null && p['productModel']!.isNotEmpty)
+                  'productModel': p['productModel'],
+                if (p['productType'] != null) 'productType': p['productType'],
               })
           .toList(),
-      'distance': distance,
-      'totalCost': totalCost,
+      'totalPrice': totalCost,
+      'totalDistance': distance.toString(),
     };
 
     final res = await _api.post(
@@ -141,6 +150,10 @@ class ShipmentRepository {
     );
     return res.data as Map<String, dynamic>;
   }
+
+  // shippingCost.type only accepts 'fedex' | 'courier'
+  String _normalizeShippingCostType(String v) =>
+      v.toLowerCase() == 'fedex' ? 'fedex' : 'courier';
 
   // IServiceType: 'fedex' | 'ups' | 'usps' | 'courier'
   String _normalizeServiceType(String v) {

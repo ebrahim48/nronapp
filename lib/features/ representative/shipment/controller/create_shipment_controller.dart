@@ -52,14 +52,21 @@ class CreateShipmentController extends GetxController {
   double? dropoffLng;
 
   // ── Dropdowns ─────────────────────────────────────────────────────────────
-  // exact API enum values
-  static const serviceTypes = ['fedex', 'ups', 'usps', 'courier'];
+  static const serviceTypes = ['fedex', 'courier'];
   static const packageTypes = ['implant', 'tray', 'bio', 'other'];
   static const priorities   = ['urgent', 'express', 'priority', 'standard', 'economy'];
 
   final selectedServiceType = 'fedex'.obs;
   final selectedPackageType = 'implant'.obs;
-  final selectedPriority    = 'urgent'.obs;
+  final selectedPriority    = 'standard'.obs;
+
+  // ── Shipment Rate (from API) ──────────────────────────────────────────────
+  double amountPerKm = 0;
+  final Map<String, double> _priorityCharges = {};
+  final estimatedCost   = 0.0.obs;
+  final estimatedBase   = 0.0.obs;
+  final priorityCharge  = 0.0.obs;
+  final isRateLoading   = false.obs;
 
   // ── Facility ─────────────────────────────────────────────────────────────
   final facilities           = <FacilityOption>[].obs;
@@ -69,16 +76,48 @@ class CreateShipmentController extends GetxController {
 
   final isLoading = false.obs;
 
-  // Selected products (id + productType)
   final selectedProducts = <Map<String, String>>[].obs;
-
-  // Uploaded files
-  final uploadedFiles = <File>[].obs;
+  final uploadedFiles    = <File>[].obs;
 
   @override
   void onInit() {
     super.onInit();
     _loadFacilities();
+    _loadShipmentRate();
+    distanceController.addListener(_recalculate);
+  }
+
+  Future<void> _loadShipmentRate() async {
+    try {
+      isRateLoading.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getShipmentRate(token);
+      if (res['success'] == true) {
+        final data = res['data'] as Map<String, dynamic>;
+        amountPerKm = (data['amountPerKm'] as num?)?.toDouble() ?? 0;
+        final charges = data['priorityCharges'] as List? ?? [];
+        for (final c in charges) {
+          final p = c['priority']?.toString() ?? '';
+          final extra = (c['extraCharge'] as num?)?.toDouble() ?? 0;
+          if (p.isNotEmpty) _priorityCharges[p] = extra;
+        }
+        _recalculate();
+      }
+    } catch (_) {
+    } finally {
+      isRateLoading.value = false;
+    }
+  }
+
+  void _recalculate() {
+    final dist = double.tryParse(distanceController.text.trim()) ?? 0;
+    final base  = amountPerKm * dist;
+    final extra = _priorityCharges[selectedPriority.value] ?? 0;
+    estimatedBase.value  = base;
+    priorityCharge.value = extra;
+    estimatedCost.value  = base + extra;
+    totalCostController.text =
+        (base + extra) > 0 ? (base + extra).toStringAsFixed(2) : '';
   }
 
   Future<void> _loadFacilities() async {
@@ -90,8 +129,7 @@ class CreateShipmentController extends GetxController {
       facilities.assignAll(
         raw.whereType<Map<String, dynamic>>().map((f) => FacilityOption(
               id: f['_id']?.toString() ?? '',
-              name: f['name']?.toString() ??
-                  f['facilityName']?.toString() ?? '',
+              name: f['name']?.toString() ?? f['facilityName']?.toString() ?? '',
             )).where((f) => f.id.isNotEmpty).toList(),
       );
       if (facilities.isNotEmpty) {
@@ -99,7 +137,6 @@ class CreateShipmentController extends GetxController {
         selectedFacilityName.value = facilities.first.name;
       }
     } catch (_) {
-      // silent
     } finally {
       isFacilitiesLoading.value = false;
     }
@@ -107,7 +144,11 @@ class CreateShipmentController extends GetxController {
 
   void setServiceType(String v) => selectedServiceType.value = v;
   void setPackageType(String v) => selectedPackageType.value = v;
-  void setPriority(String v)    => selectedPriority.value = v;
+
+  void setPriority(String v) {
+    selectedPriority.value = v;
+    _recalculate();
+  }
 
   void setFacility(FacilityOption f) {
     selectedFacilityId.value   = f.id;
@@ -134,10 +175,6 @@ class CreateShipmentController extends GetxController {
       ToastMessageHelper.showErrorMessage('Please enter company name');
       return false;
     }
-    if (jobNameController.text.trim().isEmpty) {
-      ToastMessageHelper.showErrorMessage('Please enter job name');
-      return false;
-    }
     if (selectedProducts.isEmpty) {
       ToastMessageHelper.showErrorMessage('Please add at least one product');
       return false;
@@ -147,7 +184,7 @@ class CreateShipmentController extends GetxController {
       return false;
     }
     if (totalCostController.text.trim().isEmpty) {
-      ToastMessageHelper.showErrorMessage('Please enter total cost');
+      ToastMessageHelper.showErrorMessage('Cost not calculated yet, enter distance first');
       return false;
     }
     return true;
@@ -228,6 +265,7 @@ class CreateShipmentController extends GetxController {
 
   @override
   void onClose() {
+    distanceController.removeListener(_recalculate);
     companyController.dispose();
     jobNameController.dispose();
     recipientController.dispose();

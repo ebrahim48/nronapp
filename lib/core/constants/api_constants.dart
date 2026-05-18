@@ -182,6 +182,7 @@ class ApiConstants {
 
 
   static String updateLocation = '/user/change-location';
+  static String shipmentRate = '/shipment-rate/get-all';
 
   // static String getNotificationAll = '/notification/get-all';
 

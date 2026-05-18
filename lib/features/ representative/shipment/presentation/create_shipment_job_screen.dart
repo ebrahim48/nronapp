@@ -277,6 +277,117 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
     );
   }
 
+  Widget _buildEstimatedFeeCard() {
+    return AnimatedBuilder(
+      animation: _ctrl.distanceController,
+      builder: (_, __) {
+        final distance = _ctrl.distanceController.text.trim();
+        if (distance.isEmpty) return const SizedBox.shrink();
+        return Obx(() {
+          final total        = _ctrl.estimatedCost.value;
+          final base         = _ctrl.estimatedBase.value;
+          final extra        = _ctrl.priorityCharge.value;
+          final serviceType  = _ctrl.selectedServiceType.value;
+          final priority     = _ctrl.selectedPriority.value;
+          final perKm        = _ctrl.amountPerKm;
+          return Container(
+            width: double.infinity,
+            margin: EdgeInsets.only(bottom: 4.h),
+            padding: EdgeInsets.all(20.r),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment(-0.34, -0.94),
+                end: Alignment(0.34, 0.94),
+                colors: [Color(0xFF1E3A8A), Color(0xFF00236F)],
+              ),
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'ESTIMATED SERVICE FEE',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.7),
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Text(
+                            serviceType.toUpperCase(),
+                            style: TextStyle(fontSize: 9.sp, fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Text(
+                            priority.toUpperCase(),
+                            style: TextStyle(fontSize: 9.sp, fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.h),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '\$${total.toStringAsFixed(2)}',
+                      style: TextStyle(fontSize: 28.sp, fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: Colors.white),
+                    ),
+                    SizedBox(width: 10.w),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 5.h),
+                      child: Text(
+                        '$distance mi',
+                        style: TextStyle(fontSize: 12.sp, fontFamily: 'Poppins', color: Colors.white.withValues(alpha: 0.7)),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Row(
+                  children: [
+                    Text(
+                      '\$$perKm/km × $distance mi = \$${base.toStringAsFixed(2)}',
+                      style: TextStyle(fontSize: 10.sp, fontFamily: 'Poppins', color: Colors.white.withValues(alpha: 0.6)),
+                    ),
+                    if (extra > 0) ...[
+                      Text(
+                        '  +  \$${extra.toStringAsFixed(0)} priority',
+                        style: TextStyle(fontSize: 10.sp, fontFamily: 'Poppins', color: Colors.white.withValues(alpha: 0.6)),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          );
+        });
+      },
+    );
+  }
+
   // ── Step Indicator ──────────────────────────────────────────────────────────
   Widget _buildStepIndicator() {
     return Padding(
@@ -521,28 +632,12 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomTextField(
-                      controller: _ctrl.distanceController,
-                      labelText: 'Distance (miles) *',
-                      hintText: '12.5',
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: CustomTextField(
-                      controller: _ctrl.totalCostController,
-                      labelText: 'Total Cost (\$) *',
-                      hintText: '150.00',
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-                    ),
-                  ),
-                ],
+              CustomTextField(
+                controller: _ctrl.distanceController,
+                labelText: 'Distance (miles) *',
+                hintText: '12.5',
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
               ),
               CustomTextField(
                 controller: _ctrl.specialInstructionsController,
@@ -550,6 +645,7 @@ class _CreateShipmentJobScreenState extends State<CreateShipmentJobScreen> {
                 hintText: 'Medical Implants - Temperature Sensitive',
                 maxLine: 3,
               ),
+              _buildEstimatedFeeCard(),
             ],
           ),
         ],
