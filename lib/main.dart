@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
           builder: (context, child) {
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
-              title: "Nron App",
+              title: "H.O.L.E App",
               theme: Themes().lightTheme,
               darkTheme: Themes().lightTheme,
               locale: DevicePreview.locale(context),
