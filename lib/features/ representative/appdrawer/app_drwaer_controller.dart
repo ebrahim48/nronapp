@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
+import '../../../../core/helpers/prefs_helper.dart';
 import 'sign_out_dialog.dart';
 
 class AppDrawerController extends GetxController {
@@ -34,9 +35,12 @@ class AppDrawerController extends GetxController {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => SignOutDialog(
-        onConfirm: () {
+        onConfirm: () async {
           Navigator.of(dialogContext).pop();
-          context.go(AppRoutes.roleSelection);
+          await PrefsHelper.remove('auth_token');
+          await PrefsHelper.remove('auth_refresh_token');
+          await PrefsHelper.remove('user_role');
+          AppRoutes.goRouter.go(AppRoutes.roleSelection);
         },
       ),
     );

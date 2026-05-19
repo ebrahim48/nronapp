@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/config/app-routes/app_routes.dart';
+import 'package:nron_app/core/helpers/prefs_helper.dart';
 import 'package:nron_app/features/driver/driverprofile/controller/driver_profile_api_controller.dart';
 import 'package:nron_app/features/driver/driverprofile/presentation/password_screen.dart';
 import 'package:nron_app/features/driver/driverprofile/presentation/personal_info_screen.dart';
@@ -310,7 +311,12 @@ class _DriverProfileScreenState extends State<DriverProfileScreen> {
                 SizedBox(height: 14.h),
 
                 GestureDetector(
-                  onTap: () => context.goNamed(AppRoutes.roleSelection),
+                  onTap: () async {
+                    await PrefsHelper.remove('auth_token');
+                    await PrefsHelper.remove('auth_refresh_token');
+                    await PrefsHelper.remove('user_role');
+                    AppRoutes.goRouter.go(AppRoutes.roleSelection);
+                  },
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(vertical: 14.h),

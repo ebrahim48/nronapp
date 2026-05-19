@@ -32,7 +32,9 @@
       "Bash(/c/Users/ebu/flutter/bin/flutter analyze *)",
       "Bash(where flutter *)",
       "Read(//c/Users/ebu/AppData/Local/flutter/bin/**)",
-      "Read(//c/Users/ebu/**)"
+      "Read(//c/Users/ebu/**)",
+      "Bash(dart run *)",
+      "PowerShell(fvm flutter *)"
     ]
   }
 }
