@@ -176,6 +176,8 @@ class ApiConstants {
   static String getNotificationAll = '/notification/get-all';
 
   static String messageChatBot = '/chatbot/message';
+  static String getChatBotSessions = '/chatbot/sessions';
+  static String getChatBotHistory(String sessionId) => '/chatbot/history/$sessionId';
 
   static String getActiveLog = '/active-log/get-all';
   static String getActiveLogModel = '/active-log/get-model';
