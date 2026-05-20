@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../controller/rep_home_controller.dart';
@@ -31,6 +33,13 @@ class _RepresentativeHomeScreenState extends State<RepresentativeHomeScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       drawer: const AppDrawer(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.pushNamed(AppRoutes.chatbotScreen),
+        backgroundColor: AppColors.primaryColor,
+        shape: const CircleBorder(),
+        child: Icon(Icons.smart_toy_outlined,
+            color: AppColors.blackColor, size: 24.r),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

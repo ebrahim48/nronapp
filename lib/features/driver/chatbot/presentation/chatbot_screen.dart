@@ -2,12 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../controller/chatbot_controller.dart';
 import '../model/chat_message_model.dart';
 
 class ChatbotScreen extends StatelessWidget {
   const ChatbotScreen({super.key});
+
+  // ── Sessions bottom sheet ─────────────────────────────────────────────────
+  void _showSessionsSheet(BuildContext context, ChatbotController c) {
+    c.fetchSessions();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _SessionsSheet(c: c),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,14 +74,49 @@ class ChatbotScreen extends StatelessWidget {
             ),
           ],
         ),
+        // ── 3-dots menu ──────────────────────────────────────────────
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert,
+                color: AppColors.primaryTextColor, size: 22.r),
+            color: const Color(0xFF2A2A2A),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r)),
+            onSelected: (value) {
+              if (value == 'history') {
+                _showSessionsSheet(context, c);
+              }
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'history',
+                child: Row(
+                  children: [
+                    Icon(Icons.history,
+                        color: AppColors.primaryTextColor, size: 18.r),
+                    SizedBox(width: 10.w),
+                    Text(
+                      'View History',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontFamily: 'Poppins',
+                        color: AppColors.primaryTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Column(
         children: [
           Expanded(
             child: Obx(() => ListView.builder(
                   controller: c.scrollController,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 16.w, vertical: 12.h),
                   itemCount:
                       c.messages.length + (c.isTyping.value ? 1 : 0),
                   itemBuilder: (context, index) {
@@ -86,6 +133,262 @@ class ChatbotScreen extends StatelessWidget {
     );
   }
 }
+
+// ── Sessions bottom sheet ─────────────────────────────────────────────────────
+
+class _SessionsSheet extends StatelessWidget {
+  final ChatbotController c;
+  const _SessionsSheet({required this.c});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      child: Column(
+        children: [
+          // Handle
+          Center(
+            child: Container(
+              margin: EdgeInsets.only(top: 10.h, bottom: 14.h),
+              width: 36.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF3A3A3A),
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: Row(
+              children: [
+                Icon(Icons.history,
+                    color: AppColors.primaryColor, size: 20.r),
+                SizedBox(width: 8.w),
+                Text(
+                  'Chat History',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Divider(color: const Color(0xFF2A2A2A), height: 1),
+          Expanded(
+            child: Obx(() {
+              if (c.isLoadingSessions.value) {
+                return Shimmer.fromColors(
+                  baseColor: const Color(0xFF2A2A2A),
+                  highlightColor: const Color(0xFF3A3A3A),
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(16.r),
+                    itemCount: 5,
+                    itemBuilder: (_, __) => Container(
+                      margin: EdgeInsets.only(bottom: 12.h),
+                      height: 60.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              if (c.sessions.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No chat history found.',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontFamily: 'Poppins',
+                      color: AppColors.secondaryTextColor,
+                    ),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                padding: EdgeInsets.all(16.r),
+                itemCount: c.sessions.length,
+                separatorBuilder: (_, __) =>
+                    Divider(color: const Color(0xFF2A2A2A), height: 1),
+                itemBuilder: (ctx, i) {
+                  final session = c.sessions[i];
+                  return ListTile(
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 4.w, vertical: 4.h),
+                    leading: Container(
+                      width: 40.r,
+                      height: 40.r,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.chat_bubble_outline,
+                          color: AppColors.primaryColor, size: 18.r),
+                    ),
+                    title: Text(
+                      session.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryTextColor,
+                      ),
+                    ),
+                    subtitle: Text(
+                      session.formattedDate,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontFamily: 'Poppins',
+                        color: AppColors.secondaryTextColor,
+                      ),
+                    ),
+                    trailing: Icon(Icons.chevron_right,
+                        color: AppColors.secondaryTextColor, size: 18.r),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      // Open session history screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => _SessionHistoryScreen(
+                            c: c,
+                            sessionId: session.sessionId,
+                            title: session.title,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Session history screen ────────────────────────────────────────────────────
+
+class _SessionHistoryScreen extends StatelessWidget {
+  final ChatbotController c;
+  final String sessionId;
+  final String title;
+
+  const _SessionHistoryScreen({
+    required this.c,
+    required this.sessionId,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Fetch on open
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      c.fetchSessionHistory(sessionId, title);
+    });
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF1A1A1A),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new,
+              color: AppColors.primaryTextColor, size: 18.r),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Chat History',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryTextColor,
+              ),
+            ),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10.sp,
+                fontFamily: 'Poppins',
+                color: AppColors.secondaryTextColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: Obx(() {
+        if (c.isLoadingHistory.value) {
+          return Shimmer.fromColors(
+            baseColor: const Color(0xFF2A2A2A),
+            highlightColor: const Color(0xFF3A3A3A),
+            child: ListView.builder(
+              padding: EdgeInsets.all(16.r),
+              itemCount: 6,
+              itemBuilder: (_, i) => Align(
+                alignment: i.isEven
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Container(
+                  margin: EdgeInsets.only(bottom: 10.h),
+                  width: 220.w,
+                  height: 50.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (c.historyMessages.isEmpty) {
+          return Center(
+            child: Text(
+              'No messages in this session.',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontFamily: 'Poppins',
+                color: AppColors.secondaryTextColor,
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          itemCount: c.historyMessages.length,
+          itemBuilder: (_, i) =>
+              _MessageBubble(message: c.historyMessages[i]),
+        );
+      }),
+    );
+  }
+}
+
+// ── Message bubble ────────────────────────────────────────────────────────────
 
 class _MessageBubble extends StatelessWidget {
   final ChatMessage message;
@@ -116,8 +419,9 @@ class _MessageBubble extends StatelessWidget {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment:
-                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isUser
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 Container(
                   padding: EdgeInsets.symmetric(
@@ -163,6 +467,8 @@ class _MessageBubble extends StatelessWidget {
   }
 }
 
+// ── Typing bubble ─────────────────────────────────────────────────────────────
+
 class _TypingBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -182,17 +488,15 @@ class _TypingBubble extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            padding:
+                EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
               color: const Color(0xFF2A2A2A),
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                3,
-                (i) => _Dot(delay: i * 200),
-              ),
+              children: List.generate(3, (i) => _Dot(delay: i * 200)),
             ),
           ),
         ],
@@ -241,13 +545,16 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
         width: 6.r,
         height: 6.r,
         decoration: BoxDecoration(
-          color: AppColors.secondaryTextColor.withValues(alpha: _anim.value),
+          color: AppColors.secondaryTextColor
+              .withValues(alpha: _anim.value),
           shape: BoxShape.circle,
         ),
       ),
     );
   }
 }
+
+// ── Input bar ─────────────────────────────────────────────────────────────────
 
 class _InputBar extends StatelessWidget {
   final ChatbotController controller;
