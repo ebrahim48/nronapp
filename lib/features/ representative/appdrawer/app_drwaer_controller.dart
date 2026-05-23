@@ -10,7 +10,6 @@ class AppDrawerController extends GetxController {
   final selectedIndex = 0.obs;
 
   final menuItems = [
-    {'icon': 'assets/icons/scanimplant.svg', 'label': 'Scan Implant'},
     {'icon': 'assets/icons/purchase.svg', 'label': 'Purchase Order'},
     {'icon': 'assets/icons/expense.svg', 'label': 'Expenses'},
     {'icon': 'assets/icons/sales.svg', 'label': 'Sales'},

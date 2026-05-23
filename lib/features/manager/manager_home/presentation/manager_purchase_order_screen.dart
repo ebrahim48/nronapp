@@ -47,14 +47,7 @@ class ManagerPurchaseOrderScreen extends StatelessWidget {
             ),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(44.h),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            alignment: Alignment.centerLeft,
-            child: const ManagerPOFilterTabs(),
-          ),
-        ),
+
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -62,6 +55,8 @@ class ManagerPurchaseOrderScreen extends StatelessWidget {
           children: [
             SizedBox(height: 14.h),
             const ManagerPOSearchBar(),
+            SizedBox(height: 12.h),
+            const ManagerPOFilterTabs(),
             SizedBox(height: 14.h),
             Expanded(
               child: Obx(() {

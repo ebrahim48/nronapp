@@ -14,40 +14,37 @@ class AppDrawer extends StatelessWidget {
 
   void _handleNavigation(BuildContext context, int index) {
     switch (index) {
-      case 0: // Scan Implant
-        context.pushNamed(AppRoutes.qrScanScreen);
-        break;
-      case 1: // Purchase Order
+      case 0: // Purchase Order
         context.pushNamed(AppRoutes.purchaseOrderScreen);
         break;
-      case 2: // Expenses
+      case 1: // Expenses
         context.pushNamed(AppRoutes.expensesScreen);
         break;
-      case 3: // Sales
+      case 2: // Sales
         context.pushNamed(AppRoutes.salesScreen);
         break;
-      case 4: // Commission
+      case 3: // Commission
         context.pushNamed(AppRoutes.commissionScreen);
         break;
-      case 5: // Shipments
+      case 4: // Shipments
         context.pushNamed(AppRoutes.shipmentsScreen);
         break;
-      case 6: // Physicians
+      case 5: // Physicians
         context.pushNamed(AppRoutes.physiciansScreen);
         break;
-      case 7: // All Surgeries
+      case 6: // All Surgeries
         context.pushNamed(AppRoutes.allSurgeriesScreen);
         break;
-      case 8: // Activity
+      case 7: // Activity
         context.pushNamed(AppRoutes.activityLogScreen);
         break;
-      case 9: // Setting & Profile
+      case 8: // Setting & Profile
         context.pushNamed(AppRoutes.settingProfileScreen);
         break;
-      case 10: // Contact Support
+      case 9: // Contact Support
         context.pushNamed(AppRoutes.contactSupportScreen);
         break;
-      case 11: // About App
+      case 10: // About App
         // context.pushNamed(AppRoutes.aboutAppScreen);
         break;
       case 11: // Terms & Conditions
