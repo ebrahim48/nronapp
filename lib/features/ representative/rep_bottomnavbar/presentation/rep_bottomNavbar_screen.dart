@@ -77,7 +77,7 @@ class _AppBottomNavBar extends StatelessWidget {
             onTap: () => onTap(1),
           ),
 
-          // ── QR Scan — special center button ──────────────────────
+
           _QrNavItem(
             isActive: currentIndex == 2,
             onTap: () => onTap(2),
@@ -101,7 +101,7 @@ class _AppBottomNavBar extends StatelessWidget {
   }
 }
 
-// ── Regular nav item ──────────────────────────────────────────────────────────
+
 class _NavItem extends StatelessWidget {
   final String iconPath;
   final String label;
@@ -165,7 +165,6 @@ class _NavItem extends StatelessWidget {
   }
 }
 
-// ── QR Scan center button — special raised style ──────────────────────────────
 class _QrNavItem extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;

@@ -71,6 +71,7 @@ import '../../../features/ representative/shipment/presentation/track_shipment_s
 import '../../../features/driver/driver_home/presentation/job_details_screen.dart';
 import '../../../features/ representative/shipment/presentation/shipment_screen.dart';
 import '../../../features/auth/forget/forget_screen.dart';
+import '../../../features/auth/presentation/screens/oauth_loading_screen.dart';
 import '../../../features/auth/presentation/screens/signin_screen.dart';
 import '../../../features/auth/presentation/signup_screen.dart';
 import '../../../features/auth/reset/reset_password_screen.dart';
@@ -132,6 +133,7 @@ class AppRoutes {
   static const String forgetPasswordScreen = "/forgetPasswordScreen";
   static const String verifyScreen = "/verifyScreen";
   static const String resetPasswordScreen = "/resetPasswordScreen";
+  static const String oauthLoadingScreen = "/oauthLoadingScreen";
   static const String repBottomNavBar = "/repBottomNavBar";
   static const String qrScanScreen = "/qrScanScreen";
   static const String newPoScreen = "/newPoScreen";
@@ -260,6 +262,9 @@ static const allActivitiesScreen = '/all-activities';
     redirect: (context, state) async {
       return null;
     },
+    // When GoRouter receives nron://oauth-callback (no matching route),
+    // show loading instead of falling back to splash → Home tab flash.
+    errorBuilder: (context, state) => const OAuthLoadingScreen(),
     routes: [
       GoRoute(
         path: splashScreen,
@@ -300,6 +305,11 @@ static const allActivitiesScreen = '/all-activities';
         path: resetPasswordScreen,
         name: resetPasswordScreen,
         builder: (context, state) =>  ResetPasswordScreen(),
+      ),
+      GoRoute(
+        path: oauthLoadingScreen,
+        name: oauthLoadingScreen,
+        builder: (context, state) => const OAuthLoadingScreen(),
       ),
       GoRoute(
         path: representativeHome,

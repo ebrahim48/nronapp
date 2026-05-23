@@ -186,6 +186,9 @@ class ApiConstants {
   static String updateLocation = '/user/change-location';
   static String shipmentRate = '/shipment-rate/get-all';
 
+
+  static String loginWithGoogle(String role) => '/auth/google?role=$role'; // representative,manager,driver
+
   // static String getNotificationAll = '/notification/get-all';
 
 

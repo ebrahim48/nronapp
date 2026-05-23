@@ -1,3 +1,7 @@
+# AI assistant directories
+.claude/
+.qwen/
+
 # Miscellaneous
 *.class
 *.log

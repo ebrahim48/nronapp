@@ -34,7 +34,8 @@
       "Read(//c/Users/ebu/AppData/Local/flutter/bin/**)",
       "Read(//c/Users/ebu/**)",
       "Bash(dart run *)",
-      "PowerShell(fvm flutter *)"
+      "PowerShell(fvm flutter *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k\\) for k in d.get\\('plugins',{}\\).get\\('android',[]\\)]\")"
     ]
   }
 }

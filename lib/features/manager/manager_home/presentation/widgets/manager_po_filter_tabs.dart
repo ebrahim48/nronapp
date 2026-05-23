@@ -13,48 +13,58 @@ class ManagerPOFilterTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.find<ManagerPOController>();
 
-    final filters = [
+    const filters = [
       ManagerPOStatus.all,
-      ManagerPOStatus.complete,
       ManagerPOStatus.open,
       ManagerPOStatus.lost,
+      ManagerPOStatus.complete,
     ];
-    final labels = ['All', 'Complete', 'Open', 'Lost'];
+    const labels = ['All', 'Open', 'Lost', 'Complete'];
 
-    return Obx(() => Row(
-      children: List.generate(filters.length, (i) {
-        final isSelected = c.selectedFilter.value == filters[i];
-        return GestureDetector(
-          onTap: () => c.onFilterSelected(filters[i]),
-          child: Container(
-            margin: EdgeInsets.only(right: 20.w),
-            padding: EdgeInsets.only(bottom: 8.h),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: isSelected
-                      ? AppColors.primaryColor
-                      : Colors.transparent,
-                  width: 2,
+    return Obx(
+      () => Container(
+        height: 44.h,
+        padding: EdgeInsets.all(4.r),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E2427),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(filters.length, (i) {
+            final isSelected = c.selectedFilter.value == filters[i];
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => c.onFilterSelected(filters[i]),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: 36.h,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? const Color(0xFF1B1B1B)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    labels[i],
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontFamily: 'Poppins',
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? AppColors.primaryColor
+                          : AppColors.secondaryTextColor,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            child: Text(
-              labels[i],
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontFamily: 'Poppins',
-                fontWeight: isSelected
-                    ? FontWeight.w600
-                    : FontWeight.w400,
-                color: isSelected
-                    ? AppColors.primaryTextColor
-                    : AppColors.secondaryTextColor,
-              ),
-            ),
-          ),
-        );
-      }),
-    ));
+            );
+          }),
+        ),
+      ),
+    );
   }
 }
