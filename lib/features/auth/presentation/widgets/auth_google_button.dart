@@ -65,32 +65,32 @@ class _AuthGoogleButtonState extends State<AuthGoogleButton> {
         child: Center(
           child: _isLoading
               ? SizedBox(
-                  width: 20.r,
-                  height: 20.r,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.primaryColor,
-                  ),
-                )
+            width: 20.r,
+            height: 20.r,
+            child: const CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primaryColor,
+            ),
+          )
               : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                        Icons.g_mobiledata,
-                        color: AppColors.textColorF5F5F5F5,
-                        size: 22),
-                    SizedBox(width: 8.w),
-                    Text(
-                      'Continue with Google',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textColorF5F5F5F5
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                  Icons.g_mobiledata,
+                  color: AppColors.textColorF5F5F5F5,
+                  size: 22),
+              SizedBox(width: 8.w),
+              Text(
+                'Continue with Google',
+                style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textColorF5F5F5F5
 
-                      ),
-                    ),
-                  ],
                 ),
+              ),
+            ],
+          ),
         ),
       ),
     );

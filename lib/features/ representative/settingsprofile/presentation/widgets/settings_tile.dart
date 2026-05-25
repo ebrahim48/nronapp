@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../core/utils/app_colors.dart';
@@ -11,6 +12,7 @@ class SettingsTile extends StatelessWidget {
   final VoidCallback onTap;
   final Color? iconColor;
   final Color? titleColor;
+  final IconData? fallbackIcon;
 
   const SettingsTile({
     super.key,
@@ -20,6 +22,7 @@ class SettingsTile extends StatelessWidget {
     required this.onTap,
     this.iconColor,
     this.titleColor,
+    this.fallbackIcon,
   });
 
   @override
@@ -35,18 +38,13 @@ class SettingsTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Icon
-            SvgPicture.asset(
-              iconPath,
-              width: 20.r,
-              height: 20.r,
-              colorFilter: ColorFilter.mode(
-                iconColor ?? AppColors.primaryColor,
-                BlendMode.srcIn,
-              ),
+            _SvgOrIconWidget(
+              iconPath: iconPath,
+              fallbackIcon: fallbackIcon ?? Icons.settings,
+              size: 20.r,
+              color: iconColor ?? AppColors.primaryColor,
             ),
             SizedBox(width: 12.w),
-            // Title + subtitle
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,6 +73,56 @@ class SettingsTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SvgOrIconWidget extends StatefulWidget {
+  final String iconPath;
+  final IconData fallbackIcon;
+  final double size;
+  final Color color;
+
+  const _SvgOrIconWidget({
+    required this.iconPath,
+    required this.fallbackIcon,
+    required this.size,
+    required this.color,
+  });
+
+  @override
+  State<_SvgOrIconWidget> createState() => _SvgOrIconWidgetState();
+}
+
+class _SvgOrIconWidgetState extends State<_SvgOrIconWidget> {
+  late Future<bool> _exists;
+
+  @override
+  void initState() {
+    super.initState();
+    _exists = rootBundle
+        .load(widget.iconPath)
+        .then((_) => true)
+        .catchError((_) => false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _exists,
+      builder: (_, snap) {
+        final assetExists = snap.data == true;
+        if (assetExists) {
+          return SvgPicture.asset(
+            widget.iconPath,
+            width: widget.size,
+            height: widget.size,
+            colorFilter:
+                ColorFilter.mode(widget.color, BlendMode.srcIn),
+          );
+        }
+        return Icon(widget.fallbackIcon, size: widget.size, color: widget.color);
+      },
     );
   }
 }

@@ -304,7 +304,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             labelText: 'Bio*',
                             hintText: 'Write about yourself...',
                             maxLine: 4,
-                            onChanged: (_) => _ctrl.notifyListeners(),
+                            onChanged: (_) => _ctrl.onBioChanged(),
                           ),
                           Align(
                             alignment: Alignment.centerRight,
@@ -318,6 +318,12 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           ),
                         ],
                       ),
+                      CustomTextField(
+                        controller: _ctrl.designationController,
+                        labelText: 'Designation / Company',
+                        hintText: 'e.g. MedTech Solutions Inc.',
+                      ),
+                      _LocationPickerField(ctrl: _ctrl),
 
                       if (_ctrl.errorMessage.isNotEmpty)
                         Padding(
@@ -358,6 +364,112 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _LocationPickerField extends StatelessWidget {
+  final PersonalInfoController ctrl;
+  const _LocationPickerField({required this.ctrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomText(
+            text: 'Location',
+            fontsize: 12.sp,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.start,
+            left: 2.w,
+            bottom: 6.h,
+          ),
+          // Pick from map button
+          GestureDetector(
+            onTap: () => ctrl.pickLocation(context),
+            child: Container(
+              height: 50.h,
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              decoration: BoxDecoration(
+                color: const Color(0x1A4A4A4A),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(
+                  color: ctrl.pickedLat != null
+                      ? AppColors.primaryColor
+                      : AppColors.dotButtonInactiveColor,
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.map_outlined,
+                    color: ctrl.pickedLat != null
+                        ? AppColors.primaryColor
+                        : AppColors.secondaryTextColor,
+                    size: 18.r,
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: CustomText(
+                      text: ctrl.pickedLat != null
+                          ? ctrl.pickedAddress.isNotEmpty
+                              ? ctrl.pickedAddress
+                              : '${ctrl.pickedLat!.toStringAsFixed(6)}, ${ctrl.pickedLng!.toStringAsFixed(6)}'
+                          : 'Tap to pick location on map',
+                      fontsize: 13.sp,
+                      color: ctrl.pickedLat != null
+                          ? AppColors.primaryTextColor
+                          : AppColors.secondaryTextColor,
+                      textAlign: TextAlign.start,
+                      maxline: 2,
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: AppColors.secondaryTextColor,
+                    size: 18.r,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 6.h),
+          // Use current location shortcut
+          GestureDetector(
+            onTap: () => ctrl.useCurrentLocation(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.my_location,
+                    color: AppColors.primaryColor, size: 14.r),
+                SizedBox(width: 4.w),
+                CustomText(
+                  text: 'Use current location',
+                  fontsize: 12.sp,
+                  color: AppColors.primaryColor,
+                  textAlign: TextAlign.start,
+                ),
+              ],
+            ),
+          ),
+          if (ctrl.pickedLat != null)
+            Padding(
+              padding: EdgeInsets.only(top: 6.h),
+              child: CustomText(
+                text:
+                    'Lat: ${ctrl.pickedLat!.toStringAsFixed(6)}  Lng: ${ctrl.pickedLng!.toStringAsFixed(6)}',
+                fontsize: 11.sp,
+                color: AppColors.secondaryTextColor,
+                textAlign: TextAlign.start,
+                left: 2.w,
+              ),
+            ),
+        ],
       ),
     );
   }

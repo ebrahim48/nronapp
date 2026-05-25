@@ -55,15 +55,35 @@ class ManagerPOModel {
   }
 
   factory ManagerPOModel.fromJson(Map<String, dynamic> e) {
+    // facility may be a nested object or a plain string
+    final facilityRaw = e['facility'];
+    final facilityStr = facilityRaw is Map
+        ? ((facilityRaw)['facilityName']?.toString() ??
+            (facilityRaw)['name']?.toString() ??
+            (facilityRaw)['address']?.toString() ??
+            '')
+        : facilityRaw?.toString() ?? '';
+
+    // doctor/physician may be a nested object or a plain string
+    final physicianRaw = e['physician'] ?? e['physicianId'];
+    final doctorStr = physicianRaw is Map
+        ? ((physicianRaw)['fullName']?.toString() ??
+            (physicianRaw)['name']?.toString() ??
+            '')
+        : physicianRaw?.toString() ?? '';
+
     return ManagerPOModel(
       id: e['_id']?.toString() ?? '',
       date: _poFormatDate(
           e['procedureDate']?.toString() ?? e['createdAt']?.toString()),
       serialNumber: e['purchaseOrderNumber']?.toString() ?? '',
-      doctor: e['patientId']?.toString() ?? '',
-      facility: e['facility']?.toString() ?? '',
+      doctor: doctorStr,
+      facility: facilityStr,
       typeLabel: e['orderType']?.toString() ?? '',
-      commissionAmount: 0,
+      commissionAmount:
+          (e['commissionAmount'] as num?)?.toDouble() ??
+          (e['commission'] as num?)?.toDouble() ??
+          0.0,
       totalAmount: (e['totalAmount'] as num?)?.toDouble() ?? 0.0,
       status: _parseStatus(e['status']?.toString()),
       isSentToVendor: e['isSentToVendor'] as bool? ?? false,

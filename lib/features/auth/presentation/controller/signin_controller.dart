@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import '../../../ representative/settingsprofile/controller/setting_controller.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/exceptions/app_exceptions.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/utils/manager_controller_cleaner.dart';
 import '../../data/repositories/auth_repository.dart';
 
 class SignInController extends GetxController {
@@ -43,8 +46,8 @@ class SignInController extends GetxController {
     if (password.isEmpty) {
       passwordError.value = 'Password is required';
       valid = false;
-    } else if (password.length < 8) {
-      passwordError.value = 'Password must be at least 8 characters';
+    } else if (password.length < 8 || !AppConstants.validatePassword(password)) {
+      passwordError.value = 'Password: 8 characters min, letters & digits required';
       valid = false;
     }
     if (!valid) return;
@@ -80,12 +83,13 @@ class SignInController extends GetxController {
   }
 
   void _navigateByRole(
-    BuildContext context,
-    String role,
-    Map<String, dynamic> results,
-  ) {
+      BuildContext context,
+      String role,
+      Map<String, dynamic> results,
+      ) {
     switch (role) {
       case 'manager':
+        ManagerControllerCleaner.clear();
         context.go(AppRoutes.managerBottomNavBar);
         break;
       case 'driver':
@@ -99,6 +103,10 @@ class SignInController extends GetxController {
         break;
       case 'representative':
       default:
+        ManagerControllerCleaner.clear();
+        if (Get.isRegistered<SettingsController>()) {
+          Get.delete<SettingsController>(force: true);
+        }
         context.go(AppRoutes.repBottomNavBar);
     }
   }

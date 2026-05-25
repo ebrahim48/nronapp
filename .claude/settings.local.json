@@ -35,7 +35,12 @@
       "Read(//c/Users/ebu/**)",
       "Bash(dart run *)",
       "PowerShell(fvm flutter *)",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k\\) for k in d.get\\('plugins',{}\\).get\\('android',[]\\)]\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k\\) for k in d.get\\('plugins',{}\\).get\\('android',[]\\)]\")",
+      "Bash(/c/Users/ebu/fvm/default/bin/flutter analyze *)",
+      "Bash(cat .fvmrc)",
+      "Bash(cat fvm_config.json)",
+      "Bash(cat .fvm/fvm_config.json)",
+      "Bash(/c/Users/ebu/fvm/versions/3.32.5/bin/flutter analyze *)"
     ]
   }
 }
