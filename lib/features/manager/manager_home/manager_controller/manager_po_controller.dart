@@ -14,6 +14,7 @@ class ManagerPOController extends GetxController {
 
 
   final isLoading = true.obs;
+  final errorMessage = ''.obs;
   final searchQuery = ''.obs;
   final selectedFilter = ManagerPOStatus.all.obs;
   final allOrders = <ManagerPOModel>[].obs;
@@ -35,6 +36,7 @@ class ManagerPOController extends GetxController {
   Future<void> fetchOrders() async {
     try {
       isLoading.value = true;
+      errorMessage.value = '';
       final token = await PrefsHelper.getString('auth_token');
       final statusParam = selectedFilter.value == ManagerPOStatus.all
           ? null
@@ -45,7 +47,8 @@ class ManagerPOController extends GetxController {
         results.map((e) =>
             ManagerPOModel.fromJson(e as Map<String, dynamic>)),
       );
-    } catch (_) {
+    } catch (e) {
+      errorMessage.value = e.toString();
       ToastMessageHelper.showErrorMessage('Failed to load purchase orders');
     } finally {
       isLoading.value = false;

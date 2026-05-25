@@ -32,6 +32,9 @@ class ShipmentController extends GetxController {
   final isLoadingDetail = false.obs;
   final selectedShipment = Rxn<ShipmentModel>();
 
+  // ── Error ─────────────────────────────────────────────────────────────────
+  final errorMessage = ''.obs;
+
   // ── Tracking search ───────────────────────────────────────────────────────
   final TextEditingController trackingTextController = TextEditingController();
   final isTrackingLoading = false.obs;
@@ -56,6 +59,7 @@ class ShipmentController extends GetxController {
   Future<void> _fetchStats() async {
     try {
       isLoadingStats.value = true;
+      errorMessage.value = '';
       final token = await PrefsHelper.getString('auth_token');
       final res = await _repo.getStats(token);
       final data = res['data'] as Map<String, dynamic>? ?? {};
@@ -75,8 +79,8 @@ class ShipmentController extends GetxController {
       drivers.value = activeShipments
           .where((s) => s.driverName.isNotEmpty)
           .length;
-    } catch (_) {
-      // silently fail
+    } catch (e) {
+      errorMessage.value = e.toString();
     } finally {
       isLoadingStats.value = false;
     }

@@ -55,6 +55,7 @@ class SettingsController extends GetxController {
       title: 'Change Password',
       subtitle: 'Update and secure your account password',
       route: '',
+      fallbackIcon: Icons.lock_outline,
     ),
     SettingsTileModel(
       iconPath: 'assets/icons/contact.svg',
@@ -167,7 +168,6 @@ class SettingsController extends GetxController {
     } on ServerException catch (e) {
       ToastMessageHelper.showToastMessage(e.message, title: 'Error');
     } catch (_) {
-      ToastMessageHelper.showToastMessage('Something went wrong.', title: 'Error');
     } finally {
       isUpdatingProfile.value = false;
     }
@@ -220,7 +220,6 @@ class SettingsController extends GetxController {
     } on ServerException catch (e) {
       ToastMessageHelper.showToastMessage(e.message, title: 'Error');
     } catch (_) {
-      ToastMessageHelper.showToastMessage('Something went wrong.', title: 'Error');
     } finally {
       isChangingPassword.value = false;
     }
@@ -263,7 +262,6 @@ class SettingsController extends GetxController {
       ToastMessageHelper.showToastMessage(e.message, title: 'Error');
       return false;
     } catch (_) {
-      ToastMessageHelper.showToastMessage('Something went wrong.', title: 'Error');
       return false;
     } finally {
       isSubmittingSupport.value = false;

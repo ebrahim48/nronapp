@@ -31,6 +31,9 @@ class ManagerInventoryController extends GetxController {
   final monthlyData = <double>[].obs;
   final monthLabels = <String>[].obs;
 
+  // ── Error ─────────────────────────────────────────────────────────────────
+  final errorMessage = ''.obs;
+
   // ── Distribution dropdown (UI only) ───────────────────────────────────────
   final selectedProductLine = 'All Product Lines'.obs;
   final productLines = ['All Product Lines', 'Orthopedic', 'Cardiac', 'Neuro'];
@@ -54,6 +57,7 @@ class ManagerInventoryController extends GetxController {
   Future<void> _fetchInventoryStats() async {
     try {
       isLoadingStats.value = true;
+      errorMessage.value = '';
       final token = await PrefsHelper.getString('auth_token');
       final res = await _repo.getInventoryOverview(token);
       final data = res['data'] as Map<String, dynamic>? ?? {};
@@ -112,8 +116,8 @@ class ManagerInventoryController extends GetxController {
       }).toList());
       monthLabels.assignAll(
           monthly.map((e) => e['month']?.toString() ?? '').toList());
-    } catch (_) {
-      // silently fail
+    } catch (e) {
+      errorMessage.value = e.toString();
     } finally {
       isLoadingStats.value = false;
     }

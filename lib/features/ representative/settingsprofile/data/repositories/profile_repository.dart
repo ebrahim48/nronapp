@@ -28,7 +28,6 @@ class ProfileRepository {
     String? fullName,
     String? bio,
     String? designation,
-    String? coordinates,
     File? profileImage,
   }) async {
     await _connectivity.checkConnectivity();
@@ -36,7 +35,6 @@ class ProfileRepository {
     if (fullName != null && fullName.isNotEmpty) fields['fullName'] = fullName;
     if (bio != null) fields['bio'] = bio;
     if (designation != null) fields['designation'] = designation;
-    if (coordinates != null) fields['coordinates'] = coordinates;
     if (profileImage != null) {
       fields['profile'] = await MultipartFile.fromFile(profileImage.path);
     }

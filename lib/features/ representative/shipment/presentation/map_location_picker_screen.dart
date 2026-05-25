@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/utils/app_colors.dart';
@@ -27,17 +28,44 @@ class MapLocationPickerScreen extends StatefulWidget {
 
 class _MapLocationPickerScreenState extends State<MapLocationPickerScreen> {
   static const _apiKey = 'AIzaSyDFiKLw_sSi4BAjNEBe1HYIqG-FDAs86Kk';
-  static const _defaultPos = LatLng(37.7749, -122.4194);
+  static const _defaultPos = LatLng(23.8103, 90.4125); // Dhaka default
 
   late LatLng _pickedPos;
   String _address = 'Move the map to select a location';
   bool _isFetching = false;
+  bool _isLocating = false;
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
     super.initState();
     _pickedPos = widget.initialPosition ?? _defaultPos;
     _fetchAddress(_pickedPos);
+  }
+
+  Future<void> _goToCurrentLocation() async {
+    setState(() => _isLocating = true);
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+      final target = LatLng(pos.latitude, pos.longitude);
+      _mapController?.animateCamera(CameraUpdate.newLatLngZoom(target, 16));
+      _pickedPos = target;
+      await _fetchAddress(target);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _isLocating = false);
+    }
   }
 
   Future<void> _fetchAddress(LatLng pos) async {
@@ -75,6 +103,7 @@ class _MapLocationPickerScreenState extends State<MapLocationPickerScreen> {
               target: _pickedPos,
               zoom: 15,
             ),
+            onMapCreated: (c) => _mapController = c,
             onCameraMove: (pos) => _pickedPos = pos.target,
             onCameraIdle: () => _fetchAddress(_pickedPos),
             myLocationEnabled: true,
@@ -109,16 +138,50 @@ class _MapLocationPickerScreenState extends State<MapLocationPickerScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E2427),
                   shape: BoxShape.circle,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
                       blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
                 child: Icon(Icons.arrow_back_ios_new,
                     color: AppColors.primaryTextColor, size: 16.r),
+              ),
+            ),
+          ),
+
+          // ── Current location button ────────────────────────────────────────
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12.h,
+            right: 16.w,
+            child: GestureDetector(
+              onTap: _isLocating ? null : _goToCurrentLocation,
+              child: Container(
+                width: 40.r,
+                height: 40.r,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E2427),
+                  shape: BoxShape.circle,
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: _isLocating
+                    ? Padding(
+                        padding: EdgeInsets.all(10.r),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primaryColor,
+                        ),
+                      )
+                    : Icon(Icons.my_location,
+                        color: AppColors.primaryColor, size: 20.r),
               ),
             ),
           ),

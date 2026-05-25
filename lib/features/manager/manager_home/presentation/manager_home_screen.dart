@@ -84,6 +84,40 @@ class ManagerHomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
+            // Error banner
+            Obx(() {
+              if (c.errorMessage.value.isEmpty) return const SizedBox.shrink();
+              return Container(
+                margin: EdgeInsets.only(bottom: 12.h),
+                padding: EdgeInsets.all(12.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A1A1A),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: const Color(0xFFEC0101).withValues(alpha: 0.5)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: const Color(0xFFEC0101), size: 18.r),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: CustomText(
+                        text: c.errorMessage.value,
+                        fontsize: 11.sp,
+                        color: const Color(0xFFEC0101),
+                        textAlign: TextAlign.start,
+                        maxline: 3,
+                        textOverflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: c.fetchOverview,
+                      child: Icon(Icons.refresh, color: AppColors.primaryColor, size: 20.r),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
             Obx(() {
               if (c.isLoading.value) {
                 return Shimmer.fromColors(

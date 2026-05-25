@@ -3,10 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../ representative/settingsprofile/controller/setting_controller.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../manager_home/manager_controller/manager_home_controller.dart';
 import 'app_drwaer_controller.dart';
 
 class ManagerAppDrawer extends StatelessWidget {
@@ -56,7 +57,7 @@ class ManagerAppDrawer extends StatelessWidget {
       backgroundColor: AppColors.backgroundColor,
       child: Column(
         children: [
-          _DrawerHeader(onEditProfile: c.editProfile),
+          _DrawerHeader(onEditProfile: () => c.editProfile(context)),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -108,6 +109,13 @@ class _DrawerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsCtrl = Get.isRegistered<SettingsController>()
+        ? Get.find<SettingsController>()
+        : null;
+    final homeCtrl = Get.isRegistered<ManagerHomeController>()
+        ? Get.find<ManagerHomeController>()
+        : null;
+
     return Container(
       width: double.infinity,
       height: 120.h,
@@ -121,70 +129,98 @@ class _DrawerHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Avatar with teal border
-          Container(
-            width: 44.r,
-            height: 44.r,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.primaryColor,
-                width: 2,
-              ),
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/profile.jpg',
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+          // Avatar — only reactive if settingsCtrl is available
+          if (settingsCtrl != null)
+            Obx(() {
+              final url = settingsCtrl.profile.value?.profileUrl ?? '';
+              return _buildAvatar(url.isNotEmpty ? url : null);
+            })
+          else
+            _buildAvatar(null),
 
           SizedBox(width: 12.w),
 
           // Name + Edit Profile
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CustomText(
-                text: 'Albert Flamingo',
-                fontsize: 15.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryTextColor,
-                textAlign: TextAlign.start,
-              ),
-              SizedBox(height: 4.h),
-              GestureDetector(
-                onTap: onEditProfile,
-                child: Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/edit.svg',
-                      width: 12.r,
-                      height: 12.r,
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.secondaryTextColor,
-                        BlendMode.srcIn,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (settingsCtrl != null)
+                  Obx(() {
+                    final name = settingsCtrl.profile.value?.fullName ?? '';
+                    return _buildName(name.isNotEmpty ? name : 'Manager');
+                  })
+                else if (homeCtrl != null)
+                  Obx(() => _buildName(
+                        homeCtrl.userName.value.isNotEmpty
+                            ? homeCtrl.userName.value
+                            : 'Manager',
+                      ))
+                else
+                  _buildName('Manager'),
+
+                SizedBox(height: 4.h),
+                GestureDetector(
+                  onTap: onEditProfile,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/edit.svg',
+                        width: 12.r,
+                        height: 12.r,
+                        colorFilter: const ColorFilter.mode(
+                          AppColors.secondaryTextColor,
+                          BlendMode.srcIn,
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 4.w),
-                    CustomText(
-                      text: 'Edit Profile',
-                      fontsize: 12.sp,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.secondaryTextColor,
-                      textAlign: TextAlign.start,
-                    ),
-                  ],
+                      SizedBox(width: 4.w),
+                      CustomText(
+                        text: 'Edit Profile',
+                        fontsize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondaryTextColor,
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildAvatar(String? url) => Container(
+        width: 44.r,
+        height: 44.r,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.primaryColor, width: 2),
+        ),
+        child: ClipOval(
+          child: url != null
+              ? Image.network(url, fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _defaultAvatar())
+              : _defaultAvatar(),
+        ),
+      );
+
+  Widget _buildName(String name) => CustomText(
+        text: name,
+        fontsize: 15.sp,
+        fontWeight: FontWeight.w600,
+        color: AppColors.primaryTextColor,
+        textAlign: TextAlign.start,
+      );
+
+  Widget _defaultAvatar() => Container(
+        color: const Color(0xFF3A3A3A),
+        child: const Icon(Icons.person, color: Colors.white54),
+      );
 }
 
 class _DrawerMenuItem extends StatelessWidget {

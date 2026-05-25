@@ -143,6 +143,7 @@ class SettingProfileScreen extends StatelessWidget {
                         iconPath: tile.iconPath,
                         title: tile.title,
                         subtitle: tile.subtitle,
+                        fallbackIcon: tile.fallbackIcon,
                         onTap: tile.route.isEmpty
                             ? () => _showChangePasswordSheet(context, c)
                             : () => context.push(tile.route),

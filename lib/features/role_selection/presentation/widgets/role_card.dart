@@ -95,11 +95,11 @@ class _ManagerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24.r),
                     gradient: const LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                       colors: [
-                        AppColors.cyanColorLight,
-                        AppColors.cyanColorTransparent,
+                        AppColors.dotButtonActiveColor,
+                        AppColors.tealDarkColor,
                       ],
                     ),
                   ),
@@ -108,6 +108,10 @@ class _ManagerCard extends StatelessWidget {
                       iconPath,
                       width: 30.r,
                       height: 30.r,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                 ),

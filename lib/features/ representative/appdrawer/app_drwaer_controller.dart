@@ -45,7 +45,8 @@ class AppDrawerController extends GetxController {
     );
   }
 
-  void editProfile() {
-    // Navigate to profile edit
+  void editProfile(BuildContext context) {
+    Navigator.pop(context);
+    AppRoutes.goRouter.go(AppRoutes.settingProfileScreen);
   }
 }

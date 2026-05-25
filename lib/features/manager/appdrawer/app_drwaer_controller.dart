@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/utils/manager_controller_cleaner.dart';
 import 'sign_out_dialog.dart';
 
 class ManagerAppDrawerController extends GetxController {
@@ -37,13 +38,15 @@ class ManagerAppDrawerController extends GetxController {
           await PrefsHelper.remove('auth_token');
           await PrefsHelper.remove('auth_refresh_token');
           await PrefsHelper.remove('user_role');
+          ManagerControllerCleaner.clear();
           AppRoutes.goRouter.go(AppRoutes.roleSelection);
         },
       ),
     );
   }
 
-  void editProfile() {
-    // Navigate to profile edit
+  void editProfile(BuildContext context) {
+    Navigator.pop(context);
+    AppRoutes.goRouter.go(AppRoutes.settingProfileScreen);
   }
 }
