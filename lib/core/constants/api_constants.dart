@@ -1,8 +1,8 @@
 class ApiConstants {
 
 
-  static const String baseUrl = 'https://wn85j8p6-9001.asse.devtunnels.ms/api/v1';
-  static const String socketUrl = "https://wn85j8p6-9001.asse.devtunnels.ms";
+  static const String baseUrl = 'http://206.162.244.11:9001/api/v1';
+  static const String socketUrl = "http://206.162.244.11:9001";
 
 
 
