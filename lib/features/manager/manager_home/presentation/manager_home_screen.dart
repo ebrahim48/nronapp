@@ -63,7 +63,7 @@ class ManagerHomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => context.pushNamed(AppRoutes.notificationScreen),
             icon: Icon(Icons.notifications_outlined,
                 color: AppColors.primaryTextColor, size: 22.r),
           ),

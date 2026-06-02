@@ -95,39 +95,42 @@ class EarningsScreen extends StatelessWidget {
                         color: AppColors.primaryTextColor,
                         textAlign: TextAlign.start,
                       ),
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 40.r,
-                            height: 40.r,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF252525),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.notifications_outlined,
-                              color: AppColors.primaryTextColor,
-                              size: 20.r,
-                            ),
-                          ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(
-                              width: 10.r,
-                              height: 10.r,
+                      GestureDetector(
+                        onTap: () => context.pushNamed(AppRoutes.notificationScreen),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 40.r,
+                              height: 40.r,
                               decoration: BoxDecoration(
-                                color: AppColors.primaryColor,
+                                color: const Color(0xFF252525),
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppColors.backgroundColor,
-                                  width: 1.5,
+                              ),
+                              child: Icon(
+                                Icons.notifications_outlined,
+                                color: AppColors.primaryTextColor,
+                                size: 20.r,
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Container(
+                                width: 10.r,
+                                height: 10.r,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: AppColors.backgroundColor,
+                                    width: 1.5,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
