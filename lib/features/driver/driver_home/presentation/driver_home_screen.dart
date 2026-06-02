@@ -195,33 +195,36 @@ class DriverHomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Container(
-                      width: 40.r,
-                      height: 40.r,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2A2A2A),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Icon(Icons.notifications_outlined,
-                                color: AppColors.primaryTextColor,
-                                size: 20.r),
-                          ),
-                          Positioned(
-                            top: 8.h,
-                            right: 8.w,
-                            child: Container(
-                              width: 8.r,
-                              height: 8.r,
-                              decoration: const BoxDecoration(
-                                color: AppColors.primaryColor,
-                                shape: BoxShape.circle,
+                    GestureDetector(
+                      onTap: () => context.pushNamed(AppRoutes.notificationScreen),
+                      child: Container(
+                        width: 40.r,
+                        height: 40.r,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2A2A2A),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Stack(
+                          children: [
+                            Center(
+                              child: Icon(Icons.notifications_outlined,
+                                  color: AppColors.primaryTextColor,
+                                  size: 20.r),
+                            ),
+                            Positioned(
+                              top: 8.h,
+                              right: 8.w,
+                              child: Container(
+                                width: 8.r,
+                                height: 8.r,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
