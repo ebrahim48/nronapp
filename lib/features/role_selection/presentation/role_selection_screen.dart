@@ -29,7 +29,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Assets.images.splashicon.image(
+                    Assets.images.logo.image(
                       width: 150.w,
                       height: 150.h,
                       fit: BoxFit.contain,

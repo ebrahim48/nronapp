@@ -328,7 +328,35 @@ class SettingsController extends GetxController {
     AppRoutes.goRouter.go(AppRoutes.roleSelection);
   }
 
-  void deleteAccount() {}
+  // ── Delete account ───────────────────────────────────────────────────────
+  final isDeletingAccount = false.obs;
+
+  Future<void> deleteAccount() async {
+    try {
+      isDeletingAccount.value = true;
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.deleteMyAccount(token);
+      if (res['success'] == true) {
+        await PrefsHelper.remove('auth_token');
+        await PrefsHelper.remove('auth_refresh_token');
+        await PrefsHelper.remove('user_role');
+        AppRoutes.goRouter.go(AppRoutes.roleSelection);
+      } else {
+        ToastMessageHelper.showToastMessage(
+          res['message']?.toString() ?? 'Failed to delete account.',
+          title: 'Error',
+        );
+      }
+    } on NoInternetException {
+      ToastMessageHelper.showToastMessage('No internet connection.', title: 'Error');
+    } on ServerException catch (e) {
+      ToastMessageHelper.showToastMessage(e.message, title: 'Error');
+    } catch (_) {
+      ToastMessageHelper.showToastMessage('Failed to delete account.', title: 'Error');
+    } finally {
+      isDeletingAccount.value = false;
+    }
+  }
 
   @override
   void onClose() {
