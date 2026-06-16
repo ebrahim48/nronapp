@@ -1,8 +1,8 @@
 class ApiConstants {
 
 
-  static const String baseUrl = 'http://206.162.244.11:9001/api/v1';
-  static const String socketUrl = "http://206.162.244.11:9001";
+  static const String baseUrl = 'https://api.holepackage.com/api/v1';
+  static const String socketUrl = "https://api.holepackage.com";
 
 
 
@@ -189,7 +189,7 @@ class ApiConstants {
 
   static String loginWithGoogle(String role) => '/auth/google?role=$role'; // representative,manager,driver
 
-  // static String getNotificationAll = '/notification/get-all';
+   static String deleteAccount = '/user/delete/my-account';
 
 
 

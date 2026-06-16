@@ -51,7 +51,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 AnimatedEntry(
                   delay: const Duration(milliseconds: 0),
                   child: Center(
-                    child: Assets.images.splashicon.image(
+                    child: Assets.images.logo.image(
                       width: 100.w, height: 100.h, fit: BoxFit.contain,
                     ),
                   ),

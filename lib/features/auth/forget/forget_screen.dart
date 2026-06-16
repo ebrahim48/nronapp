@@ -65,7 +65,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 AnimatedEntry(
                   delay: const Duration(milliseconds: 80),
                   child: Center(
-                    child: Assets.images.splashicon.image(
+                    child: Assets.images.logo.image(
                       width: 158.w, height: 125.h, fit: BoxFit.contain,
                     ),
                   ),

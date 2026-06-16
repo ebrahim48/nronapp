@@ -79,6 +79,15 @@ class ProfileRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> deleteMyAccount(String token) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.patch(
+      ApiConstants.deleteAccount,
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
   Future<Map<String, dynamic>> getAboutUs(String token) async {
     await _connectivity.checkConnectivity();
     final res = await _api.get(
