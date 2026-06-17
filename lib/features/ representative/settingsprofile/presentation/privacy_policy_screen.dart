@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
@@ -125,14 +126,25 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(color: const Color(0xFF3A3A3A)),
                 ),
-                child: Text(
-                  content,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontFamily: 'Poppins',
-                    color: AppColors.secondaryTextColor,
-                    height: 1.6,
-                  ),
+                child: Html(
+                  data: content,
+                  style: {
+                    'body': Style(
+                      color: AppColors.secondaryTextColor,
+                      fontSize: FontSize(13.sp),
+                      fontFamily: 'Poppins',
+                      lineHeight: const LineHeight(1.6),
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                    ),
+                    'p': Style(
+                      color: AppColors.secondaryTextColor,
+                      margin: Margins.only(bottom: 8),
+                    ),
+                    'span': Style(
+                      color: AppColors.secondaryTextColor,
+                    ),
+                  },
                 ),
               );
             }),
