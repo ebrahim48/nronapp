@@ -79,7 +79,7 @@ class SettingsController extends GetxController {
     ),
     OthersTileModel(
       iconPath: 'assets/icons/terms.svg',
-      title: 'Term & Condition',
+      title: 'Terms & Conditions',
       route: AppRoutes.termsConditionsScreen,
     ),
     OthersTileModel(
