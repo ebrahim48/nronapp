@@ -13,6 +13,7 @@ import 'all_sales_screen.dart';
 import 'controller/sales_controller.dart';
 import 'create_sales_screen.dart';
 import 'sales_details_screen.dart';
+import '../rep_bottomnavbar/presentation/widgets/rep_main_bottom_bar.dart';
 
 
 class SalesScreen extends StatelessWidget {
@@ -24,6 +25,8 @@ class SalesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar:
+          const RepMainBottomBar(currentIndex: -1, standalone: true),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E2427),

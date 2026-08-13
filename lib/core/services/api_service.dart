@@ -288,6 +288,9 @@ class ApiService {
           return NoInternetException(error.message);
         }
         return UnknownException(error.message);
+      case DioExceptionType.transformTimeout:
+        // TODO: Handle this case.
+        throw UnimplementedError();
     }
   }
 

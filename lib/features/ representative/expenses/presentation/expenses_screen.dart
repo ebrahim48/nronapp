@@ -12,6 +12,7 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/expense_controller.dart';
 import 'expense_details_screen.dart';
+import '../../rep_bottomnavbar/presentation/widgets/rep_main_bottom_bar.dart';
 
 class ExpensesScreen extends StatelessWidget {
   const ExpensesScreen({super.key});
@@ -22,6 +23,8 @@ class ExpensesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar:
+          const RepMainBottomBar(currentIndex: -1, standalone: true),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E2427),

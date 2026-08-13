@@ -12,6 +12,7 @@ import '../../data/auth_temp_data.dart';
 import '../controller/register_controller.dart';
 import '../widgets/auth_field_label.dart';
 import '../widgets/auth_google_button.dart';
+import '../widgets/auth_apple_button.dart';
 import '../widgets/auth_grid_decoration.dart';
 import '../widgets/auth_or_divider.dart';
 import '../widgets/auth_tab_switcher.dart';
@@ -248,6 +249,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       AnimatedEntry(
                         delay: const Duration(milliseconds: 800),
                         child: const AuthGoogleButton(),
+                      ),
+                      SizedBox(height: 16.h),
+                      AnimatedEntry(
+                        delay: const Duration(milliseconds: 880),
+                        child: const AuthAppleButton(),
                       ),
                       SizedBox(height: 40.h),
                     ],

@@ -8,6 +8,7 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
+import '../../../../core/custom_widgets/role_aware_bottom_bar.dart';
 import '../../appdrawer/app_drawer.dart';
 import '../controller/setting_controller.dart';
 import 'widgets/password_field.dart';
@@ -17,7 +18,12 @@ import 'widgets/settings_section_card.dart';
 import 'widgets/settings_tile.dart';
 
 class SettingProfileScreen extends StatelessWidget {
-  const SettingProfileScreen({super.key});
+  /// When shown as a standalone (drawer-pushed) route it gets its own
+  /// role-aware bottom nav bar. When embedded in a shell (rep tab 4) the
+  /// shell already provides the bar, so this stays false to avoid a double bar.
+  final bool standalone;
+
+  const SettingProfileScreen({super.key, this.standalone = false});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +32,8 @@ class SettingProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       drawer: const AppDrawer(),
+      bottomNavigationBar:
+          standalone ? const RoleAwareBottomBar() : null,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         elevation: 0,

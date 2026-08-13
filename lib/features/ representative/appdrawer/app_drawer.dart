@@ -8,15 +8,24 @@ import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../settingsprofile/controller/setting_controller.dart';
+import '../rep_bottomnavbar/controller/rep_bottomnavbar_controller.dart';
 import 'app_drwaer_controller.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
+  void _switchShellTab(BuildContext context, int tabIndex) {
+    final navC = Get.isRegistered<RepMainNavController>()
+        ? Get.find<RepMainNavController>()
+        : Get.put(RepMainNavController());
+    navC.changePage(tabIndex);
+    context.go(AppRoutes.repBottomNavBar);
+  }
+
   void _handleNavigation(BuildContext context, int index) {
     switch (index) {
-      case 0: // Purchase Order
-        context.pushNamed(AppRoutes.purchaseOrderScreen);
+      case 0: // Purchase Order (main shell tab 3)
+        _switchShellTab(context, 3);
         break;
       case 1: // Expenses
         context.pushNamed(AppRoutes.expensesScreen);
@@ -39,17 +48,17 @@ class AppDrawer extends StatelessWidget {
       case 7: // Activity
         context.pushNamed(AppRoutes.activityLogScreen);
         break;
-      case 8: // Setting & Profile
-        context.pushNamed(AppRoutes.settingProfileScreen);
+      case 8: // Setting & Profile (main shell tab 4)
+        _switchShellTab(context, 4);
         break;
       case 9: // Contact Support
         context.pushNamed(AppRoutes.contactSupportScreen);
         break;
       case 10: // About App
-        // context.pushNamed(AppRoutes.aboutAppScreen);
+        context.pushNamed(AppRoutes.aboutHoleScreen);
         break;
       case 11: // Terms & Conditions
-        // context.pushNamed(AppRoutes.termsScreen);
+        context.pushNamed(AppRoutes.termsConditionsScreen);
         break;
     }
   }
@@ -121,7 +130,7 @@ class _DrawerHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 120.h,
+      constraints: BoxConstraints(minHeight: 120.h),
       color: const Color(0xFF1E2427),
       padding: EdgeInsets.only(
         left: 16.w,

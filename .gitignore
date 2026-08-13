@@ -2,6 +2,9 @@
 .claude/
 .qwen/
 
+# VS Code (ignored entirely — do not track editor/workspace files)
+.vscode/
+
 # Miscellaneous
 *.class
 *.log
@@ -49,6 +52,4 @@ app.*.map.json
 # FVM Version Cache
 .fvm/
 branch_structure.json
-temp_auto_push.bat
-temp_interactive_push.bat
 .gitignore

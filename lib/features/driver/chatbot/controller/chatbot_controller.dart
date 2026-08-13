@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/helpers/pdf_helper.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
@@ -61,8 +62,21 @@ class ChatbotController extends GetxController {
       final reply = (data?['message'] as String?)?.trim() ??
           'Sorry, I could not get a response.';
 
-      messages.add(
-          ChatMessage(text: reply, isUser: false, time: DateTime.now()));
+      final rawAttachments = data?['attachments'];
+      final attachments = rawAttachments is List
+          ? rawAttachments
+              .whereType<Map<String, dynamic>>()
+              .map(ChatAttachment.fromJson)
+              .where((a) => a.hasData)
+              .toList()
+          : <ChatAttachment>[];
+
+      messages.add(ChatMessage(
+        text: reply,
+        isUser: false,
+        time: DateTime.now(),
+        attachments: attachments,
+      ));
     } catch (_) {
       messages.add(ChatMessage(
         text: 'Something went wrong. Please try again.',
@@ -130,6 +144,21 @@ class ChatbotController extends GetxController {
       ToastMessageHelper.showErrorMessage('Failed to load chat history');
     } finally {
       isLoadingHistory.value = false;
+    }
+  }
+
+  // ── Download / open an attachment (decodes base64 → file → share sheet) ────
+  final downloadingFile = ''.obs;
+
+  Future<void> downloadAttachment(ChatAttachment attachment) async {
+    if (!attachment.hasData || downloadingFile.value.isNotEmpty) return;
+    try {
+      downloadingFile.value = attachment.filename;
+      await PdfHelper.saveBase64AndShare(attachment.base64, attachment.filename);
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to save file');
+    } finally {
+      downloadingFile.value = '';
     }
   }
 

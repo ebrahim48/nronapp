@@ -24,6 +24,17 @@ class MonthlyCommissionTrendChart extends StatelessWidget {
 
     final maxData = pts.map((p) => p.value).reduce(max);
 
+    // All-zero (or negative) series: log(0) is -Infinity and .floor() on it
+    // throws "Unsupported operation: Infinity or NaN toInt". Fall back to a
+    // sensible default axis just like the empty case.
+    if (maxData <= 0) {
+      return (
+        niceMax: 100,
+        step: 20,
+        labels: ['100', '80', '60', '40', '20', '0'],
+      );
+    }
+
     // Choose a nice step size
     double rawStep = maxData / 5;
     final magnitude = pow(10, (log(rawStep) / ln10).floor()).toDouble();

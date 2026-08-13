@@ -120,6 +120,26 @@ class AuthRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  // POST /auth/apple  (native Sign in with Apple)
+  // Body: { identityToken, role, fullName? }
+  // Returns: { data: { results, accessToken, refreshToken } }
+  Future<Map<String, dynamic>> signInWithApple({
+    required String identityToken,
+    required String role,
+    String? fullName,
+  }) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.post(
+      ApiConstants.appleLogin,
+      data: {
+        'identityToken': identityToken,
+        'role': role,
+        if (fullName != null && fullName.isNotEmpty) 'fullName': fullName,
+      },
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
   // POST /auth/resend-otp
   // Body: { email }
   Future<Map<String, dynamic>> resendOtp({required String email}) async {

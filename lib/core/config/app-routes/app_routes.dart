@@ -539,7 +539,7 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: settingProfileScreen ,
         name: settingProfileScreen ,
-        builder: (context, state) => const SettingProfileScreen (),
+        builder: (context, state) => const SettingProfileScreen(standalone: true),
       ),
       GoRoute(
         path: contactSupportScreen  ,
