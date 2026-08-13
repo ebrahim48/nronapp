@@ -11,6 +11,7 @@ import '../../appdrawer/app_drawer.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/actitvity_log_controller.dart';
 import 'widgets/activity_log_widgets.dart';
+import '../../../../core/custom_widgets/role_aware_bottom_bar.dart';
 
 class ActivityLogScreen extends StatelessWidget {
   const ActivityLogScreen({super.key});
@@ -61,6 +62,7 @@ class ActivityLogScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar: const RoleAwareBottomBar(),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,

@@ -448,6 +448,11 @@ class _MessageBubble extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (message.attachments.isNotEmpty) ...[
+                  SizedBox(height: 6.h),
+                  ...message.attachments
+                      .map((a) => _AttachmentCard(attachment: a)),
+                ],
                 SizedBox(height: 3.h),
                 Text(
                   DateFormat('h:mm a').format(message.time),
@@ -463,6 +468,79 @@ class _MessageBubble extends StatelessWidget {
           if (isUser) SizedBox(width: 8.w),
         ],
       ),
+    );
+  }
+}
+
+// ── Attachment card (download / open a file) ──────────────────────────────────
+
+class _AttachmentCard extends StatelessWidget {
+  final ChatAttachment attachment;
+  const _AttachmentCard({required this.attachment});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Get.find<ChatbotController>();
+    return Padding(
+      padding: EdgeInsets.only(top: 6.h),
+      child: Obx(() {
+        final isDownloading =
+            c.downloadingFile.value == attachment.filename;
+        return InkWell(
+          borderRadius: BorderRadius.circular(12.r),
+          onTap: isDownloading
+              ? null
+              : () => c.downloadAttachment(attachment),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1F1F1F),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                  color: AppColors.primaryColor.withValues(alpha: 0.4)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  attachment.isPdf
+                      ? Icons.picture_as_pdf_rounded
+                      : Icons.insert_drive_file_rounded,
+                  color: AppColors.primaryColor,
+                  size: 22.r,
+                ),
+                SizedBox(width: 10.w),
+                Flexible(
+                  child: Text(
+                    attachment.filename,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primaryTextColor,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                isDownloading
+                    ? SizedBox(
+                        width: 18.r,
+                        height: 18.r,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(
+                              AppColors.primaryColor),
+                        ),
+                      )
+                    : Icon(Icons.download_rounded,
+                        color: AppColors.primaryColor, size: 20.r),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 }

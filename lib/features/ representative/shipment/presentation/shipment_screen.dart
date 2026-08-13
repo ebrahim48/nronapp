@@ -16,6 +16,7 @@ import 'shipments_list_screen.dart';
 import 'track_shipment_screen.dart';
 import 'widgets/shipment_card.dart';
 import 'widgets/state_card.dart';
+import '../../rep_bottomnavbar/presentation/widgets/rep_main_bottom_bar.dart';
 
 class ShipmentsScreen extends StatefulWidget {
   const ShipmentsScreen({super.key});
@@ -43,6 +44,8 @@ class _ShipmentsScreenState extends State<ShipmentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar:
+          const RepMainBottomBar(currentIndex: -1, standalone: true),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E2427),

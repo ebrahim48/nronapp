@@ -12,6 +12,7 @@ import '../../appdrawer/app_drawer.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_sales_controller.dart';
+import '../../manager_bottomnavbar/presentation/widgets/manager_main_bottom_bar.dart';
 
 class ManagerSalesScreen extends StatelessWidget {
   const ManagerSalesScreen({super.key});
@@ -22,6 +23,8 @@ class ManagerSalesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar:
+          const ManagerMainBottomBar(currentIndex: -1, standalone: true),
       drawer: const ManagerAppDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,

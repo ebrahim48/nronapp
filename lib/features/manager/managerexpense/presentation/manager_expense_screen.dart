@@ -12,6 +12,7 @@ import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_expense_controller.dart';
+import '../../manager_bottomnavbar/presentation/widgets/manager_main_bottom_bar.dart';
 
 class ManagerExpenseScreen extends StatelessWidget {
   const ManagerExpenseScreen({super.key});
@@ -22,6 +23,8 @@ class ManagerExpenseScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar:
+          const ManagerMainBottomBar(currentIndex: -1, standalone: true),
       drawer: const ManagerAppDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E2427),

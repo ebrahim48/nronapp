@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
@@ -237,6 +238,22 @@ class PdfHelper {
     final file = File('${dir.path}/$fileName');
     await file.writeAsBytes(bytes);
     await Share.shareXFiles([XFile(file.path)], subject: subject);
+  }
+
+  // ── Save a base64-encoded file (e.g. chatbot attachment) & share ───────────
+  static Future<void> saveBase64AndShare(
+      String base64Data, String fileName) async {
+    if (base64Data.isEmpty) return;
+    // Strip a data-URI prefix if present (e.g. "data:application/pdf;base64,")
+    final commaIndex = base64Data.indexOf(',');
+    final cleaned = base64Data.startsWith('data:') && commaIndex != -1
+        ? base64Data.substring(commaIndex + 1)
+        : base64Data;
+    final bytes = base64Decode(cleaned);
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/$fileName');
+    await file.writeAsBytes(bytes);
+    await Share.shareXFiles([XFile(file.path)]);
   }
 
   // ── Download from URL & share ──────────────────────────────────────────────

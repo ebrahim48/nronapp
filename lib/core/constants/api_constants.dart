@@ -5,7 +5,6 @@ class ApiConstants {
   static const String socketUrl = "https://api.holepackage.com";
 
 
-
   static const String apiVersion = '/api/v1';
 
   static Map<String, String> headers = {
@@ -188,6 +187,9 @@ class ApiConstants {
 
 
   static String loginWithGoogle(String role) => '/auth/google?role=$role'; // representative,manager,driver
+
+  // Native Sign in with Apple — the app posts the identity token here.
+  static const String appleLogin = '/auth/apple';
 
    static String deleteAccount = '/user/delete/my-account';
 

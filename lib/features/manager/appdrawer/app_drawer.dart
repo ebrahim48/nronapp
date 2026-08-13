@@ -8,17 +8,26 @@ import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../manager_home/manager_controller/manager_home_controller.dart';
+import '../manager_bottomnavbar/controller/manager_main_nav_controller.dart';
 import 'app_drwaer_controller.dart';
 
 class ManagerAppDrawer extends StatelessWidget {
   const ManagerAppDrawer({super.key});
 
+  void _switchShellTab(BuildContext context, int tabIndex) {
+    final navC = Get.isRegistered<ManagerMainNavController>()
+        ? Get.find<ManagerMainNavController>()
+        : Get.put(ManagerMainNavController());
+    navC.changePage(tabIndex);
+    context.go(AppRoutes.managerBottomNavBar);
+  }
+
   void _handleNavigation(BuildContext context, int index) {
     switch (index) {
-      case 0: // Manager Purchase
-        context.pushNamed(AppRoutes.managerPurchaseOrderScreen);
+      case 0: // Manager Purchase (main shell tab 2)
+        _switchShellTab(context, 2);
         break;
-      case 1: // Purchase Order
+      case 1: // Expenses
         context.pushNamed(AppRoutes.managerExpenseScreen);
         break;
       case 2: // Sales
@@ -27,8 +36,8 @@ class ManagerAppDrawer extends StatelessWidget {
       case 3: // Commission
         context.pushNamed(AppRoutes.commissionDashboardScreen);
         break;
-      case 4: // Shipments
-        context.pushNamed(AppRoutes.managerShipmentsScreen);
+      case 4: // Shipments (main shell tab 3)
+        _switchShellTab(context, 3);
         break;
       case 5: // Activity
         context.pushNamed(AppRoutes.activityLogScreen);
@@ -118,7 +127,9 @@ class _DrawerHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 120.h,
+      // Add the safe-area inset on top of the content height so the notch /
+      // Dynamic Island doesn't squeeze the inner column (was overflowing).
+      height: 120.h + MediaQuery.of(context).padding.top,
       color: const Color(0xFF1E2427),
       padding: EdgeInsets.only(
         left: 16.w,

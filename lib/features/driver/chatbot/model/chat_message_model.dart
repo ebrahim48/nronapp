@@ -2,12 +2,39 @@ class ChatMessage {
   final String text;
   final bool isUser;
   final DateTime time;
+  final List<ChatAttachment> attachments;
 
   ChatMessage({
     required this.text,
     required this.isUser,
     required this.time,
+    this.attachments = const [],
   });
+}
+
+// ── File attachment (e.g. a generated PDF from the chatbot) ───────────────────
+
+class ChatAttachment {
+  final String filename;
+  final String mimeType;
+  final String base64;
+
+  const ChatAttachment({
+    required this.filename,
+    required this.mimeType,
+    required this.base64,
+  });
+
+  factory ChatAttachment.fromJson(Map<String, dynamic> e) {
+    return ChatAttachment(
+      filename: e['filename']?.toString() ?? 'document.pdf',
+      mimeType: e['mimeType']?.toString() ?? 'application/octet-stream',
+      base64: e['base64']?.toString() ?? '',
+    );
+  }
+
+  bool get isPdf => mimeType.contains('pdf') || filename.endsWith('.pdf');
+  bool get hasData => base64.isNotEmpty;
 }
 
 // ── Chat session (from /chatbot/sessions) ─────────────────────────────────────

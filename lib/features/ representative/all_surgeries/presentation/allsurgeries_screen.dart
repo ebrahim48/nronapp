@@ -12,6 +12,7 @@ import 'add_surgery_screen.dart';
 import 'surgery_details_screen.dart';
 import 'widgets/surgery_card.dart';
 import 'widgets/surgery_search_bar.dart';
+import '../../rep_bottomnavbar/presentation/widgets/rep_main_bottom_bar.dart';
 
 class AllSurgeriesScreen extends StatelessWidget {
   const AllSurgeriesScreen({super.key});
@@ -22,6 +23,8 @@ class AllSurgeriesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar:
+          const RepMainBottomBar(currentIndex: -1, standalone: true),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E2427),

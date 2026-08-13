@@ -11,6 +11,7 @@ import '../domain/model/physician_model.dart';
 import 'add_physicians_screen.dart';
 import 'physicions_profile_screen.dart';
 import 'widgets/physician_card.dart';
+import '../../rep_bottomnavbar/presentation/widgets/rep_main_bottom_bar.dart';
 
 class PhysiciansScreen extends StatelessWidget {
   const PhysiciansScreen({super.key});
@@ -21,6 +22,8 @@ class PhysiciansScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
+      bottomNavigationBar:
+          const RepMainBottomBar(currentIndex: -1, standalone: true),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,

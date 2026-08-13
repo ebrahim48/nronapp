@@ -25,8 +25,16 @@ class AuthTabSwitcher extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD4D4D4), width: 0.8),
       ),
       child: Row(children: [
-        GestureDetector(onTap: onLoginTap, child: AuthTab(label: 'Log In', isActive: isLogin)),
-        GestureDetector(onTap: onSignUpTap, child: AuthTab(label: 'Sign Up', isActive: !isLogin)),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onLoginTap,
+          child: AuthTab(label: 'Log In', isActive: isLogin),
+        ),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onSignUpTap,
+          child: AuthTab(label: 'Sign Up', isActive: !isLogin),
+        ),
       ]),
     );
   }
