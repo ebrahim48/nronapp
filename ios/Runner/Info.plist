@@ -34,7 +34,26 @@
 				<string>nron</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.nron.google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Reversed iOS OAuth client id: com.googleusercontent.apps.<id> -->
+				<string>com.googleusercontent.apps.TODO_IOS_CLIENT_ID</string>
+			</array>
+		</dict>
 	</array>
+	<!-- Sign in with Google. GIDClientID is the iOS OAuth client; GIDServerClientID
+	     is the Web client the backend verifies ID tokens against. Both are also
+	     passed from Dart (lib/core/config/google_sign_in_config.dart), which takes
+	     precedence — keep them in sync. -->
+	<key>GIDClientID</key>
+	<string>TODO_IOS_CLIENT_ID.apps.googleusercontent.com</string>
+	<key>GIDServerClientID</key>
+	<string>TODO_WEB_CLIENT_ID.apps.googleusercontent.com</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>

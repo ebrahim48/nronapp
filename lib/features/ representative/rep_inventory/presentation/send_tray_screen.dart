@@ -10,13 +10,35 @@ import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/send_tray_controller.dart';
 
 
-class SendTrayScreen extends StatelessWidget {
+class SendTrayScreen extends StatefulWidget {
   final String trayId;
   const SendTrayScreen({super.key, required this.trayId});
 
   @override
+  State<SendTrayScreen> createState() => _SendTrayScreenState();
+}
+
+class _SendTrayScreenState extends State<SendTrayScreen> {
+  late final SendTrayController c;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.put(SendTrayController())..trayId = widget.trayId;
+  }
+
+  @override
+  void dispose() {
+    // Children unmount before their parent, so the fields holding this
+    // controller's TextEditingControllers are already gone by now. Deleting
+    // it from a button handler instead threw "A TextEditingController was
+    // used after being disposed".
+    Get.delete<SendTrayController>(force: true);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final c = Get.put(SendTrayController())..trayId = trayId;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -154,8 +176,7 @@ class SendTrayScreen extends StatelessWidget {
                       onpress: () async {
                         final ok = await c.sendTray();
                         if (ok && context.mounted) {
-                          Get.delete<SendTrayController>(force: true);
-                          Navigator.pop(context);
+                                Navigator.pop(context);
                         }
                       },
                       prefixIcon: SvgPicture.asset(

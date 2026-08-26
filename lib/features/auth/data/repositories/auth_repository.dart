@@ -120,6 +120,26 @@ class AuthRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  // POST /auth/google  (native Sign in with Google)
+  // Body: { idToken, role, fullName? }
+  // Returns: { data: { results, accessToken, refreshToken } }
+  Future<Map<String, dynamic>> signInWithGoogle({
+    required String idToken,
+    required String role,
+    String? fullName,
+  }) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.post(
+      ApiConstants.googleLogin,
+      data: {
+        'idToken': idToken,
+        'role': role,
+        if (fullName != null && fullName.isNotEmpty) 'fullName': fullName,
+      },
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
   // POST /auth/apple  (native Sign in with Apple)
   // Body: { identityToken, role, fullName? }
   // Returns: { data: { results, accessToken, refreshToken } }

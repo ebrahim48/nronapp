@@ -96,13 +96,35 @@ class _IssueTypeSelector extends StatelessWidget {
 }
 
 
-class MissingInstrumentScreen extends StatelessWidget {
+class MissingInstrumentScreen extends StatefulWidget {
   final String trayId;
   const MissingInstrumentScreen({super.key, required this.trayId});
 
   @override
+  State<MissingInstrumentScreen> createState() => _MissingInstrumentScreenState();
+}
+
+class _MissingInstrumentScreenState extends State<MissingInstrumentScreen> {
+  late final MissingInstrumentController c;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.put(MissingInstrumentController())..trayId = widget.trayId;
+  }
+
+  @override
+  void dispose() {
+    // Children unmount before their parent, so the fields holding this
+    // controller's TextEditingControllers are already gone by now. Deleting
+    // it from a button handler instead threw "A TextEditingController was
+    // used after being disposed".
+    Get.delete<MissingInstrumentController>(force: true);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final c = Get.put(MissingInstrumentController())..trayId = trayId;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -134,7 +156,7 @@ class MissingInstrumentScreen extends StatelessWidget {
               SizedBox(height: 20.h),
 
               // Tray Mini Card
-              _TrayMiniCard(trayId: trayId),
+              _TrayMiniCard(trayId: widget.trayId),
 
               SizedBox(height: 20.h),
 
@@ -261,7 +283,6 @@ class MissingInstrumentScreen extends StatelessWidget {
                 onpress: () async {
                   final ok = await c.submitReport();
                   if (ok && context.mounted) {
-                    Get.delete<MissingInstrumentController>(force: true);
                     context.pushNamed(AppRoutes.reportSuccessScreen);
                   }
                 },

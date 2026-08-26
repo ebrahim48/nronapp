@@ -13,13 +13,34 @@ import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../controller/add_bio_inventory_controller.dart';
 
-class AddBioInventoryScreen extends StatelessWidget {
+class AddBioInventoryScreen extends StatefulWidget {
   const AddBioInventoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final c = Get.put(AddBioInventoryController());
+  State<AddBioInventoryScreen> createState() => _AddBioInventoryScreenState();
+}
 
+class _AddBioInventoryScreenState extends State<AddBioInventoryScreen> {
+  late final AddBioInventoryController c;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.put(AddBioInventoryController());
+  }
+
+  @override
+  void dispose() {
+    // Children unmount before their parent, so by the time this runs the
+    // fields holding these TextEditingControllers are already gone. Deleting
+    // the controller while the route was still mounted was what threw
+    // "A TextEditingController was used after being disposed".
+    Get.delete<AddBioInventoryController>(force: true);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -141,7 +162,6 @@ class AddBioInventoryScreen extends StatelessWidget {
                 onpress: () async {
                   final ok = await c.saveBioInventory();
                   if (ok && context.mounted) {
-                    Get.delete<AddBioInventoryController>(force: true);
                     Navigator.pop(context);
                   }
                 },

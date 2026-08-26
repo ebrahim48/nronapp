@@ -186,7 +186,11 @@ class ApiConstants {
   static String shipmentRate = '/shipment-rate/get-all';
 
 
+  // Web / redirect OAuth fallback — opens the browser, backend deep-links back.
   static String loginWithGoogle(String role) => '/auth/google?role=$role'; // representative,manager,driver
+
+  // Native Sign in with Google — the app posts the Google ID token here.
+  static const String googleLogin = '/auth/google';
 
   // Native Sign in with Apple — the app posts the identity token here.
   static const String appleLogin = '/auth/apple';

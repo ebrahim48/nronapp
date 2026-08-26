@@ -8,6 +8,7 @@ import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/services/google_sign_in_service.dart';
 import '../data/repositories/profile_repository.dart';
 import '../domain/model/settings_model.dart';
 
@@ -322,6 +323,8 @@ class SettingsController extends GetxController {
 
   // ── Logout ────────────────────────────────────────────────────────────────
   void logout() async {
+    // Clear the cached Google account so the next sign-in shows the picker.
+    await GoogleSignInService.signOut();
     await PrefsHelper.remove('auth_token');
     await PrefsHelper.remove('auth_refresh_token');
     await PrefsHelper.remove('user_role');

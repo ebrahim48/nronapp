@@ -29,6 +29,16 @@ class _EditBioInventoryScreenState extends State<EditBioInventoryScreen> {
     c = Get.put(EditBioInventoryController(bioId: widget.bioId));
   }
 
+  @override
+  void dispose() {
+    // Children unmount before their parent, so the fields holding this
+    // controller's TextEditingControllers are already gone by now. Deleting
+    // it from a button handler instead threw "A TextEditingController was
+    // used after being disposed".
+    Get.delete<EditBioInventoryController>(force: true);
+    super.dispose();
+  }
+
   Future<void> _confirmDelete() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -53,7 +63,6 @@ class _EditBioInventoryScreenState extends State<EditBioInventoryScreen> {
     if (confirmed == true && mounted) {
       final ok = await c.deleteBio();
       if (ok && mounted) {
-        Get.delete<EditBioInventoryController>(force: true);
         Navigator.pop(context); // pop edit screen
         Navigator.pop(context); // pop details screen
       }
@@ -218,7 +227,6 @@ class _EditBioInventoryScreenState extends State<EditBioInventoryScreen> {
                   onpress: () async {
                     final ok = await c.saveUpdate();
                     if (ok && context.mounted) {
-                      Get.delete<EditBioInventoryController>(force: true);
                       Navigator.pop(context);
                     }
                   },
