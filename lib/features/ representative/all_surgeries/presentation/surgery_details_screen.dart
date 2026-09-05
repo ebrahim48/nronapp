@@ -433,7 +433,7 @@ class SurgeryDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DetailSectionHeader(
-                      iconPath: 'assets/icons/attachments.svg',
+                      iconPath: 'assets/icons/atachments.svg',
                       title: 'Documents',
                     ),
                     if (attachments.isEmpty)
@@ -490,7 +490,7 @@ class SurgeryDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DetailSectionHeader(
-                      iconPath: 'assets/icons/radiology.svg',
+                      iconPath: 'assets/icons/radiolgy.svg',
                       title: 'Radiology Images',
                     ),
                     RadiologyDetailGrid(images: radiologyImages),

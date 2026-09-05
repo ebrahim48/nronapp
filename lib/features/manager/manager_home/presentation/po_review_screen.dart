@@ -10,6 +10,7 @@ import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../manager_controller/manager_po_controller.dart';
 import '../model/manager_po_model.dart';
+import '../../../../core/custom_widgets/document_preview.dart';
 
 class POReviewScreen extends StatelessWidget {
   const POReviewScreen({super.key});
@@ -226,7 +227,10 @@ class _DocumentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => openDocumentPreview(context, doc.url),
+      child: Container(
       margin: EdgeInsets.only(bottom: 8.h),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -264,6 +268,7 @@ class _DocumentTile extends StatelessWidget {
           Icon(Icons.remove_red_eye_outlined,
               color: AppColors.primaryColor, size: 18.r),
         ],
+      ),
       ),
     );
   }

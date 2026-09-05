@@ -29,7 +29,7 @@ class SurgeryAttachmentTile extends StatelessWidget {
         child: Row(
           children: [
             SvgPicture.asset(
-              'assets/icons/attachments.svg',
+              'assets/icons/atachments.svg',
               width: 18.r,
               height: 18.r,
               colorFilter: const ColorFilter.mode(

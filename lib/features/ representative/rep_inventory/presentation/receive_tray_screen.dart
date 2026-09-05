@@ -11,13 +11,35 @@ import '../../../../core/custom_widgets/custom_text_field.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../controller/receive_tray_controller.dart';
 
-class ReceiveTrayScreen extends StatelessWidget {
+class ReceiveTrayScreen extends StatefulWidget {
   final String trayId;
   const ReceiveTrayScreen({super.key, required this.trayId});
 
   @override
+  State<ReceiveTrayScreen> createState() => _ReceiveTrayScreenState();
+}
+
+class _ReceiveTrayScreenState extends State<ReceiveTrayScreen> {
+  late final ReceiveTrayController c;
+
+  @override
+  void initState() {
+    super.initState();
+    c = Get.put(ReceiveTrayController())..trayId = widget.trayId;
+  }
+
+  @override
+  void dispose() {
+    // Children unmount before their parent, so the fields holding this
+    // controller's TextEditingControllers are already gone by now. Deleting
+    // it from a button handler instead threw "A TextEditingController was
+    // used after being disposed".
+    Get.delete<ReceiveTrayController>(force: true);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final c = Get.put(ReceiveTrayController())..trayId = trayId;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -177,7 +199,7 @@ class ReceiveTrayScreen extends StatelessWidget {
 
               // Report Missing Instrument Button
               GestureDetector(
-                onTap: () => context.pushNamed(AppRoutes.missingInstrumentScreen, extra: trayId),
+                onTap: () => context.pushNamed(AppRoutes.missingInstrumentScreen, extra: widget.trayId),
                 child: Container(
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
@@ -223,7 +245,6 @@ class ReceiveTrayScreen extends StatelessWidget {
                 onpress: () async {
                   final ok = await c.confirmReceive();
                   if (ok && context.mounted) {
-                    Get.delete<ReceiveTrayController>(force: true);
                     Navigator.pop(context);
                   }
                 },

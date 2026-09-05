@@ -10,6 +10,7 @@ import 'controller/sales_controller.dart';
 import 'create_sales_screen.dart';
 import 'model/sales_model.dart';
 import 'packing_slip_screen.dart';
+import '../../../core/custom_widgets/document_preview.dart';
 
 
 class SaleDetailScreen extends StatefulWidget {
@@ -483,7 +484,10 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
               textAlign: TextAlign.start,
             )
           else
-            ...d.attachments.map((att) => Container(
+            ...d.attachments.map((att) => GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => openDocumentPreview(context, att.url ?? ''),
+                  child: Container(
                   margin: EdgeInsets.only(bottom: 10.h),
                   padding: EdgeInsets.all(12.r),
                   decoration: BoxDecoration(
@@ -539,6 +543,7 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
                           color: AppColors.primaryColor, size: 18.r),
                     ],
                   ),
+                ),
                 )),
 
           SizedBox(height: 20.h),

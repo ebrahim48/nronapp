@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/custom_widgets/custom_network_image.dart';
+import '../../../../core/custom_widgets/document_preview.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../controller/purchase_order_controller.dart';
@@ -168,15 +169,18 @@ class _ThumbnailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12.r),
-      child: SizedBox(
-        width: double.infinity,
-        height: 160.h,
-        child: CustomNetworkImage(
-          imageUrl: url,
+    return GestureDetector(
+      onTap: () => openDocumentPreview(context, url),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.r),
+        child: SizedBox(
           width: double.infinity,
           height: 160.h,
+          child: CustomNetworkImage(
+            imageUrl: url,
+            width: double.infinity,
+            height: 160.h,
+          ),
         ),
       ),
     );
@@ -543,7 +547,9 @@ class _DocPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => openDocumentPreview(context, url),
+      child: Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
@@ -577,6 +583,7 @@ class _DocPreviewCard extends StatelessWidget {
           Icon(Icons.open_in_new,
               color: AppColors.primaryColor, size: 16.r),
         ],
+      ),
       ),
     );
   }
@@ -624,10 +631,13 @@ class _DocumentsCard extends StatelessWidget {
             return Column(
               children: [
                 Divider(color: const Color(0xFF3A3A3A), height: 1.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 14.w, vertical: 12.h),
-                  child: Row(
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => openDocumentPreview(context, url),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 14.w, vertical: 12.h),
+                    child: Row(
                     children: [
                       Container(
                         width: 36.r,
@@ -651,7 +661,8 @@ class _DocumentsCard extends StatelessWidget {
                       ),
                       Icon(Icons.remove_red_eye_outlined,
                           color: AppColors.primaryColor, size: 20.r),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 if (!isLast)
