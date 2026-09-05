@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 import '../../model/manager_sales_model.dart';
+import '../../../../../core/custom_widgets/document_preview.dart';
 
 class SaleAttachmentTile extends StatelessWidget {
   final SaleAttachmentItem attachment;
@@ -11,7 +12,10 @@ class SaleAttachmentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => openDocumentPreview(context, attachment.url),
+      child: Container(
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -65,6 +69,7 @@ class SaleAttachmentTile extends StatelessWidget {
           Icon(Icons.remove_red_eye_outlined,
               color: AppColors.primaryColor, size: 20.r),
         ],
+      ),
       ),
     );
   }
