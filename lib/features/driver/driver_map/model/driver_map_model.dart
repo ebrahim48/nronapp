@@ -25,6 +25,7 @@ class MapJobModel {
   final RouteStopModel destination;
   final String etaToPickup;
   final String distanceMi;
+  final String destinationPhone;
 
   const MapJobModel({
     required this.id,
@@ -35,6 +36,7 @@ class MapJobModel {
     required this.destination,
     required this.etaToPickup,
     required this.distanceMi,
+    this.destinationPhone = '',
   });
 }
 

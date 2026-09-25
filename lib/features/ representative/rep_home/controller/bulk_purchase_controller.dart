@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +12,8 @@ import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
+import '../../../../core/utils/app_colors.dart';
+import '../../../../core/custom_widgets/custom_text.dart';
 import '../../purchaseorder/data/repositories/purchase_order_repository.dart';
 import '../../purchaseorder/model/purchase_order_model.dart';
 import 'scan_session_controller.dart';
@@ -181,6 +185,22 @@ class BulkPurchaseController extends GetxController {
 
   final _picker = ImagePicker();
 
+  void showAttachOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E2121),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      isScrollControlled: true,
+      builder: (_) => _BulkAttachOptionsSheet(
+        onPickPdf: uploadPDF,
+        onPickCamera: _pickFromCamera,
+        onPickGallery: _pickFromGallery,
+      ),
+    );
+  }
+
   Future<void> uploadPDF() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -201,18 +221,36 @@ class BulkPurchaseController extends GetxController {
     }
   }
 
-  Future<void> takePhoto() async {
+  Future<void> _pickFromCamera() async {
     try {
       final photo = await _picker.pickImage(
           source: ImageSource.camera, imageQuality: 85);
       if (photo != null) attachedDocs.add(File(photo.path));
     } catch (_) {
-      Get.snackbar('Error', 'Could not open camera.',
+      // Camera not available — fall back to gallery silently
+      await _pickFromGallery();
+    }
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final result = await FilePicker.platform
+          .pickFiles(type: FileType.image, allowMultiple: true);
+      if (result != null) {
+        for (final f in result.files) {
+          if (f.path != null) attachedDocs.add(File(f.path!));
+        }
+      }
+    } catch (_) {
+      Get.snackbar('Error', 'Could not open gallery.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFF1E2121),
           colorText: Colors.white);
     }
   }
+
+  /// Kept for backward compatibility — now opens the full attach sheet.
+  void takePhoto(BuildContext context) => showAttachOptions(context);
 
   Future<void> saveOrder(BuildContext context) => _submit(context);
 
@@ -329,5 +367,172 @@ class BulkPurchaseController extends GetxController {
       Get.delete<ScanSessionController>();
     }
     super.onClose();
+  }
+}
+
+// ── Bulk Attach Options Bottom Sheet ─────────────────────────────────────────
+class _BulkAttachOptionsSheet extends StatelessWidget {
+  final VoidCallback onPickPdf;
+  final VoidCallback onPickCamera;
+  final VoidCallback onPickGallery;
+
+  const _BulkAttachOptionsSheet({
+    required this.onPickPdf,
+    required this.onPickCamera,
+    required this.onPickGallery,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 32.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF3A3A3A),
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 20.h),
+          CustomText(
+            text: 'Attach Document',
+            fontsize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.start,
+          ),
+          SizedBox(height: 6.h),
+          CustomText(
+            text: 'Choose how you want to attach your PO document',
+            fontsize: 12.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.secondaryTextColor,
+            textAlign: TextAlign.start,
+          ),
+          SizedBox(height: 24.h),
+          _BulkOptionTile(
+            iconPath: 'assets/icons/document.svg',
+            title: 'Browse Files',
+            subtitle: 'Upload PDF or Word document',
+            onTap: () {
+              Navigator.pop(context);
+              onPickPdf();
+            },
+          ),
+          SizedBox(height: 12.h),
+          _BulkOptionTile(
+            iconPath: 'assets/icons/camera.svg',
+            title: 'Camera',
+            subtitle: 'Take a photo of your document',
+            onTap: () {
+              Navigator.pop(context);
+              onPickCamera();
+            },
+          ),
+          SizedBox(height: 12.h),
+          _BulkOptionTile(
+            iconPath: 'assets/icons/scanitem.svg',
+            title: 'Gallery',
+            subtitle: 'Choose from your photo gallery',
+            onTap: () {
+              Navigator.pop(context);
+              onPickGallery();
+            },
+          ),
+          SizedBox(height: 8.h),
+        ],
+      ),
+    );
+  }
+}
+
+class _BulkOptionTile extends StatelessWidget {
+  final String iconPath;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _BulkOptionTile({
+    required this.iconPath,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: const Color(0x1A4A4A4A),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: const Color(0xFF3A3A3A), width: 0.8),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40.r,
+              height: 40.r,
+              decoration: BoxDecoration(
+                color: const Color(0xFF332F2F),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  iconPath,
+                  width: 20.r,
+                  height: 20.r,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.primaryColor,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    text: title,
+                    fontsize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                  SizedBox(height: 2.h),
+                  CustomText(
+                    text: subtitle,
+                    fontsize: 11.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.secondaryTextColor,
+                    textAlign: TextAlign.start,
+                  ),
+                ],
+              ),
+            ),
+            SvgPicture.asset(
+              'assets/icons/next.svg',
+              width: 14.r,
+              height: 14.r,
+              colorFilter: const ColorFilter.mode(
+                AppColors.secondaryTextColor,
+                BlendMode.srcIn,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

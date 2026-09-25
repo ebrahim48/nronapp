@@ -142,53 +142,14 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
                   color: AppColors.secondaryTextColor, size: 18.r),
             ),
 
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _FieldLabel(text: 'Year'),
-                      Obx(() {
-                        final safeVal = c.years.contains(c.selectedYear.value)
-                            ? c.selectedYear.value
-                            : null;
-                        return DarkDropdown(
-                          label: '',
-                          hint: '2026',
-                          value: safeVal,
-                          items: c.years,
-                          onChanged: (v) =>
-                              c.selectedYear.value = v ?? c.selectedYear.value,
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _FieldLabel(text: 'Month'),
-                      Obx(() {
-                        final safeVal =
-                            c.months.contains(c.selectedMonth.value)
-                                ? c.selectedMonth.value
-                                : null;
-                        return DarkDropdown(
-                          label: '',
-                          hint: 'Month',
-                          value: safeVal,
-                          items: c.months,
-                          onChanged: (v) =>
-                              c.selectedMonth.value = v ?? c.selectedMonth.value,
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ],
+            _FieldLabel(text: 'Accounting Period'),
+            CustomTextField(
+              controller: c.periodController,
+              hintText: 'Month Year',
+              readOnly: true,
+              onTap: () => c.pickMonthYear(context),
+              suffixIcon: Icon(Icons.calendar_month_outlined,
+                  color: AppColors.secondaryTextColor, size: 18.r),
             ),
 
             SizedBox(height: 6.h),
@@ -341,6 +302,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
     );
   }
 }
+
 
 class _FieldLabel extends StatelessWidget {
   final String text;

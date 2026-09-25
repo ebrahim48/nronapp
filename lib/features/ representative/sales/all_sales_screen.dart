@@ -19,6 +19,7 @@ class _AllSalesScreenState extends State<AllSalesScreen>
     with SingleTickerProviderStateMixin {
   late final SaleController c;
   late final TabController _tabController;
+  int _lastTabIndex = 0;
 
   final List<String> _tabLabels = ['All', 'Pending', 'Approved', 'Rejected'];
   final List<String> _tabFilters = ['', 'pending', 'approved', 'rejected'];
@@ -33,10 +34,10 @@ class _AllSalesScreenState extends State<AllSalesScreen>
   }
 
   void _onTabChanged() {
-    if (_tabController.indexIsChanging) {
-      c.fetchAllSales(
-          reset: true, filter: _tabFilters[_tabController.index]);
-    }
+    final i = _tabController.index;
+    if (i == _lastTabIndex) return; // listener fires twice per change
+    _lastTabIndex = i;
+    c.fetchAllSales(reset: true, filter: _tabFilters[i]);
   }
 
   @override

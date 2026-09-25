@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/exceptions/app_exceptions.dart';
+import '../../../../core/helpers/email_helper.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
@@ -255,6 +256,7 @@ class SurgeryController extends GetxController {
     platesController.text = d.plates;
     rodsController.text = d.rodsOrConnectors;
     implantsController.text = d.implants;
+    biologicsController.text = d.biologics;
     caseNotesController.text = d.caseNotes;
     if (d.dateOfSurgery.isNotEmpty) {
       try {
@@ -325,6 +327,7 @@ class SurgeryController extends GetxController {
           plates: platesController.text.trim(),
           rodsOrConnectors: rodsController.text.trim(),
           implants: implantsController.text.trim(),
+          biologics: biologicsController.text.trim(),
           caseNotes: caseNotesController.text.trim(),
           sticker: _file('PATIENT STICKER'),
           appre: _file('AP PRE'),
@@ -346,6 +349,7 @@ class SurgeryController extends GetxController {
           plates: platesController.text.trim(),
           rodsOrConnectors: rodsController.text.trim(),
           implants: implantsController.text.trim(),
+          biologics: biologicsController.text.trim(),
           caseNotes: caseNotesController.text.trim(),
           sticker: _file('PATIENT STICKER'),
           appre: _file('AP PRE'),
@@ -386,6 +390,56 @@ class SurgeryController extends GetxController {
       isDeleting.value = false;
     }
     return false;
+  }
+
+  // ── Send surgery details to doctor email ─────────────────────────────────
+  final isSendingMail = false.obs;
+
+  Future<void> sendToDoctorMail(SurgeryDetailModel d) async {
+    if (isSendingMail.value) return;
+    final email = d.physicianEmail.trim();
+    if (email.isEmpty) {
+      ToastMessageHelper.showToastMessage('Doctor email not available.', title: 'Error');
+      return;
+    }
+
+    String fmt(String v) => v.trim().isEmpty ? '—' : v.trim();
+    String date = d.dateOfSurgery;
+    try {
+      date = DateFormat('MM/dd/yyyy').format(DateTime.parse(d.dateOfSurgery));
+    } catch (_) {}
+
+    final body = StringBuffer()
+      ..writeln('Hello ${fmt(d.physicianName)},')
+      ..writeln()
+      ..writeln('Please find the surgery details below.')
+      ..writeln()
+      ..writeln('SURGERY INFO')
+      ..writeln('Patient ID: ${fmt(d.patientId)}')
+      ..writeln('Facility: ${fmt(d.facilityName)}')
+      ..writeln('Date of Surgery: ${fmt(date)}')
+      ..writeln('Surgery Type: ${fmt(d.surgeryType)}')
+      ..writeln()
+      ..writeln('SURGERY MATERIALS')
+      ..writeln('Screws: ${fmt(d.screws)}')
+      ..writeln('Plates: ${fmt(d.plates)}')
+      ..writeln('Rods/Connectors: ${fmt(d.rodsOrConnectors)}')
+      ..writeln('Implants: ${fmt(d.implants)}')
+      ..writeln('Biologics: ${fmt(d.biologics)}')
+      ..writeln()
+      ..writeln('NOTES')
+      ..writeln(fmt(d.caseNotes));
+
+    isSendingMail.value = true;
+    try {
+      await EmailHelper.compose(
+        to: email,
+        subject: 'Surgery Details - PT ID ${fmt(d.patientId)}',
+        body: body.toString(),
+      );
+    } finally {
+      isSendingMail.value = false;
+    }
   }
 
   final pickingRadiologyLabel = ''.obs;

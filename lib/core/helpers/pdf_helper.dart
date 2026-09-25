@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart' show Rect, WidgetsBinding;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
+import 'toast_mesage_helper.dart';
 import '../../features/ representative/all_surgeries/model/surgery_model.dart';
 import '../../features/ representative/physicions/domain/model/physician_model.dart';
+import '../../features/ representative/sales/model/sales_model.dart';
+import '../../features/manager/commission/model/manager_commission_model.dart';
 
 class PdfHelper {
   static const _primary = PdfColor.fromInt(0xFF00C5DA);
@@ -144,6 +149,275 @@ class PdfHelper {
     await _saveAndShare(pdf, 'physician_${p.id}.pdf', 'Physician Profile');
   }
 
+  // ── Packing slip PDF ───────────────────────────────────────────────────────
+  static Future<void> sharePackingSlipPdf(SaleDetailModel d) async {
+    final pdf = pw.Document();
+    final items = d.inventoryItems;
+    final subtotal =
+        items.fold<double>(0, (sum, i) => sum + (i.price * i.qty));
+    final total = subtotal > 0 ? subtotal : d.totalAmount;
+    String money(double v) => '\$${v.toStringAsFixed(2)}';
+
+    pw.Widget cell(String text,
+            {pw.TextAlign align = pw.TextAlign.left, bool bold = false}) =>
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+          child: pw.Text(
+            text,
+            textAlign: align,
+            style: pw.TextStyle(
+              fontSize: 10,
+              fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+              color: bold ? _subText : PdfColors.black,
+            ),
+          ),
+        );
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(36),
+        theme: pw.ThemeData.withFont(
+          base: pw.Font.helvetica(),
+          bold: pw.Font.helveticaBold(),
+        ),
+        build: (ctx) => [
+          _pageHeader('Packing Slip'),
+          pw.SizedBox(height: 20),
+
+          _sectionBox('Sale Info', [
+            _infoRow('Sale ID', d.saleNumber),
+            _infoRow('Date', d.procedureDate),
+            _infoRow('Facility', d.facility),
+            _infoRow('Physician', d.physician),
+            _infoRow('Vendor', d.vendor),
+            _infoRow('PO Number', d.ppoNumber),
+          ]),
+          pw.SizedBox(height: 14),
+
+          _sectionBox('Items', [
+            pw.Table(
+              border: pw.TableBorder(
+                horizontalInside: pw.BorderSide(color: _border, width: 0.5),
+                bottom: pw.BorderSide(color: _border, width: 0.5),
+              ),
+              columnWidths: const {
+                0: pw.FlexColumnWidth(5),
+                1: pw.FlexColumnWidth(2),
+                2: pw.FlexColumnWidth(3),
+              },
+              children: [
+                pw.TableRow(children: [
+                  cell('PRODUCT', bold: true),
+                  cell('QTY', align: pw.TextAlign.center, bold: true),
+                  cell('PRICE', align: pw.TextAlign.right, bold: true),
+                ]),
+                if (items.isEmpty)
+                  pw.TableRow(children: [cell('No items.'), cell(''), cell('')])
+                else
+                  ...items.map((i) => pw.TableRow(children: [
+                        cell([
+                          i.name.isEmpty ? i.tag : i.name,
+                          if (i.serial.isNotEmpty) 'SN: ${i.serial}',
+                        ].join('\n')),
+                        cell(i.qty.toString().padLeft(2, '0'),
+                            align: pw.TextAlign.center),
+                        cell(i.price > 0 ? money(i.price * i.qty) : '—',
+                            align: pw.TextAlign.right),
+                      ])),
+              ],
+            ),
+            pw.SizedBox(height: 10),
+            if (subtotal > 0)
+              pw.Align(
+                alignment: pw.Alignment.centerRight,
+                child: pw.Text('Subtotal:  ${money(subtotal)}',
+                    style: const pw.TextStyle(fontSize: 11, color: _subText)),
+              ),
+            pw.SizedBox(height: 4),
+            pw.Align(
+              alignment: pw.Alignment.centerRight,
+              child: pw.Text('TOTAL:  ${money(total)}',
+                  style: pw.TextStyle(
+                      fontSize: 13, fontWeight: pw.FontWeight.bold)),
+            ),
+          ]),
+
+          pw.SizedBox(height: 20),
+          _footer(),
+        ],
+      ),
+    );
+
+    await _saveAndShare(
+        pdf, 'packing_slip_${d.saleNumber.isEmpty ? d.id : d.saleNumber}.pdf',
+        'Packing Slip');
+  }
+
+  // ── Missing / damaged instrument report PDF ────────────────────────────────
+  static Future<void> shareMissingReportPdf({
+    required String id,
+    required String trayTitle,
+    required String instrumentName,
+    required String issueType,
+    required String vendorName,
+    String reportedBy = '',
+    String date = '',
+    String notes = '',
+    List<String> evidenceUrls = const [],
+  }) async {
+    // Download evidence images up front; skip any that fail or aren't images.
+    final images = <pw.MemoryImage>[];
+    for (final url in evidenceUrls) {
+      final lower = url.toLowerCase().split('?').first;
+      if (!(lower.endsWith('.png') ||
+          lower.endsWith('.jpg') ||
+          lower.endsWith('.jpeg') ||
+          lower.endsWith('.webp'))) {
+        continue;
+      }
+      try {
+        final res = await Dio().get<List<int>>(url,
+            options: Options(responseType: ResponseType.bytes));
+        if (res.data != null) {
+          images.add(pw.MemoryImage(Uint8List.fromList(res.data!)));
+        }
+      } catch (_) {}
+    }
+
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(36),
+        theme: pw.ThemeData.withFont(
+          base: pw.Font.helvetica(),
+          bold: pw.Font.helveticaBold(),
+        ),
+        build: (ctx) => [
+          _pageHeader('Missing Instrument Report'),
+          pw.SizedBox(height: 20),
+          _sectionBox('Report Info', [
+            _infoRow('Tray', trayTitle),
+            _infoRow('Instrument', instrumentName),
+            _infoRow('Issue Type', issueType),
+            _infoRow('Vendor', vendorName),
+            _infoRow('Reported By', reportedBy),
+            _infoRow('Date', _fmtDate(date)),
+          ]),
+          pw.SizedBox(height: 14),
+          _sectionBox('Description & Notes', [
+            pw.Text(
+              notes.isNotEmpty ? notes : 'No notes added.',
+              style: pw.TextStyle(
+                fontSize: 11,
+                color: notes.isNotEmpty ? PdfColors.black : _subText,
+              ),
+            ),
+          ]),
+          if (images.isNotEmpty) ...[
+            pw.SizedBox(height: 14),
+            _sectionBox('Evidence', [
+              pw.Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: images
+                    .map((img) => pw.Container(
+                          width: 160,
+                          height: 160,
+                          child: pw.Image(img, fit: pw.BoxFit.cover),
+                        ))
+                    .toList(),
+              ),
+            ]),
+          ],
+          pw.SizedBox(height: 20),
+          _footer(),
+        ],
+      ),
+    );
+
+    await _saveAndShare(pdf, 'missing_report_$id.pdf', 'Missing Instrument Report');
+  }
+
+  // ── Commission receipt PDF ─────────────────────────────────────────────────
+  static Future<void> shareCommissionReceiptPdf(CommissionDetailModel d) async {
+    String money(double v) => '\$${v.toStringAsFixed(2)}';
+    final isPaid = d.paymentStatus == CommissionPaymentStatus.paid;
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(36),
+        theme: pw.ThemeData.withFont(
+          base: pw.Font.helvetica(),
+          bold: pw.Font.helveticaBold(),
+        ),
+        build: (ctx) => [
+          _pageHeader('Commission Receipt'),
+          pw.SizedBox(height: 20),
+
+          // Amount + status
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.all(16),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: _border, width: 0.8),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+            ),
+            child: pw.Column(children: [
+              pw.Text(money(d.totalCommissionDue),
+                  style: pw.TextStyle(
+                      fontSize: 26,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColor.fromInt(0xFF1DB954))),
+              pw.SizedBox(height: 4),
+              pw.Text(isPaid ? 'PAID' : 'UNPAID',
+                  style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                      color: isPaid
+                          ? PdfColor.fromInt(0xFF1DB954)
+                          : PdfColors.orange)),
+            ]),
+          ),
+          pw.SizedBox(height: 14),
+
+          _sectionBox('Sale Details', [
+            _infoRow('Sale ID', d.saleId),
+            _infoRow('Date', d.date),
+            _infoRow('Representative', d.repName),
+            _infoRow('Facility', d.facility),
+            _infoRow('Sale Amount', d.saleAmount > 0 ? money(d.saleAmount) : ''),
+            _infoRow('Commission Rate', d.rate > 0 ? '${d.rate.toInt()}%' : ''),
+          ]),
+
+          if (d.splits.isNotEmpty) ...[
+            pw.SizedBox(height: 14),
+            _sectionBox('Commission Split', [
+              ...d.splits.map((sp) => _infoRow(
+                    sp.name,
+                    [
+                      '${sp.splitPercent}%',
+                      if (sp.splitAmount != null) money(sp.splitAmount!),
+                    ].join('  ·  '),
+                  )),
+              if (d.totalCommissionPool > 0)
+                _infoRow('Total Pool', money(d.totalCommissionPool)),
+            ]),
+          ],
+
+          pw.SizedBox(height: 20),
+          _footer(),
+        ],
+      ),
+    );
+
+    final ref = d.saleId.isNotEmpty ? d.saleId : d.id;
+    await _saveAndShare(pdf, 'commission_receipt_$ref.pdf', 'Commission Receipt');
+  }
+
   // ── Shared widgets ─────────────────────────────────────────────────────────
   static pw.Widget _pageHeader(String title) {
     return pw.Container(
@@ -237,7 +511,24 @@ class PdfHelper {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$fileName');
     await file.writeAsBytes(bytes);
-    await Share.shareXFiles([XFile(file.path)], subject: subject);
+    await _share([XFile(file.path)], subject: subject);
+  }
+
+  // iOS/iPad requires a non-zero sharePositionOrigin, otherwise the share
+  // sheet throws a PlatformException. Anchor it to the screen centre.
+  static Rect _shareOrigin() {
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final size = view.physicalSize / view.devicePixelRatio;
+    return Rect.fromLTWH(size.width / 2, size.height / 2, 1, 1);
+  }
+
+  static Future<void> _share(List<XFile> files, {String? subject}) async {
+    try {
+      await Share.shareXFiles(files,
+          subject: subject, sharePositionOrigin: _shareOrigin());
+    } catch (_) {
+      ToastMessageHelper.showToastMessage('Failed to share file.', title: 'Error');
+    }
   }
 
   // ── Save a base64-encoded file (e.g. chatbot attachment) & share ───────────
@@ -253,7 +544,7 @@ class PdfHelper {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$fileName');
     await file.writeAsBytes(bytes);
-    await Share.shareXFiles([XFile(file.path)]);
+    await _share([XFile(file.path)]);
   }
 
   // ── Download from URL & share ──────────────────────────────────────────────
@@ -264,8 +555,13 @@ class PdfHelper {
         : 'document';
     final dir = await getTemporaryDirectory();
     final savePath = '${dir.path}/$fileName';
-    await Dio().download(url, savePath);
-    await Share.shareXFiles([XFile(savePath)]);
+    try {
+      await Dio().download(url, savePath);
+    } catch (_) {
+      ToastMessageHelper.showToastMessage('Failed to download file.', title: 'Error');
+      return;
+    }
+    await _share([XFile(savePath)]);
   }
 
   static String _fmtDate(String iso) {

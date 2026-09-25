@@ -51,6 +51,10 @@ class AddImplantController extends GetxController {
   final isLoadingFacilities = true.obs;
   final isLoadingVendors = true.obs;
   final isSaving = false.obs;
+
+  final vendorError = Rxn<String>();
+  final facilityError = Rxn<String>();
+  final systemTypeError = Rxn<String>();
   final facilities = <FacilityOption>[].obs;
   final vendors = <VendorOption>[].obs;
 
@@ -158,14 +162,19 @@ class AddImplantController extends GetxController {
   void selectFacility(String id, String name) {
     selectedFacilityId.value = id;
     selectedFacilityName.value = name;
+    facilityError.value = null;
   }
 
   void selectVendor(String id, String name) {
     selectedVendorId.value = id;
     selectedVendorName.value = name;
+    vendorError.value = null;
   }
 
-  void setSystemType(String? v) => selectedSystemType.value = v;
+  void setSystemType(String? v) {
+    selectedSystemType.value = v;
+    systemTypeError.value = null;
+  }
   void setSystemSubType(String? v) => selectedSystemSubType.value = v;
 
   Future<void> pickInboundImage(BuildContext context) async {
@@ -214,10 +223,27 @@ class AddImplantController extends GetxController {
 
   Future<bool> save() async {
     if (!(formKey.currentState?.validate() ?? false)) return false;
+
+    // Reset field errors
+    facilityError.value = null;
+    vendorError.value = null;
+    systemTypeError.value = null;
+
     final facilityId = selectedFacilityId.value;
-    if (facilityId == null || facilityId.isEmpty) return false;
+    if (facilityId == null || facilityId.isEmpty) {
+      facilityError.value = 'Please select a facility.';
+      return false;
+    }
+    final vendorId = selectedVendorId.value;
+    if (vendorId == null || vendorId.isEmpty) {
+      vendorError.value = 'Please select a vendor.';
+      return false;
+    }
     final systemType = selectedSystemType.value;
-    if (systemType == null || systemType.isEmpty) return false;
+    if (systemType == null || systemType.isEmpty) {
+      systemTypeError.value = 'Please select a system type.';
+      return false;
+    }
     try {
       isSaving.value = true;
       final token = await PrefsHelper.getString('auth_token');
@@ -228,7 +254,7 @@ class AddImplantController extends GetxController {
           facilityId: facilityId,
           serialNumber: serial1Controller.text.trim(),
           systemType: systemType,
-          vendor: selectedVendorName.value ?? '',
+          vendor: vendorId,
           recipientEmail: recipientEmailController.text.trim(),
           additionalNotes: additionalNotesController.text.trim(),
           brokenNotes: brokenNotesController.text.trim(),
@@ -242,7 +268,7 @@ class AddImplantController extends GetxController {
           serialNumber: serial1Controller.text.trim(),
           systemType: systemType,
           material: selectedSystemSubType.value,
-          vendor: selectedVendorName.value ?? '',
+          vendor: vendorId,
           recipientEmail: recipientEmailController.text.trim(),
           additionalNotes: additionalNotesController.text.trim(),
           brokenNotes: brokenNotesController.text.trim(),

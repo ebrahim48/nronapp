@@ -281,9 +281,10 @@ class _MissingInstrumentScreenState extends State<MissingInstrumentScreen> {
                 title: 'Submit Report',
                 loading: c.isSubmitting.value,
                 onpress: () async {
-                  final ok = await c.submitReport();
-                  if (ok && context.mounted) {
-                    context.pushNamed(AppRoutes.reportSuccessScreen);
+                  final instrumentId = await c.submitReport();
+                  if (instrumentId != null && context.mounted) {
+                    context.pushNamed(AppRoutes.reportSuccessScreen,
+                        extra: instrumentId);
                   }
                 },
                 prefixIcon: Icon(

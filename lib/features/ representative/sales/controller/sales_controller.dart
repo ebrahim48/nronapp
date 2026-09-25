@@ -10,6 +10,7 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../data/repositories/sales_repository.dart';
 import '../model/sales_model.dart';
+import '../../../../core/helpers/email_helper.dart';
 
 class SaleController extends GetxController {
   final _repo = SalesRepository(
@@ -36,6 +37,7 @@ class SaleController extends GetxController {
   final allSalesFilter = ''.obs; // '' = all, 'pending', 'approved', 'rejected'
   int _allSalesPage = 1;
   int _allSalesTotalPage = 1;
+  int _allSalesRequestId = 0; // drops stale responses on fast tab switches
   final allSalesScrollController = ScrollController();
 
   final detailObs = Rxn<SaleDetailModel>();
@@ -230,6 +232,7 @@ class SaleController extends GetxController {
   }
 
   Future<void> fetchAllSales({bool reset = true, String? filter}) async {
+    final requestId = reset ? ++_allSalesRequestId : _allSalesRequestId;
     if (reset) {
       _allSalesPage = 1;
       allSalesList.clear();
@@ -244,12 +247,15 @@ class SaleController extends GetxController {
       final status = allSalesFilter.value.isEmpty ? null : allSalesFilter.value;
       final res = await _repo.getAll(token,
           page: _allSalesPage, limit: 15, status: status);
+      if (requestId != _allSalesRequestId) return; // a newer tab took over
       if (res['success'] == true) {
         final data = res['data'] as Map<String, dynamic>;
         final meta = data['meta'] as Map<String, dynamic>? ?? {};
         _allSalesTotalPage = (meta['totalPage'] as num?)?.toInt() ?? 1;
         final results = (data['results'] as List<dynamic>)
             .map((e) => SaleModel.fromJson(e as Map<String, dynamic>))
+            // Enforce the tab client-side too, in case the API ignores status.
+            .where((s) => status == null || s.status.name == status)
             .toList();
         allSalesList.addAll(results);
       }
@@ -257,8 +263,17 @@ class SaleController extends GetxController {
     } on ServerException catch (_) {
     } catch (_) {
     } finally {
-      isLoadingAllSales.value = false;
-      isLoadingMoreAllSales.value = false;
+      if (requestId == _allSalesRequestId) {
+        isLoadingAllSales.value = false;
+        isLoadingMoreAllSales.value = false;
+      }
+    }
+    // Too few matches on this page to scroll → pull the next page.
+    if (requestId == _allSalesRequestId &&
+        allSalesList.length < 10 &&
+        _allSalesPage < _allSalesTotalPage) {
+      _allSalesPage++;
+      await fetchAllSales(reset: false);
     }
   }
 
@@ -339,6 +354,50 @@ class SaleController extends GetxController {
       isConverting.value = false;
     }
     return false;
+  }
+
+  // ── Packing slip: email to vendor ─────────────────────────────────────────
+  Future<void> emailPackingSlipToVendor(SaleDetailModel d) async {
+    String fmt(String v) => v.trim().isEmpty ? '—' : v.trim();
+    final items = d.inventoryItems;
+    final subtotal =
+        items.fold<double>(0, (sum, i) => sum + (i.price * i.qty));
+    final total = subtotal > 0 ? subtotal : d.totalAmount;
+
+    final body = StringBuffer()
+      ..writeln('Hello ${fmt(d.vendor)},')
+      ..writeln()
+      ..writeln('Please find the packing slip details below.')
+      ..writeln()
+      ..writeln('PACKING SLIP')
+      ..writeln('Sale ID: ${fmt(d.saleNumber)}')
+      ..writeln('Date: ${fmt(d.procedureDate)}')
+      ..writeln('Facility: ${fmt(d.facility)}')
+      ..writeln('Physician: ${fmt(d.physician)}')
+      ..writeln('PO Number: ${fmt(d.ppoNumber)}')
+      ..writeln()
+      ..writeln('ITEMS');
+    if (items.isEmpty) {
+      body.writeln('No items.');
+    } else {
+      for (final i in items) {
+        final name = i.name.isEmpty ? i.tag : i.name;
+        final sn = i.serial.isNotEmpty ? ' (SN: ${i.serial})' : '';
+        final price = i.price > 0
+            ? ' - \$${(i.price * i.qty).toStringAsFixed(2)}'
+            : '';
+        body.writeln('• $name$sn x${i.qty}$price');
+      }
+    }
+    body
+      ..writeln()
+      ..writeln('TOTAL: \$${total.toStringAsFixed(2)}');
+
+    await EmailHelper.compose(
+      to: d.vendorEmail.trim(),
+      subject: 'Packing Slip - ${fmt(d.saleNumber)}',
+      body: body.toString(),
+    );
   }
 
   Future<void> fetchDropdowns() async {
@@ -572,6 +631,7 @@ class SaleController extends GetxController {
 
 
   void clearForm() {
+    submitError.value = null;
     selectedSaleType.value = SaleType.sold;
     selectedPhysician.value = '';
     selectedPhysicianName.value = '';
@@ -602,7 +662,40 @@ class SaleController extends GetxController {
   }
 
 
+  final submitError = Rxn<String>();
+
+  /// Maps the raw productModel/productType string to a valid API productModel.
+  /// API accepts: 'Implant' | 'Tray' | 'Bio' | 'PurchaseOrder'
+  /// Falls back to 'Implant' if value is unrecognised or empty.
+  String _toApiProductModel(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'implant':
+        return 'Implant';
+      case 'tray':
+        return 'Tray';
+      case 'bio':
+        return 'Bio';
+      case 'purchaseorder':
+        return 'PurchaseOrder';
+      default:
+        return 'Implant'; // safe fallback — never send empty string
+    }
+  }
+
+  /// Maps the rep role to a valid API assignRole value.
+  /// API accepts: 'primary' | 'assist'
+  String _toApiAssignRole(String role) {
+    switch (role.toLowerCase()) {
+      case 'assist':
+        return 'assist';
+      case 'primary':
+      default:
+        return 'primary';
+    }
+  }
+
   Future<bool> submitSale(BuildContext context, {String? saleId}) async {
+    submitError.value = null;
     final physicianId = selectedPhysician.value;
     final facilityId = selectedFacility.value;
     final vendorId = selectedVendorId.value;
@@ -644,7 +737,7 @@ class SaleController extends GetxController {
     final reps = addedRepresentatives
         .map((r) => {
               'representative': r.id,
-              'assignRole': r.role.toLowerCase(),
+              'assignRole': _toApiAssignRole(r.role),
               'commissionRate': r.commissionPercent,
             })
         .toList();
@@ -652,13 +745,15 @@ class SaleController extends GetxController {
     final inventory = [
       ...selectedImplants.map((item) => {
             'product': item.id,
-            'productModel': item.productModel,
-            'productType': item.productType,
+            'productModel': _toApiProductModel(
+                item.productModel.isNotEmpty ? item.productModel : item.productType),
+            'productType': 'inventory',
           }),
       ...selectedPoItems.map((item) => {
             'product': item.id,
-            'productModel': item.productModel,
-            'productType': item.productType,
+            'productModel': _toApiProductModel(
+                item.productModel.isNotEmpty ? item.productModel : item.productType),
+            'productType': 'purchase',
           }),
     ];
 
@@ -709,14 +804,27 @@ class SaleController extends GetxController {
         fetchOverview();
         return true;
       } else {
-        final msg =
-            res['message']?.toString() ?? 'Failed to save sale';
-        ToastMessageHelper.showToastMessage(msg, title: 'Error');
+        // Parse validation errorMessages if present
+        final errorMessages = res['errorMessages'];
+        if (errorMessages is List && errorMessages.isNotEmpty) {
+          final msgs = errorMessages
+              .map((e) => (e as Map<String, dynamic>)['message']?.toString() ?? '')
+              .where((m) => m.isNotEmpty)
+              .join('\n');
+          submitError.value = msgs;
+          ToastMessageHelper.showToastMessage(msgs, title: 'Validation Error');
+        } else {
+          final msg = res['message']?.toString() ?? 'Failed to save sale';
+          submitError.value = msg;
+          ToastMessageHelper.showToastMessage(msg, title: 'Error');
+        }
       }
     } on NoInternetException {
+      submitError.value = 'No internet connection.';
       ToastMessageHelper.showToastMessage('No internet connection.',
           title: 'Error');
     } on ServerException catch (e) {
+      submitError.value = e.message;
       ToastMessageHelper.showToastMessage(e.message, title: 'Error');
     } catch (_) {
     } finally {

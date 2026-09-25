@@ -41,20 +41,30 @@ class ApiService {
           final requestOptions = error.requestOptions;
 
           // Only attempt refresh on 401 or 403, and not on the refresh endpoint itself
+          // Also skip for endpoints that handle auth errors themselves
           if ((statusCode == 401 || statusCode == 403) &&
-              !requestOptions.path.contains(ApiConstants.refreshToken)) {
+              !requestOptions.path.contains(ApiConstants.refreshToken) &&
+              !requestOptions.path.contains('send-vendor')) {
             try {
               final refreshToken =
                   await PrefsHelper.getString('auth_refresh_token');
               if (refreshToken.isEmpty) {
-                _logout();
-                return handler.next(error);
+                await _logout();
+                return handler.reject(error, true);
               }
 
-              // Call refresh-token endpoint
+              // Server reads req.cookies.refresh_token (note: underscore).
+              // Flutter cannot receive httpOnly cookies, so we manually set
+              // the Cookie header with both possible names to cover the mismatch.
               final refreshRes = await _dio.post(
                 ApiConstants.refreshToken,
                 data: {'refreshToken': refreshToken},
+                options: Options(
+                  headers: {
+                    'Cookie':
+                        'refresh_token=$refreshToken; refreshToken=$refreshToken',
+                  },
+                ),
               );
 
               final data =
@@ -63,8 +73,8 @@ class ApiService {
                   (data['accessToken'] ?? data['token'] ?? '').toString();
 
               if (newToken.isEmpty) {
-                _logout();
-                return handler.next(error);
+                await _logout();
+                return handler.reject(error, true);
               }
 
               await PrefsHelper.setString('auth_token', newToken);
@@ -74,8 +84,8 @@ class ApiService {
               final retryRes = await _dio.fetch(requestOptions);
               return handler.resolve(retryRes);
             } catch (_) {
-              _logout();
-              return handler.next(error);
+              await _logout();
+              return handler.reject(error, true);
             }
           }
 
@@ -117,10 +127,10 @@ class ApiService {
     }
   }
 
-  void _logout() {
-    PrefsHelper.remove('auth_token');
-    PrefsHelper.remove('auth_refresh_token');
-    PrefsHelper.remove('user_role');
+  Future<void> _logout() async {
+    await PrefsHelper.remove('auth_token');
+    await PrefsHelper.remove('auth_refresh_token');
+    await PrefsHelper.remove('user_role');
     AppRoutes.goRouter.go(AppRoutes.roleSelection);
   }
 

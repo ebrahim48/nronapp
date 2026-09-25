@@ -21,7 +21,9 @@ class ReviewSendPoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ReviewSendPoController());
+    final controller = Get.isRegistered<ReviewSendPoController>()
+        ? Get.find<ReviewSendPoController>()
+        : Get.put(ReviewSendPoController());
 
     return Scaffold(
       backgroundColor: _bg,

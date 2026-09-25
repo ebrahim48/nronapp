@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import '../../../core/helpers/pdf_helper.dart';
 import '../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
@@ -484,7 +485,7 @@ class PackingSlipScreen extends StatelessWidget {
                 children: [
                   CustomButton(
                     title: 'Generate PDF',
-                    onpress: () {},
+                    onpress: () => PdfHelper.sharePackingSlipPdf(d),
                     color: Colors.transparent,
                     borderColor: AppColors.warningColor,
                     titlecolor: AppColors.warningColor,
@@ -502,7 +503,7 @@ class PackingSlipScreen extends StatelessWidget {
                   SizedBox(height: 10.h),
                   CustomButton(
                     title: 'Email to Vendor',
-                    onpress: () {},
+                    onpress: () => c.emailPackingSlipToVendor(d),
                     color: const Color(0xFF1E2A3A),
                     titlecolor: AppColors.primaryTextColor,
                     fontWeight: FontWeight.w600,

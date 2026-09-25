@@ -117,6 +117,7 @@ class SurgeryDetailModel {
   final String plates;
   final String rodsOrConnectors;
   final String implants;
+  final String biologics;
   // radiology
   final String patientSticker;
   final String preOpAP;
@@ -149,6 +150,7 @@ class SurgeryDetailModel {
     this.plates = '',
     this.rodsOrConnectors = '',
     this.implants = '',
+    this.biologics = '',
     this.patientSticker = '',
     this.preOpAP = '',
     this.postOpAP = '',
@@ -189,6 +191,7 @@ class SurgeryDetailModel {
       plates: materials['plates'] ?? '',
       rodsOrConnectors: materials['rodsOrconnectors'] ?? '',
       implants: materials['implants'] ?? '',
+      biologics: materials['biologics'] ?? '',
       patientSticker: radiology['patientSticker'] ?? '',
       preOpAP: radiology['preOpAP'] ?? '',
       postOpAP: radiology['postOpAP'] ?? '',

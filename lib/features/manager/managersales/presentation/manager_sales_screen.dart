@@ -104,16 +104,40 @@ class ManagerSalesScreen extends StatelessWidget {
                 }
 
                 // ── List ───────────────────────────────────────────────
-                return ListView.builder(
-                  padding: EdgeInsets.only(bottom: 24.h),
-                  itemCount: list.length,
-                  itemBuilder: (context, i) => ManagerSaleCard(
-                    sale: list[i],
-                    onTap: () async {
-                      await c.fetchSaleDetail(list[i].id);
-                      if (context.mounted) {
-                        context.push(AppRoutes.managerSaleDetailScreen);
+                return RefreshIndicator(
+                  color: AppColors.primaryColor,
+                  backgroundColor: const Color(0xFF1E2427),
+                  onRefresh: () => c.fetchSales(),
+                  child: ListView.builder(
+                    controller: c.scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.only(bottom: 24.h),
+                    itemCount:
+                        list.length + (c.isLoadingMore.value ? 1 : 0),
+                    itemBuilder: (context, i) {
+                      if (i == list.length) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          child: Center(
+                            child: SizedBox(
+                              width: 22.r,
+                              height: 22.r,
+                              child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primaryColor),
+                            ),
+                          ),
+                        );
                       }
+                      return ManagerSaleCard(
+                        sale: list[i],
+                        onTap: () async {
+                          await c.fetchSaleDetail(list[i].id);
+                          if (context.mounted) {
+                            context.push(AppRoutes.managerSaleDetailScreen);
+                          }
+                        },
+                      );
                     },
                   ),
                 );

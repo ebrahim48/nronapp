@@ -12,6 +12,7 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../../purchaseorder/data/repositories/purchase_order_repository.dart';
 import '../../purchaseorder/model/purchase_order_model.dart';
+import 'review_send_po_controller.dart';
 
 class UpdatePurchaseController extends GetxController {
   final String orderId;
@@ -303,6 +304,41 @@ class UpdatePurchaseController extends GetxController {
       );
       if (res['success'] == true) {
         if (navigate && context.mounted) {
+          // Pre-populate ReviewSendPoController with real data from API response
+          final data = res['data'] as Map<String, dynamic>? ?? {};
+          final reviewCtrl = Get.put(ReviewSendPoController());
+
+          reviewCtrl.poNumber.value =
+              data['purchaseOrderNumber']?.toString() ?? '';
+          reviewCtrl.poStatus.value = data['status']?.toString() ?? '';
+          reviewCtrl.poType.value = data['orderType']?.toString() ?? '';
+
+          final rawDocs = data['documents'];
+          if (rawDocs is List && rawDocs.isNotEmpty) {
+            final urls = rawDocs.map((e) => e.toString()).toList();
+            final updatedDocs = List<Map<String, dynamic>>.generate(
+              urls.length,
+              (i) {
+                final url = urls[i];
+                final fileName = url.split('/').last;
+                final ext = fileName.contains('.')
+                    ? fileName.split('.').last.toLowerCase()
+                    : 'file';
+                return {
+                  'id': '${i + 1}',
+                  'name': fileName,
+                  'size': '',
+                  'date': '',
+                  'type': ['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)
+                      ? 'image'
+                      : ext,
+                  'url': url,
+                };
+              },
+            );
+            reviewCtrl.documents.value = updatedDocs;
+          }
+
           context.pushNamed(AppRoutes.reviewSendPoScreen);
         } else {
           ToastMessageHelper.showToastMessage('Order updated successfully.', title: 'Success');

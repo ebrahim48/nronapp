@@ -79,9 +79,9 @@ class InventoryScreen extends StatelessWidget {
           ),
           child: Center(
             child: SvgPicture.asset(
-              'assets/icons/tapbutton.svg',
-              width: 32.r,
-              height: 32.r,
+              'assets/icons/plusicon.svg',
+              width: 22.r,
+              height: 22.r,
             ),
           ),
         ),
@@ -192,10 +192,11 @@ class InventoryScreen extends StatelessWidget {
 
             SizedBox(height: 24.h),
 
-            InventorySearchBar(
+            Obx(() => InventorySearchBar(
               onSearch: c.onSearch,
-              onFilter: c.openFilter,
-            ),
+              onFilter: () => c.openFilter(context),
+              filterActive: c.isFilterActive,
+            )),
 
             SizedBox(height: 24.h),
 

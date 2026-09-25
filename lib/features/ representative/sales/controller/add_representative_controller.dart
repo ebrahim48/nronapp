@@ -9,7 +9,7 @@ class AddRepresentativeController extends GetxController {
   final commissionController = TextEditingController();
   final selectedRole = 'Assist'.obs;
 
-  final roles = ['Primary', 'Assist', 'Manager'];
+  final roles = ['Primary', 'Assist'];
 
   RepresentativeModel build() {
     return RepresentativeModel(

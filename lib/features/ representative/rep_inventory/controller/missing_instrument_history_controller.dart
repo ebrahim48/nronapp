@@ -8,6 +8,7 @@ import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../data/repositories/inventory_repository.dart';
 import '../model/missing_instrument_model.dart';
+import '../presentation/widgets/status_filter_sheet.dart';
 
 class MissingInstrumentHistoryController extends GetxController {
   final _repo = InventoryRepository(
@@ -19,20 +20,25 @@ class MissingInstrumentHistoryController extends GetxController {
   final totalCount = 0.obs;
   final missingCount = 0.obs;
   final searchQuery = ''.obs;
+  final selectedStatus = ''.obs; // '' = All, else statusLabel
   final TextEditingController searchController = TextEditingController();
 
   final _allItems = <MissingInstrumentModel>[].obs;
 
   List<MissingInstrumentModel> get filteredItems {
-    if (searchQuery.value.isEmpty) return _allItems;
-    final q = searchQuery.value.toLowerCase();
-    return _allItems
-        .where((e) =>
-            e.trayId.toLowerCase().contains(q) ||
-            e.facility.toLowerCase().contains(q) ||
-            e.instrumentName.toLowerCase().contains(q))
-        .toList();
+    final q = searchQuery.value.trim().toLowerCase();
+    final status = selectedStatus.value;
+    return _allItems.where((e) {
+      if (status.isNotEmpty && e.statusLabel != status) return false;
+      if (q.isEmpty) return true;
+      return e.trayId.toLowerCase().contains(q) ||
+          e.facility.toLowerCase().contains(q) ||
+          e.instrumentName.toLowerCase().contains(q) ||
+          e.reportedBy.toLowerCase().contains(q);
+    }).toList();
   }
+
+  bool get isFilterActive => selectedStatus.value.isNotEmpty;
 
   @override
   void onInit() {
@@ -127,5 +133,15 @@ class MissingInstrumentHistoryController extends GetxController {
     );
   }
 
-  void openFilter(BuildContext context) {}
+  Future<void> openFilter(BuildContext context) async {
+    const order = ['Missing', 'Damaged', 'Resolved', 'Other'];
+    final present = _allItems.map((e) => e.statusLabel).toSet();
+    final picked = await showStatusFilterSheet(
+      context,
+      title: 'Filter by Issue Type',
+      options: order.where(present.contains).toList(),
+      selected: selectedStatus.value,
+    );
+    if (picked != null) selectedStatus.value = picked;
+  }
 }

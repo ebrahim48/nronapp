@@ -1,11 +1,12 @@
 class ApiConstants {
 
 
-  static const String baseUrl = 'https://api.holepackage.com/api/v1';
-  static const String socketUrl = "https://api.holepackage.com";
+  static const String baseUrl = 'https://dgpjqg8r-1000.inc1.devtunnels.ms/api/v1';
+  static const String socketUrl = "https://dgpjqg8r-1000.inc1.devtunnels.ms";
 
 
-
+  // static const String baseUrl = 'https://api.holepackage.com/api/v1';
+  // static const String socketUrl = "https://api.holepackage.com";
 
   static const String apiVersion = '/api/v1';
 
@@ -107,6 +108,7 @@ class ApiConstants {
   static String deleteTrayById(String id) => '/tray/delete/$id';
   static String sendTrayById(String id) => '/tray/send/$id';
   static String receiveTrayById(String id) => '/tray/receive/$id';
+  static String sendTrayToVendor(String id) => '/tray/send-vendor/$id';
   static const String getSummaryCount = '/missing-instrument/my-overview';
   static const String getMissingHistory = '/missing-instrument/history';
   static const String createMissingInstrument = '/missing-instrument/create';

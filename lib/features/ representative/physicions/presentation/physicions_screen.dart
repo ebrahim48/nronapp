@@ -8,6 +8,8 @@ import '../../appdrawer/app_drawer.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/physicians_controller.dart';
 import '../domain/model/physician_model.dart';
+import '../../all_surgeries/controller/surgery_controller.dart';
+import '../../all_surgeries/presentation/add_surgery_screen.dart';
 import 'add_physicians_screen.dart';
 import 'physicions_profile_screen.dart';
 import 'widgets/physician_card.dart';
@@ -204,7 +206,17 @@ class PhysiciansScreen extends StatelessWidget {
                                   PhysicianProfileScreen(physician: p),
                             ),
                           ),
-                          onAddSurgeries: () {},
+                          onAddSurgeries: () {
+                            final sc = Get.isRegistered<SurgeryController>()
+                                ? Get.find<SurgeryController>()
+                                : Get.put(SurgeryController());
+                            sc.clearForm();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const AddSurgeryScreen()),
+                            );
+                          },
                           onEdit: () async {
                             final result = await Navigator.push<bool>(
                               context,

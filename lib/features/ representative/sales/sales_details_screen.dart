@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ import 'create_sales_screen.dart';
 import 'model/sales_model.dart';
 import 'packing_slip_screen.dart';
 import '../../../core/custom_widgets/document_preview.dart';
+import '../../../core/helpers/toast_mesage_helper.dart';
 
 
 class SaleDetailScreen extends StatefulWidget {
@@ -119,8 +121,25 @@ class _SaleDetailScreenState extends State<SaleDetailScreen> {
           _DetailSectionHeader(
             iconPath: 'assets/icons/shipmentinformation.svg',
             title: 'Shipment Information',
-            trailing: Icon(Icons.copy_outlined,
-                color: AppColors.secondaryTextColor, size: 18.r),
+            trailing: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () async {
+                final text = [
+                  'Sale ID: ${d.saleNumber}',
+                  'Sale Type: ${d.saleType}',
+                  'Physician: ${d.physician}',
+                  'Facility: ${d.facility}',
+                  'Procedure Date: ${d.procedureDate}',
+                ].join('\n');
+                await Clipboard.setData(ClipboardData(text: text));
+                ToastMessageHelper.showToastMessage('Shipment info copied');
+              },
+              child: Padding(
+                padding: EdgeInsets.all(4.r),
+                child: Icon(Icons.copy_outlined,
+                    color: AppColors.secondaryTextColor, size: 18.r),
+              ),
+            ),
           ),
 
           SizedBox(height: 10.h),

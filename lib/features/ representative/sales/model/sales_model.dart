@@ -198,6 +198,7 @@ class SaleDetailModel {
   final String serialNumbers;
   final String vendor;
   final String vendorId;
+  final String vendorEmail;
   final String ppoNumber;
   final double totalAmount;
   final double vendorPayment;
@@ -223,6 +224,7 @@ class SaleDetailModel {
     required this.serialNumbers,
     required this.vendor,
     this.vendorId = '',
+    this.vendorEmail = '',
     required this.ppoNumber,
     this.totalAmount = 0,
     this.vendorPayment = 0,
@@ -280,6 +282,9 @@ class SaleDetailModel {
     final vendorId = vendorRaw is Map
         ? vendorRaw['_id']?.toString() ?? ''
         : vendorRaw?.toString() ?? '';
+    final vendorEmail = vendorRaw is Map
+        ? vendorRaw['email']?.toString() ?? ''
+        : billingRaw['vendorEmail']?.toString() ?? '';
     final poNumber =
         billingRaw['purchaseOrderNumber']?.toString() ?? '';
     final totalAmount = _toDouble(billingRaw['totalAmount']);
@@ -398,6 +403,7 @@ class SaleDetailModel {
       serialNumbers: inventoryItems.map((i) => i.serial).join('\n'),
       vendor: vendorName,
       vendorId: vendorId,
+      vendorEmail: vendorEmail,
       ppoNumber: poNumber,
       totalAmount: totalAmount,
       vendorPayment: vendorPayment,
@@ -445,7 +451,20 @@ class ImplantItem {
   });
 
   factory ImplantItem.fromJson(Map<String, dynamic> json) {
-    final productModel = json['productModel']?.toString() ?? '';
+    // Determine productModel — API may return it directly, or we infer from
+    // which fields are present: Bio has itemName, Tray has title, Implant has systemType
+    String productModel = json['productModel']?.toString() ?? '';
+    if (productModel.isEmpty) {
+      if (json['purchaseOrderNumber'] != null) {
+        productModel = 'PurchaseOrder';
+      } else if (json['itemName'] != null && (json['itemName'] as String).isNotEmpty) {
+        productModel = 'Bio';
+      } else if (json['title'] != null && (json['title'] as String).isNotEmpty) {
+        productModel = 'Tray';
+      } else {
+        productModel = 'Implant';
+      }
+    }
     final statusStr = json['productStatus']?.toString() ?? json['status']?.toString() ?? '';
 
     ImplantAvailability availability;
@@ -513,7 +532,7 @@ class ImplantItem {
     return ImplantItem(
       id: json['_id']?.toString() ?? '',
       name: name,
-      productType: json['productType']?.toString() ?? '',
+      productType: 'inventory',
       productModel: productModel,
       serial: serial,
       material: material,

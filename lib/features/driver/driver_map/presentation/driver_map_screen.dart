@@ -12,22 +12,34 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/driver_map_controller.dart';
 
-class DriverMapScreen extends StatelessWidget {
+class DriverMapScreen extends StatefulWidget {
   final String? jobId;
 
   const DriverMapScreen({super.key, this.jobId});
 
   @override
+  State<DriverMapScreen> createState() => _DriverMapScreenState();
+}
+
+class _DriverMapScreenState extends State<DriverMapScreen> {
+  final c = Get.put(DriverMapController());
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch once here (not in build) so rebuilds don't refetch the job.
+    final jobId = widget.jobId;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (jobId != null && jobId.isNotEmpty) {
+        c.fetchJobForMap(jobId);
+      } else if (c.mapJob.value == null) {
+        c.loadActiveJob();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final c = Get.put(DriverMapController());
-
-    // Initialize with jobId if provided
-    if (jobId != null && jobId!.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        c.fetchJobForMap(jobId!);
-      });
-    }
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: Obx(() {
@@ -115,7 +127,9 @@ class DriverMapScreen extends StatelessWidget {
                     ),
                     Expanded(
                       child: job == null
-                          ? _buildShimmer()
+                          ? (c.hasNoActiveJob.value
+                              ? _buildEmptyState()
+                              : _buildShimmer())
                           : SingleChildScrollView(
                               padding: EdgeInsets.symmetric(
                                   horizontal: 16.w, vertical: 6.h),
@@ -280,6 +294,41 @@ class DriverMapScreen extends StatelessWidget {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.local_shipping_outlined,
+              color: AppColors.secondaryTextColor, size: 42.r),
+          SizedBox(height: 10.h),
+          CustomText(
+            text: 'No active delivery',
+            fontsize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primaryTextColor,
+          ),
+          SizedBox(height: 4.h),
+          CustomText(
+            text: 'Accept a job to see its route here',
+            fontsize: 11.sp,
+            color: AppColors.secondaryTextColor,
+          ),
+          SizedBox(height: 12.h),
+          TextButton(
+            onPressed: c.loadActiveJob,
+            child: CustomText(
+              text: 'Refresh',
+              fontsize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -159,7 +159,9 @@ class ManagerShipmentsScreen extends StatelessWidget {
                   textAlign: TextAlign.start,
                 ),
                 GestureDetector(
-                  onTap: () {},
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () =>
+                      context.push(AppRoutes.managerAllShipmentsScreen),
                   child: CustomText(
                     text: 'View All',
                     fontsize: 13.sp,
@@ -194,9 +196,11 @@ class ManagerShipmentsScreen extends StatelessWidget {
                 );
               }
 
-              final list = c.allShipments.isNotEmpty
-                  ? c.allShipments
-                  : c.activeShipments;
+              // Preview only — the full list lives behind "View All".
+              final source = c.activeShipments.isNotEmpty
+                  ? c.activeShipments
+                  : c.allShipments;
+              final list = source.take(5).toList();
 
               if (list.isEmpty) {
                 return Center(

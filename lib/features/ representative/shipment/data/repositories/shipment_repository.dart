@@ -119,8 +119,7 @@ class ShipmentRepository {
         if (pickupPhone.isNotEmpty) 'phoneNumber': pickupPhone,
         if (pickupDate.isNotEmpty) 'pickupDate': pickupDate,
         if (pickupInstructions.isNotEmpty) 'instructions': pickupInstructions,
-        if (pickupLng != null && pickupLat != null)
-          'coordinates': [pickupLng, pickupLat],
+        'coordinates': [pickupLng ?? 0.0, pickupLat ?? 0.0],
       },
       'dropoffInfo': {
         'address': dropoffAddress,
@@ -128,15 +127,16 @@ class ShipmentRepository {
         if (dropoffPhone.isNotEmpty) 'phoneNumber': dropoffPhone,
         if (dropoffInstructions.isNotEmpty) 'instructions': dropoffInstructions,
         'facility': dropoffFacility,
-        if (dropoffLng != null && dropoffLat != null)
-          'coordinates': [dropoffLng, dropoffLat],
+        'coordinates': [dropoffLng ?? 0.0, dropoffLat ?? 0.0],
       },
       'products': products
           .map((p) => {
-                if (p['product'] != null) 'product': p['product'],
-                if (p['productModel'] != null && p['productModel']!.isNotEmpty)
-                  'productModel': p['productModel'],
-                if (p['productType'] != null) 'productType': p['productType'],
+                'product': p['product'] ?? '',
+                'productModel': _toApiProductModel(
+                    (p['productModel'] != null && p['productModel']!.isNotEmpty)
+                        ? p['productModel']!
+                        : p['productType'] ?? ''),
+                'productType': _toApiProductType(p['productType'] ?? ''),
               })
           .toList(),
       'totalPrice': totalCost,
@@ -149,6 +149,25 @@ class ShipmentRepository {
       options: _auth(token),
     );
     return res.data as Map<String, dynamic>;
+  }
+
+  // API enum: 'Implant' | 'Tray' | 'Bio' | 'PurchaseOrder'
+  String _toApiProductModel(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'implant':       return 'Implant';
+      case 'tray':          return 'Tray';
+      case 'bio':           return 'Bio';
+      case 'purchaseorder': return 'PurchaseOrder';
+      default:              return 'Implant'; // safe fallback
+    }
+  }
+
+  // API enum: 'inventory' | 'purchase'
+  String _toApiProductType(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'purchase': return 'purchase';
+      default:         return 'inventory';
+    }
   }
 
   // shippingCost.type only accepts 'fedex' | 'courier'

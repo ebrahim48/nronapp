@@ -16,6 +16,8 @@ class ManagerSaleCard extends StatelessWidget {
         return const Color(0xFF006500);
       case ManagerSaleStatus.pending:
         return const Color(0xFFFFB516);
+      case ManagerSaleStatus.rejected:
+        return const Color(0xFFB00020);
       default:
         return AppColors.primaryColor;
     }
@@ -26,6 +28,7 @@ class ManagerSaleCard extends StatelessWidget {
       case ManagerSaleStatus.paid:
         return AppColors.primaryTextColor;
       case ManagerSaleStatus.pending:
+      case ManagerSaleStatus.rejected:
         return AppColors.primaryTextColor;
       default:
         return AppColors.blackColor;
@@ -38,6 +41,10 @@ class ManagerSaleCard extends StatelessWidget {
         return 'Paid';
       case ManagerSaleStatus.pending:
         return 'Pending';
+      case ManagerSaleStatus.approved:
+        return 'Approved';
+      case ManagerSaleStatus.rejected:
+        return 'Rejected';
       default:
         return 'All';
     }
@@ -61,13 +68,18 @@ class ManagerSaleCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CustomText(
-                  text: sale.facility,
-                  fontsize: 15.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryTextColor,
-                  textAlign: TextAlign.start,
+                Expanded(
+                  child: CustomText(
+                    text: sale.facility,
+                    fontsize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryTextColor,
+                    textAlign: TextAlign.start,
+                    maxline: 1,
+                    textOverflow: TextOverflow.ellipsis,
+                  ),
                 ),
+                SizedBox(width: 8.w),
                 Container(
                   padding: EdgeInsets.symmetric(
                       horizontal: 12.w, vertical: 5.h),
@@ -101,24 +113,29 @@ class ManagerSaleCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CustomText(
-                      text: 'Surgeon',
-                      fontsize: 10.sp,
-                      color: AppColors.secondaryTextColor,
-                      textAlign: TextAlign.start,
-                    ),
-                    CustomText(
-                      text: sale.surgeon,
-                      fontsize: 13.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primaryTextColor,
-                      textAlign: TextAlign.start,
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        text: 'Surgeon',
+                        fontsize: 10.sp,
+                        color: AppColors.secondaryTextColor,
+                        textAlign: TextAlign.start,
+                      ),
+                      CustomText(
+                        text: sale.surgeon,
+                        fontsize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryTextColor,
+                        textAlign: TextAlign.start,
+                        maxline: 1,
+                        textOverflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
+                SizedBox(width: 8.w),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [

@@ -53,6 +53,24 @@ class ManagerInventoryScreen extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: GestureDetector(
+        onTap: () => _showCreateOptions(context),
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF1AC8DB),
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/icons/plusicon.svg',
+              width: 22.r,
+              height: 22.r,
+            ),
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 40.h),
         child: Column(
@@ -231,6 +249,132 @@ class ManagerInventoryScreen extends StatelessWidget {
                 onTabChange: c.selectMovementTab,
               );
             }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void _showCreateOptions(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: const Color(0xFF1E2121),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+    ),
+    builder: (_) => Padding(
+      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 36.h),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF3A3A3A),
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 20.h),
+          CustomText(
+            text: 'Create New',
+            fontsize: 16.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.primaryTextColor,
+            textAlign: TextAlign.start,
+          ),
+          SizedBox(height: 16.h),
+          _CreateOptionTile(
+            icon: 'assets/icons/managerinventory.svg',
+            label: 'Add Implant',
+            onTap: () {
+              Navigator.pop(context);
+              context.pushNamed(AppRoutes.addImplantScreen);
+            },
+          ),
+          SizedBox(height: 12.h),
+          _CreateOptionTile(
+            icon: 'assets/icons/managerinventory.svg',
+            label: 'New Tray',
+            onTap: () {
+              Navigator.pop(context);
+              context.pushNamed(AppRoutes.newTrayScreen);
+            },
+          ),
+          SizedBox(height: 12.h),
+          _CreateOptionTile(
+            icon: 'assets/icons/managerinventory.svg',
+            label: 'Add Bio Inventory',
+            onTap: () {
+              Navigator.pop(context);
+              context.pushNamed(AppRoutes.addBioInventoryScreen);
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _CreateOptionTile extends StatelessWidget {
+  final String icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _CreateOptionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: const Color(0xFF252929),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: const Color(0xFF3A3A3A)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36.r,
+              height: 36.r,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  icon,
+                  width: 18.r,
+                  height: 18.r,
+                  colorFilter: const ColorFilter.mode(
+                      AppColors.primaryColor, BlendMode.srcIn),
+                ),
+              ),
+            ),
+            SizedBox(width: 14.w),
+            CustomText(
+              text: label,
+              fontsize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryTextColor,
+              textAlign: TextAlign.start,
+            ),
+            const Spacer(),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.secondaryTextColor,
+              size: 14.r,
+            ),
           ],
         ),
       ),
