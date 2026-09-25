@@ -107,8 +107,11 @@ class CreateImplantSaleController extends GetxController {
         _repo.getFacilities(token),       // [1]
         _repo.getVendors(token),          // [2]
         _repo.getRepresentatives(token),  // [3]
-        _repo.getInventory(token),        // [4]
+        _repo.getInventory(token, type: 'inventory'),        // [4]
       ]);
+
+      // Guard: screen may have been popped while requests were in-flight
+      if (isClosed) return;
 
       physicianList.assignAll(
         _parseList(results[0]['data'])
@@ -139,7 +142,7 @@ class CreateImplantSaleController extends GetxController {
       _preselectFromImplant();
     } catch (_) {
     } finally {
-      isLoadingDropdowns.value = false;
+      if (!isClosed) isLoadingDropdowns.value = false;
     }
   }
 
@@ -234,6 +237,23 @@ class CreateImplantSaleController extends GetxController {
     }
   }
 
+  String _toApiProductModel(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'implant':       return 'Implant';
+      case 'tray':          return 'Tray';
+      case 'bio':           return 'Bio';
+      case 'purchaseorder': return 'PurchaseOrder';
+      default:              return 'Implant'; // safe fallback
+    }
+  }
+
+  String _toApiAssignRole(String role) {
+    switch (role.toLowerCase()) {
+      case 'assist': return 'assist';
+      default:       return 'primary';
+    }
+  }
+
   Future<bool> submit() async {
     if (selectedPhysicianId.value.isEmpty) {
       ToastMessageHelper.showErrorMessage('Please select a physician');
@@ -258,18 +278,28 @@ class CreateImplantSaleController extends GetxController {
     final reps = addedRepresentatives
         .map((r) => {
               'representative': r.id,
-              'assignRole': r.role.toLowerCase(),
+              'assignRole': _toApiAssignRole(r.role),
               'commissionRate': r.commissionPercent,
             })
         .toList();
 
     final products = [
-      {'product': implantId, 'productType': 'Implant'},
-      ...selectedInventoryImplants.map((item) => {
-            'product': item.id,
-            'productType':
-                item.productType.isNotEmpty ? item.productType : 'Implant',
-          }),
+      // The implant this sale is created from — always an Implant inventory item
+      {
+        'product': implantId,
+        'productModel': 'Implant',
+        'productType': 'inventory',
+      },
+      // Any additional inventory items the user selected
+      ...selectedInventoryImplants.map((item) {
+        final model = _toApiProductModel(
+            item.productModel.isNotEmpty ? item.productModel : item.productType);
+        return {
+          'product': item.id,
+          'productModel': model,
+          'productType': 'inventory',
+        };
+      }),
     ];
 
     try {

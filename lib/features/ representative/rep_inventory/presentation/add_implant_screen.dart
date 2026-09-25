@@ -226,7 +226,7 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                   children: [
                     // Facility dropdown from API
                     Padding(
-                      padding: EdgeInsets.only(bottom: 12.h),
+                      padding: EdgeInsets.only(bottom: 4.h),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -245,8 +245,11 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                               color: const Color(0x1A4A4A4A),
                               borderRadius: BorderRadius.circular(8.r),
                               border: Border.all(
-                                  color: AppColors.dotButtonInactiveColor,
-                                  width: 0.8),
+                                color: _ctrl.facilityError.value != null
+                                    ? const Color(0xFFEC0101)
+                                    : AppColors.dotButtonInactiveColor,
+                                width: 0.8,
+                              ),
                             ),
                             child: _ctrl.isLoadingFacilities.value
                                 ? Row(children: [
@@ -316,13 +319,27 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                                     ),
                                   ),
                           ),
+                          Obx(() => _ctrl.facilityError.value != null
+                              ? Padding(
+                                  padding: EdgeInsets.only(top: 4.h, left: 4.w),
+                                  child: Text(
+                                    _ctrl.facilityError.value!,
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      color: const Color(0xFFEC0101),
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink()),
                         ],
                       ),
                     ),
+                    SizedBox(height: 8.h),
 
                     // Vendor dropdown from API
                     Padding(
-                      padding: EdgeInsets.only(bottom: 12.h),
+                      padding: EdgeInsets.only(bottom: 4.h),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -340,7 +357,12 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0x1A4A4A4A),
                               borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(color: AppColors.dotButtonInactiveColor, width: 0.8),
+                              border: Border.all(
+                                color: _ctrl.vendorError.value != null
+                                    ? const Color(0xFFEC0101)
+                                    : AppColors.dotButtonInactiveColor,
+                                width: 0.8,
+                              ),
                             ),
                             child: _ctrl.isLoadingVendors.value
                                 ? Row(children: [
@@ -394,9 +416,23 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                                     ),
                                   ),
                           ),
+                          Obx(() => _ctrl.vendorError.value != null
+                              ? Padding(
+                                  padding: EdgeInsets.only(top: 4.h, left: 4.w),
+                                  child: Text(
+                                    _ctrl.vendorError.value!,
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      color: const Color(0xFFEC0101),
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink()),
                         ],
                       ),
                     ),
+                    SizedBox(height: 8.h),
 
                     // System Type — 2 dropdowns side by side
                     CustomText(
@@ -419,8 +455,11 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                                 color: const Color(0x1A4A4A4A),
                                 borderRadius: BorderRadius.circular(8.r),
                                 border: Border.all(
-                                    color: AppColors.dotButtonInactiveColor,
-                                    width: 0.8),
+                                  color: _ctrl.systemTypeError.value != null
+                                      ? const Color(0xFFEC0101)
+                                      : AppColors.dotButtonInactiveColor,
+                                  width: 0.8,
+                                ),
                               ),
                               child: Row(
                                 children: [
@@ -524,6 +563,19 @@ class _AddImplantScreenState extends State<AddImplantScreen> {
                         ),
                       ],
                     ),
+                    Obx(() => _ctrl.systemTypeError.value != null
+                        ? Padding(
+                            padding: EdgeInsets.only(bottom: 8.h, left: 4.w),
+                            child: Text(
+                              _ctrl.systemTypeError.value!,
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: const Color(0xFFEC0101),
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          )
+                        : SizedBox(height: 4.h)),
 
                     // Recipient Email
                     CustomTextField(

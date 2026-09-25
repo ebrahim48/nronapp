@@ -182,10 +182,30 @@ class ManagerSaleDetailModel {
         : [];
     final inventoryItems = products.map((p) {
       final pMap = p is Map ? p as Map<String, dynamic> : <String, dynamic>{};
+      final productType = pMap['productType']?.toString() ?? '';
+      final prod = pMap['product'];
+      String name = productType;
+      String serial = '';
+      if (prod is Map) {
+        name = prod['itemName']?.toString() ??
+            prod['title']?.toString() ??
+            prod['name']?.toString() ??
+            prod['systemType']?.toString() ??
+            productType;
+        serial = prod['serialNumber']?.toString() ??
+            prod['lotNumber']?.toString() ??
+            prod['trayId']?.toString() ??
+            '';
+      } else {
+        // product not populated — never show the raw Mongo id
+        serial = pMap['serialNumber']?.toString() ??
+            pMap['lotNumber']?.toString() ??
+            '';
+      }
       return SaleInventoryItem(
-        name: pMap['productType']?.toString() ?? '',
-        serial: pMap['product']?.toString() ?? '',
-        tag: pMap['productType']?.toString() ?? '',
+        name: name.isEmpty ? productType : name,
+        serial: serial,
+        tag: productType,
       );
     }).toList();
 

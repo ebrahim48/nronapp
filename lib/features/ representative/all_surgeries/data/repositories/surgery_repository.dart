@@ -72,6 +72,7 @@ class SurgeryRepository {
     required String plates,
     required String rodsOrConnectors,
     required String implants,
+    required String biologics,
     required String caseNotes,
     File? sticker,
     File? appre,
@@ -91,6 +92,7 @@ class SurgeryRepository {
       'plates': plates,
       'rodsOrconnectors': rodsOrConnectors,
       'implants': implants,
+      'biologics': biologics,
       'caseNotes': caseNotes,
     };
     if (sticker != null) fields['sticker'] = await MultipartFile.fromFile(sticker.path);
@@ -123,6 +125,7 @@ class SurgeryRepository {
     String? plates,
     String? rodsOrConnectors,
     String? implants,
+    String? biologics,
     String? caseNotes,
     File? sticker,
     File? appre,
@@ -142,6 +145,7 @@ class SurgeryRepository {
     if (plates != null && plates.isNotEmpty) fields['plates'] = plates;
     if (rodsOrConnectors != null && rodsOrConnectors.isNotEmpty) fields['rodsOrconnectors'] = rodsOrConnectors;
     if (implants != null && implants.isNotEmpty) fields['implants'] = implants;
+    if (biologics != null && biologics.isNotEmpty) fields['biologics'] = biologics;
     if (caseNotes != null && caseNotes.isNotEmpty) fields['caseNotes'] = caseNotes;
     if (sticker != null) fields['sticker'] = await MultipartFile.fromFile(sticker.path);
     if (appre != null) fields['appre'] = await MultipartFile.fromFile(appre.path);

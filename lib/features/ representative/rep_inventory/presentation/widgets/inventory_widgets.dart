@@ -100,11 +100,13 @@ class StartReceivingButton extends StatelessWidget {
 class InventorySearchBar extends StatelessWidget {
   final ValueChanged<String> onSearch;
   final VoidCallback onFilter;
+  final bool filterActive;
 
   const InventorySearchBar({
     super.key,
     required this.onSearch,
     required this.onFilter,
+    this.filterActive = false,
   });
 
   @override
@@ -173,15 +175,20 @@ class InventorySearchBar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF1E2121),
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xFF3A3A3A)),
+                border: Border.all(
+                    color: filterActive
+                        ? AppColors.primaryColor
+                        : const Color(0xFF3A3A3A)),
               ),
               child: Center(
                 child: SvgPicture.asset(
                   'assets/icons/drawer1.svg',
                   width: 20.r,
                   height: 20.r,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.primaryTextColor,
+                  colorFilter: ColorFilter.mode(
+                    filterActive
+                        ? AppColors.primaryColor
+                        : AppColors.primaryTextColor,
                     BlendMode.srcIn,
                   ),
                 ),

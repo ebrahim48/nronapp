@@ -94,20 +94,20 @@ class MissingInstrumentController extends GetxController {
 
   void removePhoto() => instrumentPhoto.value = null;
 
-  Future<bool> submitReport() async {
+  Future<String?> submitReport() async {
     final name = instrumentNameController.text.trim();
     if (name.isEmpty) {
       ToastMessageHelper.showErrorMessage('Please enter instrument name');
-      return false;
+      return null;
     }
     if (trayId.isEmpty) {
       ToastMessageHelper.showErrorMessage('Tray ID is missing');
-      return false;
+      return null;
     }
     try {
       isSubmitting.value = true;
       final token = await PrefsHelper.getString('auth_token');
-      await _repo.createMissingInstrument(
+      final res = await _repo.createMissingInstrument(
         token,
         trayId: trayId,
         instrumentName: name,
@@ -118,11 +118,14 @@ class MissingInstrumentController extends GetxController {
             : null,
         photo: instrumentPhoto.value,
       );
-      return true;
+      // Return the created missing instrument _id
+      final data = res['data'];
+      final id = (data is Map ? data['_id']?.toString() : null) ?? '';
+      return id.isNotEmpty ? id : null;
     } catch (e) {
       final msg = e is AppException ? e.message : 'Failed to submit report';
       ToastMessageHelper.showErrorMessage(msg);
-      return false;
+      return null;
     } finally {
       isSubmitting.value = false;
     }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
+import '../../../rep_bottomnavbar/controller/rep_bottomnavbar_controller.dart';
 import '../controller/rep_qr_scan_controller.dart';
 
 class QrTopBar extends StatelessWidget {
@@ -26,7 +27,15 @@ class QrTopBar extends StatelessWidget {
           children: [
             // Close
             GestureDetector(
-              onTap: () => context.pop(),
+              onTap: () {
+                // Opened as a route → go back. Opened as the bottom-nav tab →
+                // nothing to pop, so switch to the Home tab instead.
+                if (context.canPop()) {
+                  context.pop();
+                } else if (Get.isRegistered<RepMainNavController>()) {
+                  Get.find<RepMainNavController>().changePage(0);
+                }
+              },
               child: Container(
                 width: 32.w,
                 height: 32.h,

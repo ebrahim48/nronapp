@@ -48,7 +48,11 @@ class ImplantDetailsController extends GetxController {
 
       serialNumber.value = data['serialNumber']?.toString() ?? '';
       systemType.value = data['systemType']?.toString() ?? '';
-      vendor.value = vendorMap['vendorName']?.toString() ?? data['vendor']?.toString() ?? '';
+      vendor.value = vendorMap['vendorName']?.toString() ?? vendorMap['name']?.toString() ?? '';
+      // If vendor is not populated (raw ID string), don't display it
+      if (vendor.value.isEmpty && data['vendor'] is! Map) {
+        vendor.value = '';
+      }
       vendorId.value = vendorMap['_id']?.toString() ?? '';
       status.value = _capitalize(data['productStatus']?.toString() ?? data['status']?.toString() ?? '');
       facilityAddress.value = facilityMap['address']?.toString() ?? '';

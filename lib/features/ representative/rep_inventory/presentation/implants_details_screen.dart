@@ -172,6 +172,7 @@ class ImplantDetailsScreen extends StatelessWidget {
                   children: [
                     CustomButton(
                       title: 'Create Implant Sale',
+                      titlecolor: Colors.white,
                       prefixIcon: Icon(Icons.person_add_alt_1_outlined,
                           color: AppColors.primaryTextColor, size: 18.r),
                       onpress: () => context.pushNamed(

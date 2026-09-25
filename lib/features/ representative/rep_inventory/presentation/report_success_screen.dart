@@ -1,14 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nron_app/core/config/app-routes/app_routes.dart';
 
+import '../../../../core/helpers/prefs_helper.dart';
+import '../../../../core/helpers/toast_mesage_helper.dart';
+import '../../../../core/services/api_service.dart';
+import '../../../../core/services/connectivity_service.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
+import '../data/repositories/inventory_repository.dart';
 
-class ReportSuccessScreen extends StatelessWidget {
-  const ReportSuccessScreen({super.key});
+class ReportSuccessScreen extends StatefulWidget {
+  final String trayId;
+  const ReportSuccessScreen({super.key, required this.trayId});
+
+  @override
+  State<ReportSuccessScreen> createState() => _ReportSuccessScreenState();
+}
+
+class _ReportSuccessScreenState extends State<ReportSuccessScreen> {
+  final _repo = InventoryRepository(
+    connectivityService: ConnectivityService(),
+    apiService: ApiService(),
+  );
+
+  final _isSending = false.obs;
+  final _isSent = false.obs;
+
+  Future<void> _sendToVendor() async {
+    if (_isSent.value || _isSending.value) return;
+    if (widget.trayId.isEmpty) {
+      ToastMessageHelper.showErrorMessage('Report ID not available');
+      return;
+    }
+    _isSending.value = true;
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      await _repo.sendVendorMail(token, widget.trayId);
+      if (!mounted) return;
+      _isSent.value = true;
+      _isSending.value = false;
+      ToastMessageHelper.showSuccessMessage('Sent to vendor successfully');
+    } catch (e) {
+      if (!mounted) return;
+      _isSending.value = false;
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('401') || msg.contains('403') || msg.contains('authorized')) {
+        ToastMessageHelper.showErrorMessage('Session expired. Please log in again.');
+      } else {
+        ToastMessageHelper.showErrorMessage('Failed to send to vendor');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -199,32 +245,57 @@ class ReportSuccessScreen extends StatelessWidget {
               SizedBox(height: 12.h),
 
               GestureDetector(
-                onTap: () {
-                },
-                child: Container(
+                onTap: _sendToVendor,
+                child: Obx(() => Container(
                   width: double.infinity,
                   height: 52.h,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E2121),
+                    color: _isSent.value
+                        ? AppColors.primaryColor.withValues(alpha: 0.15)
+                        : const Color(0xFF1E2121),
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: const Color(0xFF3A3A3A)),
+                    border: Border.all(
+                      color: _isSent.value
+                          ? AppColors.primaryColor
+                          : const Color(0xFF3A3A3A),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.mail_outline,
-                          color: AppColors.primaryTextColor, size: 16.r),
-                      SizedBox(width: 8.w),
-                      CustomText(
-                        text: 'View Sent Email',
-                        fontsize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryTextColor,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
+                  child: _isSending.value
+                      ? Center(
+                          child: SizedBox(
+                            width: 20.r,
+                            height: 20.r,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _isSent.value
+                                  ? Icons.check_circle_outline
+                                  : Icons.mail_outline,
+                              color: _isSent.value
+                                  ? AppColors.primaryColor
+                                  : AppColors.primaryTextColor,
+                              size: 16.r,
+                            ),
+                            SizedBox(width: 8.w),
+                            CustomText(
+                              text: _isSent.value ? 'Email Sent' : 'Sent to Email',
+                              fontsize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: _isSent.value
+                                  ? AppColors.primaryColor
+                                  : AppColors.primaryTextColor,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                )),
               ),
 
               SizedBox(height: 24.h),

@@ -477,6 +477,16 @@ class InventoryRepository {
     return res.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> sendTrayToVendor(String token, String trayId) async {
+    await _connectivity.checkConnectivity();
+    final res = await _api.patch(
+      ApiConstants.sendTrayToVendor(trayId),
+      data: {},
+      options: _auth(token),
+    );
+    return res.data as Map<String, dynamic>;
+  }
+
 
   Future<Map<String, dynamic>> getFacilities(String token) async {
     await _connectivity.checkConnectivity();

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/config/app-routes/app_routes.dart';
 import '../../../../core/helpers/prefs_helper.dart';
@@ -31,6 +32,7 @@ class DriverMapController extends GetxController {
   final isLoading = false.obs;
   final isArrivingAtDestination = false.obs;
   final isCompleting = false.obs;
+  final hasNoActiveJob = false.obs;
   final mapJob = Rxn<MapJobModel>();
 
   // Live location
@@ -73,9 +75,34 @@ class DriverMapController extends GetxController {
     _waypointIcon = results[2];
   }
 
+  /// Used by the Map tab (no jobId passed): shows the driver's first active job.
+  Future<void> loadActiveJob() async {
+    if (isLoading.value) return;
+    try {
+      isLoading.value = true;
+      hasNoActiveJob.value = false;
+      final jobCtrl = Get.isRegistered<DriverJobController>()
+          ? Get.find<DriverJobController>()
+          : Get.put(DriverJobController());
+      await jobCtrl.fetchActiveJobs();
+      if (jobCtrl.activeJobs.isEmpty) {
+        mapJob.value = null;
+        hasNoActiveJob.value = true;
+        isLoading.value = false;
+        return;
+      }
+      isLoading.value = false;
+      await fetchJobForMap(jobCtrl.activeJobs.first.id);
+    } catch (e) {
+      isLoading.value = false;
+      hasNoActiveJob.value = mapJob.value == null;
+    }
+  }
+
   Future<void> fetchJobForMap(String id) async {
     try {
       isLoading.value = true;
+      hasNoActiveJob.value = false;
       await _markerIconsFuture; // ensure custom icons are ready
       final token = await PrefsHelper.getString('auth_token');
       final response = await _repo.getSingleJob(token, id);
@@ -142,6 +169,8 @@ class DriverMapController extends GetxController {
         ),
         etaToPickup: '',
         distanceMi: totalDistance,
+        destinationPhone:
+            data['dropoffInfo']?['phoneNumber']?.toString() ?? '',
       );
 
       _buildMarkers();
@@ -326,13 +355,13 @@ class DriverMapController extends GetxController {
         // Step 2: mark as delivered to move job to Completed tab
         await _repo.changeStatus(token, job.id, 'delivered');
       }
-      currentProgress.value = DeliveryProgressStatus.delivered;
       // Refresh job lists so Active tab is up-to-date when user navigates back
       if (Get.isRegistered<DriverJobController>()) {
-        final jobCtrl = Get.find<DriverJobController>();
-        jobCtrl.fetchActiveJobs();
-        jobCtrl.fetchCompletedJobs();
+        Get.find<DriverJobController>().fetchCompletedJobs();
       }
+      _resetDeliveryState();
+      // Map tab moves on to the next active job (or shows empty state)
+      loadActiveJob();
       if (context.mounted) {
         context.go(AppRoutes.deliveryCompletedScreen);
       }
@@ -344,14 +373,35 @@ class DriverMapController extends GetxController {
     }
   }
 
+  void _resetDeliveryState() {
+    mapJob.value = null;
+    currentProgress.value = DeliveryProgressStatus.inTransit;
+    deliveryPhotoPath.value = '';
+    deliveryNotes.clear();
+    _buildDefaultMarkers();
+    _buildDefaultRoute();
+  }
+
   Future<void> pickDeliveryPhoto({ImageSource source = ImageSource.camera}) async {
     final picked = await ImagePicker().pickImage(source: source);
     if (picked != null) deliveryPhotoPath.value = picked.path;
   }
 
-  void callDestination() {
-    Get.snackbar('Calling', 'Calling destination...',
-        snackPosition: SnackPosition.BOTTOM);
+  Future<void> callDestination() async {
+    final phone =
+        (mapJob.value?.destinationPhone ?? '').replaceAll(RegExp(r'[^0-9+]'), '');
+    if (phone.isEmpty) {
+      ToastMessageHelper.showErrorMessage('No phone number available');
+      return;
+    }
+    try {
+      final launched = await launchUrl(Uri(scheme: 'tel', path: phone));
+      if (!launched) {
+        ToastMessageHelper.showErrorMessage('Could not open phone dialer');
+      }
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Could not open phone dialer');
+    }
   }
 
   void toggleBottomSheet() =>

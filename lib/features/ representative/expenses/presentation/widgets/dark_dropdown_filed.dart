@@ -9,6 +9,7 @@ class DarkDropdown extends StatelessWidget {
   final List<String> items;
   final List<String>? values;
   final void Function(String?) onChanged;
+  final String? currentHighlight; // marks "current" item with a badge
 
   const DarkDropdown({
     super.key,
@@ -18,6 +19,7 @@ class DarkDropdown extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.values,
+    this.currentHighlight,
   });
 
   List<DropdownMenuItem<String>> _buildItems() {
@@ -28,15 +30,42 @@ class DarkDropdown extends StatelessWidget {
           ? values![i]
           : items[i];
       if (seen.add(itemValue)) {
+        final isCurrent = currentHighlight != null && itemValue == currentHighlight;
         result.add(DropdownMenuItem(
           value: itemValue,
-          child: Text(
-            items[i],
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontFamily: 'Poppins',
-              color: AppColors.primaryTextColor,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  items[i],
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontFamily: 'Poppins',
+                    fontWeight: isCurrent ? FontWeight.w600 : FontWeight.w400,
+                    color: isCurrent
+                        ? AppColors.primaryColor
+                        : AppColors.primaryTextColor,
+                  ),
+                ),
+              ),
+              if (isCurrent)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Text(
+                    'Current',
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ));
       }

@@ -179,14 +179,6 @@ class CreateShipmentController extends GetxController {
       ToastMessageHelper.showErrorMessage('Please add at least one product');
       return false;
     }
-    if (distanceController.text.trim().isEmpty) {
-      ToastMessageHelper.showErrorMessage('Please enter distance');
-      return false;
-    }
-    if (totalCostController.text.trim().isEmpty) {
-      ToastMessageHelper.showErrorMessage('Cost not calculated yet, enter distance first');
-      return false;
-    }
     return true;
   }
 

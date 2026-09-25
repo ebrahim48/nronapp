@@ -99,9 +99,7 @@ class SalesRepository {
     for (var i = 0; i < inventoryProducts.length; i++) {
       final item = inventoryProducts[i];
       fields['inventoryProducts[$i][product]'] = item['product'];
-      if (item['productModel'] != null && (item['productModel'] as String).isNotEmpty) {
-        fields['inventoryProducts[$i][productModel]'] = item['productModel'];
-      }
+      fields['inventoryProducts[$i][productModel]'] = item['productModel'] ?? '';
       fields['inventoryProducts[$i][productType]'] = item['productType'];
     }
 
@@ -180,9 +178,7 @@ class SalesRepository {
       for (var i = 0; i < inventoryProducts.length; i++) {
         final item = inventoryProducts[i];
         fields['inventoryProducts[$i][product]'] = item['product'];
-        if (item['productModel'] != null && (item['productModel'] as String).isNotEmpty) {
-          fields['inventoryProducts[$i][productModel]'] = item['productModel'];
-        }
+        fields['inventoryProducts[$i][productModel]'] = item['productModel'] ?? '';
         fields['inventoryProducts[$i][productType]'] = item['productType'];
       }
     }

@@ -4,13 +4,26 @@ import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/custom_widgets/custom_text.dart';
 import '../../model/manager_sales_model.dart';
 
-class SaleInventoryList extends StatelessWidget {
+class SaleInventoryList extends StatefulWidget {
   final List<SaleInventoryItem> items;
 
   const SaleInventoryList({super.key, required this.items});
 
   @override
+  State<SaleInventoryList> createState() => _SaleInventoryListState();
+}
+
+class _SaleInventoryListState extends State<SaleInventoryList> {
+  static const _collapsedCount = 3;
+  bool _expanded = false;
+
+  @override
   Widget build(BuildContext context) {
+    final items = widget.items;
+    final visible = _expanded || items.length <= _collapsedCount
+        ? items
+        : items.take(_collapsedCount).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -30,8 +43,18 @@ class SaleInventoryList extends StatelessWidget {
           ),
           child: Column(
             children: [
-              ...items.map((item) {
-                final isLast = item == items.last;
+              if (items.isEmpty)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  child: CustomText(
+                    text: 'No items.',
+                    fontsize: 12.sp,
+                    color: AppColors.secondaryTextColor,
+                  ),
+                ),
+              ...visible.asMap().entries.map((entry) {
+                final item = entry.value;
+                final isLast = entry.key == visible.length - 1;
                 return Column(
                   children: [
                     Padding(
@@ -40,24 +63,32 @@ class SaleInventoryList extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CustomText(
-                                text: item.name,
-                                fontsize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primaryTextColor,
-                                textAlign: TextAlign.start,
-                              ),
-                              CustomText(
-                                text: item.serial,
-                                fontsize: 10.sp,
-                                color: AppColors.secondaryTextColor,
-                                textAlign: TextAlign.start,
-                              ),
-                            ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomText(
+                                  text: item.name,
+                                  fontsize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primaryTextColor,
+                                  textAlign: TextAlign.start,
+                                  maxline: 2,
+                                  textOverflow: TextOverflow.ellipsis,
+                                ),
+                                if (item.serial.isNotEmpty)
+                                  CustomText(
+                                    text: 'SN: ${item.serial}',
+                                    fontsize: 10.sp,
+                                    color: AppColors.secondaryTextColor,
+                                    textAlign: TextAlign.start,
+                                    maxline: 1,
+                                    textOverflow: TextOverflow.ellipsis,
+                                  ),
+                              ],
+                            ),
                           ),
+                          SizedBox(width: 8.w),
                           Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 10.w, vertical: 4.h),
@@ -85,17 +116,27 @@ class SaleInventoryList extends StatelessWidget {
                   ],
                 );
               }),
-              Divider(
-                  height: 1, color: const Color(0xFF3A3A3A), thickness: 0.5),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
-                child: CustomText(
-                  text: 'View All 12 Items',
-                  fontsize: 13.sp,
-                  color: AppColors.primaryColor,
-                  fontWeight: FontWeight.w500,
+              if (items.length > _collapsedCount) ...[
+                Divider(
+                    height: 1, color: const Color(0xFF3A3A3A), thickness: 0.5),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => setState(() => _expanded = !_expanded),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    child: Center(
+                      child: CustomText(
+                        text: _expanded
+                            ? 'Show Less'
+                            : 'View All ${items.length} Items',
+                        fontsize: 13.sp,
+                        color: AppColors.primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

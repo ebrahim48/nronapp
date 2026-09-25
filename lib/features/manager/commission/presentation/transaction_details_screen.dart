@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import '../../../../core/helpers/pdf_helper.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_commission_controller.dart';
@@ -177,7 +178,7 @@ class TransactionDetailScreen extends StatelessWidget {
 
               // ── Download receipt ────────────────────────────────────
               GestureDetector(
-                onTap: () {},
+                onTap: () => PdfHelper.shareCommissionReceiptPdf(detail),
                 child: Container(
                   width: double.infinity,
                   height: 52.h,

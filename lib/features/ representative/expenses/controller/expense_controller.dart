@@ -13,6 +13,7 @@ import '../../physicions/data/repositories/physician_repository.dart';
 import '../../physicions/domain/model/physician_model.dart';
 import '../data/repositories/expense_repository.dart';
 import '../domain/model/expense_model.dart';
+import '../presentation/widgets/month_year_picker.dart';
 
 class ExpenseController extends GetxController {
   final _repo = ExpenseRepository(
@@ -60,6 +61,7 @@ class ExpenseController extends GetxController {
   final amountController = TextEditingController();
   final descriptionController = TextEditingController();
   final expenseDateController = TextEditingController();
+  final periodController = TextEditingController(); // "September 2026"
   final uploadedFiles = <File>[].obs;
   final isSubmitting = false.obs;
   final isPickingFile = false.obs;
@@ -67,9 +69,9 @@ class ExpenseController extends GetxController {
 
   // ── Static data ───────────────────────────────────────────────────────────
   final years = List.generate(
-    DateTime.now().year - 2019 + 5,
-    (i) => (2020 + i).toString(),
-  );
+    6,
+    (i) => (DateTime.now().year - 2 + i).toString(),
+  )..sort((a, b) => b.compareTo(a)); // descending: newest first
   final months = [
     'January', 'February', 'March', 'April',
     'May', 'June', 'July', 'August',
@@ -82,7 +84,9 @@ class ExpenseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    everAll([selectedYear, selectedMonth], (_) => _syncPeriod());
     _setCurrentYearMonth();
+    _syncPeriod();
     fetchExpenses();
     fetchRepresentatives();
     fetchPhysiciansForDropdown();
@@ -97,6 +101,7 @@ class ExpenseController extends GetxController {
     amountController.dispose();
     descriptionController.dispose();
     expenseDateController.dispose();
+    periodController.dispose();
     super.onClose();
   }
 
@@ -104,6 +109,11 @@ class ExpenseController extends GetxController {
     final now = DateTime.now();
     selectedYear.value = now.year.toString();
     selectedMonth.value = DateFormat('MMMM').format(now);
+  }
+
+  void _syncPeriod() {
+    periodController.text =
+        '${selectedMonth.value} ${selectedYear.value}'.trim();
   }
 
   void _onScroll() {
@@ -470,6 +480,26 @@ class ExpenseController extends GetxController {
       expenseDateController.text = DateFormat('MM/dd/yyyy').format(picked);
       selectedYear.value = picked.year.toString();
       selectedMonth.value = DateFormat('MMMM').format(picked);
+    }
+  }
+
+  // ── Month-year picker (accounting period) ─────────────────────────────────
+  Future<void> pickMonthYear(BuildContext context) async {
+    final yearNums = years.map(int.parse).toList();
+    final monthIdx = months.indexOf(selectedMonth.value);
+    final initial = DateTime(
+      int.tryParse(selectedYear.value) ?? DateTime.now().year,
+      monthIdx == -1 ? DateTime.now().month : monthIdx + 1,
+    );
+    final picked = await showMonthYearPicker(
+      context,
+      initial: initial,
+      firstYear: yearNums.reduce((a, b) => a < b ? a : b),
+      lastYear: yearNums.reduce((a, b) => a > b ? a : b),
+    );
+    if (picked != null) {
+      selectedYear.value = picked.year.toString();
+      selectedMonth.value = months[picked.month - 1];
     }
   }
 

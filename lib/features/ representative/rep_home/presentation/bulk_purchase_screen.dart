@@ -244,7 +244,7 @@ class _BulkPurchaseScreenState extends State<BulkPurchaseScreen> {
 
                     BulkAttachDocumentBox(
                       onUploadPDF: c.uploadPDF,
-                      onTakePhoto: c.takePhoto,
+                      onTakePhoto: () => c.takePhoto(context),
                     ),
 
                     SizedBox(height: 24.h),

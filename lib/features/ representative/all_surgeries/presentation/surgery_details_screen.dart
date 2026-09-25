@@ -500,10 +500,10 @@ class SurgeryDetailScreen extends StatelessWidget {
 
               SizedBox(height: 16.h),
 
-              GestureDetector(
-                onTap: () {
-
-                },
+              Obx(() => GestureDetector(
+                onTap: c.isSendingMail.value
+                    ? null
+                    : () => c.sendToDoctorMail(d),
                 child: Container(
                   width: double.infinity,
                   height: 48.h,
@@ -511,7 +511,16 @@ class SurgeryDetailScreen extends StatelessWidget {
                     color: const Color(0xFF1E2121),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: Row(
+                  child: c.isSendingMail.value
+                      ? Center(
+                          child: SizedBox(
+                            width: 20.r,
+                            height: 20.r,
+                            child: const CircularProgressIndicator(
+                                strokeWidth: 2, color: Color(0xFF00C5DA)),
+                          ),
+                        )
+                      : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
@@ -536,7 +545,7 @@ class SurgeryDetailScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
+              )),
 
               SizedBox(height: 30.h),
             ],

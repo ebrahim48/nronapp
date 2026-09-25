@@ -58,10 +58,11 @@ class MissingInstrumentHistoryScreen extends StatelessWidget {
             SizedBox(height: 16.h),
 
             // ── Search bar ──
-            MissingSearchBar(
+            Obx(() => MissingSearchBar(
               controller: c.searchController,
               onFilterTap: () => c.openFilter(context),
-            ),
+              filterActive: c.isFilterActive,
+            )),
 
             SizedBox(height: 16.h),
 

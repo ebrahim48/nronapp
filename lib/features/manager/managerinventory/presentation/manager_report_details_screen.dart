@@ -7,6 +7,7 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/custom_widgets/custom_button.dart';
 import '../../../../core/custom_widgets/custom_text.dart';
 import '../controller/manager_missing_report_controller.dart';
+import '../../../../core/helpers/pdf_helper.dart';
 
 class ManagerReportDetailsScreen extends StatelessWidget {
   final MissingReportItem item;
@@ -177,7 +178,17 @@ class ManagerReportDetailsScreen extends StatelessWidget {
                 _OutlinedActionButton(
                   icon: Icons.download_outlined,
                   label: 'Download PDF',
-                  onTap: () {},
+                  onTap: () => PdfHelper.shareMissingReportPdf(
+                    id: item.id,
+                    trayTitle: item.trayTitle ?? item.trayId,
+                    instrumentName: item.instrumentName,
+                    issueType: item.issueType,
+                    vendorName: item.vendorName ?? '',
+                    reportedBy: item.user,
+                    date: item.date,
+                    notes: item.descriptionAndNotes ?? '',
+                    evidenceUrls: item.files,
+                  ),
                 ),
                 SizedBox(height: 10.h),
                 Obx(() => CustomButton(

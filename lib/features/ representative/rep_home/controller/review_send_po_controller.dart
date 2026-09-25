@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ReviewSendPoController extends GetxController {
   // Step info
@@ -27,7 +28,7 @@ class ReviewSendPoController extends GetxController {
   final RxString handwrittenPoImage = 'assets/images/review.png'.obs;
   final RxString handwrittenPoFileName = 'PO_scan_88234.jpg'.obs;
 
-  // Documents
+  // Documents — url field holds the actual S3/remote URL
   final RxList<Map<String, dynamic>> documents = <Map<String, dynamic>>[
     {
       'id': '1',
@@ -35,6 +36,7 @@ class ReviewSendPoController extends GetxController {
       'size': '1.2 MB',
       'date': 'FEB 15',
       'type': 'pdf',
+      'url': '',
     },
     {
       'id': '2',
@@ -42,37 +44,94 @@ class ReviewSendPoController extends GetxController {
       'size': '3.4 MB',
       'date': 'FEB 15',
       'type': 'image',
+      'url': '',
     },
   ].obs;
 
   final RxBool isLoading = false.obs;
 
+  /// Opens a URL in the browser/viewer. Shows a snackbar only on error.
+  Future<void> _openUrl(String url) async {
+    if (url.isEmpty) {
+      _showError('No URL available for this document.');
+      return;
+    }
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      _showError('Invalid URL.');
+      return;
+    }
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        _showError('Could not open the document.');
+      }
+    } catch (_) {
+      _showError('Could not open the document.');
+    }
+  }
+
+  void _showError(String message) {
+    // Post-frame so the overlay is always ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        Get.snackbar(
+          'Error',
+          message,
+          backgroundColor: Colors.red.shade700,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    });
+  }
+
   Future<void> saveAndSend() async {
     isLoading.value = true;
     await Future.delayed(const Duration(seconds: 1));
     isLoading.value = false;
-    Get.snackbar(
-      'Success',
-      'PO saved and sent to vendor successfully',
-      backgroundColor: const Color(0xff00C2CB),
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        Get.snackbar(
+          'Success',
+          'PO saved and sent to vendor successfully',
+          backgroundColor: const Color(0xff00C2CB),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    });
+  }
+
+  /// Call this after the PO is created to populate real document URLs from API.
+  void setDocumentsFromUrls(List<String> urls) {
+    for (int i = 0; i < documents.length && i < urls.length; i++) {
+      documents[i] = Map<String, dynamic>.from(documents[i])
+        ..['url'] = urls[i];
+    }
+    documents.refresh();
   }
 
   void viewHandwrittenPo() {
-    Get.snackbar('View', 'Opening handwritten PO...',
-        snackPosition: SnackPosition.BOTTOM);
+    final url = handwrittenPoImage.value;
+    // If it's a remote URL, open it; otherwise it's a local asset — nothing to launch
+    if (url.startsWith('http')) {
+      _openUrl(url);
+    }
   }
 
   void viewDocument(Map<String, dynamic> doc) {
-    Get.snackbar('View', 'Opening ${doc['name']}...',
-        snackPosition: SnackPosition.BOTTOM);
+    final url = (doc['url'] as String?) ?? '';
+    _openUrl(url);
   }
 
   void addNote() {
-    Get.snackbar('Note', 'Add note tapped',
-        snackPosition: SnackPosition.BOTTOM);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.context != null) {
+        Get.snackbar('Note', 'Add note tapped',
+            snackPosition: SnackPosition.BOTTOM);
+      }
+    });
   }
 }
 

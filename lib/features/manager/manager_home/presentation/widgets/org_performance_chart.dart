@@ -103,131 +103,140 @@ class OrgPerformanceChart extends StatelessWidget {
 
             SizedBox(height: 14.h),
 
-            SizedBox(
-              height: 200.h,
-              child: Stack(
-                children: [
-                  BarChart(
-                    BarChartData(
-                      alignment: BarChartAlignment.spaceAround,
-                      maxY: 110,
-                      minY: 0,
-                      barTouchData: BarTouchData(enabled: false),
-                      titlesData: FlTitlesData(
-                        show: true,
-                        topTitles: const AxisTitles(
-                            sideTitles:
-                            SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(
-                            sideTitles:
-                            SideTitles(showTitles: false)),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 36.w,
-                            interval: 20,
-                            getTitlesWidget: (value, meta) {
-                              if (value == 0)
-                                return const SizedBox();
-                              return Text(
-                                '${value.toInt()}L',
-                                style: TextStyle(
-                                  color: AppColors.secondaryTextColor,
-                                  fontSize: 9.sp,
-                                  fontFamily: 'Poppins',
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 22.h,
-                            getTitlesWidget: (value, meta) {
-                              final idx = value.toInt();
-                              if (idx < 0 || idx >= months.length)
-                                return const SizedBox();
-                              return Padding(
-                                padding: EdgeInsets.only(top: 6.h),
-                                child: Text(
-                                  months[idx],
-                                  style: TextStyle(
-                                    color: AppColors.secondaryTextColor,
-                                    fontSize: 10.sp,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        horizontalInterval: 20,
-                        getDrawingHorizontalLine: (value) => FlLine(
-                          color: const Color(0xFF3A3A3A),
-                          strokeWidth: 0.5,
-                          dashArray: [4, 4],
-                        ),
-                      ),
-                      borderData: FlBorderData(show: false),
-                      barGroups:
-                      List.generate(months.length, (i) {
-                        final vals = data[months[i]]!;
-                        return BarChartGroupData(
-                          x: i,
-                          barsSpace: 3.w,
-                          barRods: [
-                            BarChartRodData(
-                              toY: vals[0],
-                              color: _salesColor,
-                              width: 8.w,
-                              borderRadius:
-                              BorderRadius.circular(2.r),
-                              backDrawRodData:
-                              BackgroundBarChartRodData(
-                                show: true,
-                                toY: 110,
-                                color: _salesColor
-                                    .withValues(alpha: 0.08),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final chartWidth = constraints.maxWidth;
+                const leftReserved = 36.0; // matches reservedSize for left titles
+                final dashedLineLeft = leftReserved.w;
+                final dashedLineWidth = chartWidth - dashedLineLeft;
+
+                return SizedBox(
+                  height: 200.h,
+                  child: Stack(
+                    children: [
+                      BarChart(
+                        BarChartData(
+                          alignment: BarChartAlignment.spaceAround,
+                          maxY: 110,
+                          minY: 0,
+                          barTouchData: BarTouchData(enabled: false),
+                          titlesData: FlTitlesData(
+                            show: true,
+                            topTitles: const AxisTitles(
+                                sideTitles:
+                                SideTitles(showTitles: false)),
+                            rightTitles: const AxisTitles(
+                                sideTitles:
+                                SideTitles(showTitles: false)),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 36.w,
+                                interval: 20,
+                                getTitlesWidget: (value, meta) {
+                                  if (value == 0)
+                                    return const SizedBox();
+                                  return Text(
+                                    '${value.toInt()}L',
+                                    style: TextStyle(
+                                      color: AppColors.secondaryTextColor,
+                                      fontSize: 9.sp,
+                                      fontFamily: 'Poppins',
+                                    ),
+                                  );
+                                },
                               ),
                             ),
-                            BarChartRodData(
-                              toY: vals[1],
-                              color: _expensesColor,
-                              width: 8.w,
-                              borderRadius:
-                              BorderRadius.circular(2.r),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 22.h,
+                                getTitlesWidget: (value, meta) {
+                                  final idx = value.toInt();
+                                  if (idx < 0 || idx >= months.length)
+                                    return const SizedBox();
+                                  return Padding(
+                                    padding: EdgeInsets.only(top: 6.h),
+                                    child: Text(
+                                      months[idx],
+                                      style: TextStyle(
+                                        color: AppColors.secondaryTextColor,
+                                        fontSize: 10.sp,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                            BarChartRodData(
-                              toY: vals[2],
-                              color: _commissionColor,
-                              width: 8.w,
-                              borderRadius:
-                              BorderRadius.circular(2.r),
+                          ),
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: false,
+                            horizontalInterval: 20,
+                            getDrawingHorizontalLine: (value) => FlLine(
+                              color: const Color(0xFF3A3A3A),
+                              strokeWidth: 0.5,
+                              dashArray: [4, 4],
                             ),
-                          ],
-                        );
-                      }),
-                    ),
-                  ),
-                  // Top dashed line
-                  Positioned(
-                    top: 3.h,
-                    left: 30.34.w,
-                    child: SizedBox(
-                      width: 314.66.w,
-                      child: CustomPaint(
-                        painter: _DashedLinePainter(),
-                        size: Size(314.66.w, 1),
+                          ),
+                          borderData: FlBorderData(show: false),
+                          barGroups:
+                          List.generate(months.length, (i) {
+                            final vals = data[months[i]]!;
+                            return BarChartGroupData(
+                              x: i,
+                              barsSpace: 3.w,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: vals[0],
+                                  color: _salesColor,
+                                  width: 8.w,
+                                  borderRadius:
+                                  BorderRadius.circular(2.r),
+                                  backDrawRodData:
+                                  BackgroundBarChartRodData(
+                                    show: true,
+                                    toY: 110,
+                                    color: _salesColor
+                                        .withValues(alpha: 0.08),
+                                  ),
+                                ),
+                                BarChartRodData(
+                                  toY: vals[1],
+                                  color: _expensesColor,
+                                  width: 8.w,
+                                  borderRadius:
+                                  BorderRadius.circular(2.r),
+                                ),
+                                BarChartRodData(
+                                  toY: vals[2],
+                                  color: _commissionColor,
+                                  width: 8.w,
+                                  borderRadius:
+                                  BorderRadius.circular(2.r),
+                                ),
+                              ],
+                            );
+                          }),
+                        ),
                       ),
-                    ),
+                      // Top dashed line — width computed from actual layout
+                      Positioned(
+                        top: 3.h,
+                        left: dashedLineLeft,
+                        child: SizedBox(
+                          width: dashedLineWidth,
+                          child: CustomPaint(
+                            painter: _DashedLinePainter(),
+                            size: Size(dashedLineWidth, 1),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ],
         ),

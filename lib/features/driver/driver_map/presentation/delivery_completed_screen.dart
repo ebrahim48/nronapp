@@ -12,9 +12,24 @@ import '../../driver_bottomnavbar/controller/driver_man-nav_controller.dart';
 class DeliveryCompletedScreen extends StatelessWidget {
   const DeliveryCompletedScreen({super.key});
 
+  void _goToHome(BuildContext context, {int tab = 0}) {
+    final nav = Get.isRegistered<DriverMainNavController>()
+        ? Get.find<DriverMainNavController>()
+        : Get.put(DriverMainNavController());
+    nav.changePage(tab);
+    context.go(AppRoutes.driverBottomNavBar);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // This screen is reached via context.go (stack cleared), so system back
+    // would close the app — send the driver home instead.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goToHome(context);
+      },
+      child: Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Center(
@@ -60,16 +75,14 @@ class DeliveryCompletedScreen extends StatelessWidget {
               CustomButton(
                 title: 'View Earnings',
                 loading: false,
-                onpress: () {
-                  Get.find<DriverMainNavController>().changePage(3);
-                  context.go(AppRoutes.driverBottomNavBar);
-                },
+                onpress: () => _goToHome(context, tab: 3),
                 titlecolor: AppColors.blackColor,
                 fontWeight: FontWeight.w600,
               ),
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -18,6 +18,11 @@ class ManagerSaleController extends GetxController {
   final searchQuery = ''.obs;
   final selectedFilter = ManagerSaleStatus.allSales.obs;
   final allSales = <ManagerSaleModel>[].obs;
+  final isLoadingMore = false.obs;
+  final scrollController = ScrollController();
+  int _page = 1;
+  int _totalPage = 1;
+  int _requestId = 0; // drops stale responses on fast chip switches
 
   // ── Detail state ──────────────────────────────────────────────────────────
   final isLoadingDetail = false.obs;
@@ -33,28 +38,87 @@ class ManagerSaleController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    scrollController.addListener(_onScroll);
     fetchSales();
+  }
+
+  void _onScroll() {
+    if (scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200 &&
+        _page < _totalPage &&
+        !isLoadingMore.value &&
+        !isLoading.value) {
+      _page++;
+      fetchSales(reset: false);
+    }
+  }
+
+  /// API status for the selected chip. "Paid" = backend "approved".
+  String? get _statusParam {
+    switch (selectedFilter.value) {
+      case ManagerSaleStatus.allSales:
+        return null;
+      case ManagerSaleStatus.paid:
+        return 'approved';
+      default:
+        return selectedFilter.value.name;
+    }
+  }
+
+  bool _matchesFilter(ManagerSaleModel s) {
+    switch (selectedFilter.value) {
+      case ManagerSaleStatus.allSales:
+        return true;
+      case ManagerSaleStatus.paid:
+        return s.status == ManagerSaleStatus.paid ||
+            s.status == ManagerSaleStatus.approved;
+      default:
+        return s.status == selectedFilter.value;
+    }
   }
 
   // ── Fetch list ────────────────────────────────────────────────────────────
 
-  Future<void> fetchSales() async {
-    try {
+  Future<void> fetchSales({bool reset = true}) async {
+    final requestId = reset ? ++_requestId : _requestId;
+    if (reset) {
+      _page = 1;
+      allSales.clear();
       isLoading.value = true;
+    } else {
+      if (isLoadingMore.value) return;
+      isLoadingMore.value = true;
+    }
+    try {
       final token = await PrefsHelper.getString('auth_token');
-      final statusParam = selectedFilter.value == ManagerSaleStatus.allSales
-          ? null
-          : selectedFilter.value.name;
-      final res = await _repo.getAllSales(token, status: statusParam);
-      final results = _asList(res['data']);
-      allSales.assignAll(
-        results.map((e) =>
-            ManagerSaleModel.fromJson(e as Map<String, dynamic>)),
-      );
+      final res = await _repo.getAllSales(token,
+          status: _statusParam, page: _page, limit: 15);
+      if (requestId != _requestId) return; // a newer chip took over
+      final data = res['data'];
+      final meta = data is Map && data['meta'] is Map
+          ? data['meta'] as Map
+          : const {};
+      _totalPage = (meta['totalPage'] as num?)?.toInt() ?? 1;
+      allSales.addAll(_asList(data)
+          .map((e) => ManagerSaleModel.fromJson(e as Map<String, dynamic>))
+          // Enforce the chip client-side too, in case the API ignores status.
+          .where(_matchesFilter));
     } catch (_) {
-      ToastMessageHelper.showErrorMessage('Failed to load sales');
+      if (requestId == _requestId) {
+        ToastMessageHelper.showErrorMessage('Failed to load sales');
+      }
     } finally {
-      isLoading.value = false;
+      if (requestId == _requestId) {
+        isLoading.value = false;
+        isLoadingMore.value = false;
+      }
+    }
+    // Too few matches on this page to scroll → pull the next page.
+    if (requestId == _requestId &&
+        allSales.length < 10 &&
+        _page < _totalPage) {
+      _page++;
+      await fetchSales(reset: false);
     }
   }
 
@@ -79,14 +143,9 @@ class ManagerSaleController extends GetxController {
   // ── Filtered list ─────────────────────────────────────────────────────────
 
   List<ManagerSaleModel> get filteredSales {
-    var result = allSales.toList();
-    if (selectedFilter.value != ManagerSaleStatus.allSales) {
-      result = result
-          .where((s) => s.status == selectedFilter.value)
-          .toList();
-    }
-    if (searchQuery.value.isNotEmpty) {
-      final q = searchQuery.value.toLowerCase();
+    var result = allSales.where(_matchesFilter).toList();
+    final q = searchQuery.value.trim().toLowerCase();
+    if (q.isNotEmpty) {
       result = result
           .where((s) =>
               s.facility.toLowerCase().contains(q) ||
@@ -101,6 +160,7 @@ class ManagerSaleController extends GetxController {
   // ── Actions ───────────────────────────────────────────────────────────────
 
   void onFilterSelected(ManagerSaleStatus status) {
+    if (selectedFilter.value == status) return;
     selectedFilter.value = status;
     fetchSales();
   }
@@ -169,6 +229,8 @@ class ManagerSaleController extends GetxController {
 
   @override
   void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
     feedbackController.dispose();
     super.onClose();
   }

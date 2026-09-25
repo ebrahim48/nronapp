@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/services/connectivity_service.dart';
 import '../data/repositories/inventory_repository.dart';
+import '../presentation/widgets/status_filter_sheet.dart';
 
 class InventoryController extends GetxController {
   final _repo = InventoryRepository(
@@ -24,8 +26,10 @@ class InventoryController extends GetxController {
 
   // ── List ───────────────────────────────────────────────────────────────────
   final isLoadingList = true.obs;
-  final inventoryItems = <Map<String, dynamic>>[].obs;
+  final _allItems = <Map<String, dynamic>>[];
+  final inventoryItems = <Map<String, dynamic>>[].obs; // filtered view
   final searchQuery = ''.obs;
+  final selectedStatus = ''.obs; // '' = All
 
   @override
   void onInit() {
@@ -57,22 +61,24 @@ class InventoryController extends GetxController {
   Future<void> _fetchList() async {
     try {
       isLoadingList.value = true;
+      _allItems.clear();
       inventoryItems.clear();
       final token = await PrefsHelper.getString('auth_token');
       final tab = tabs[activeTab.value];
       if (tab == 'Implants') {
-        final res = await _repo.getImplants(token);
+        final res = await _repo.getImplants(token, limit: 100);
         final list = _asList(res['data']);
-        inventoryItems.assignAll(list.map((e) => _mapImplant(e)));
+        _allItems.addAll(list.map((e) => _mapImplant(e)));
       } else if (tab == 'Trays') {
-        final res = await _repo.getTrays(token);
+        final res = await _repo.getTrays(token, limit: 100);
         final list = _asList(res['data']);
-        inventoryItems.assignAll(list.map((e) => _mapTray(e)));
+        _allItems.addAll(list.map((e) => _mapTray(e)));
       } else {
-        final res = await _repo.getBio(token);
+        final res = await _repo.getBio(token, limit: 100);
         final list = _asList(res['data']);
-        inventoryItems.assignAll(list.map((e) => _mapBio(e)));
+        _allItems.addAll(list.map((e) => _mapBio(e)));
       }
+      _applyFilters();
     } catch (e) {
       ToastMessageHelper.showErrorMessage('Failed to load inventory');
     } finally {
@@ -153,13 +159,37 @@ class InventoryController extends GetxController {
 
   bool get isEmpty => inventoryItems.isEmpty;
 
+  // ── Search & filter (client-side) ─────────────────────────────────────────
+  void _applyFilters() {
+    final q = searchQuery.value.trim().toLowerCase();
+    final status = selectedStatus.value;
+    inventoryItems.assignAll(_allItems.where((e) {
+      if (status.isNotEmpty && e['status'] != status) return false;
+      if (q.isEmpty) return true;
+      return ['name', 'serial', 'lot', 'location', 'vendor', 'systemType']
+          .any((k) => (e[k]?.toString() ?? '').toLowerCase().contains(q));
+    }));
+  }
+
+  /// Distinct statuses present in the current tab's data.
+  List<String> get availableStatuses => _allItems
+      .map((e) => e['status']?.toString() ?? '')
+      .where((s) => s.isNotEmpty)
+      .toSet()
+      .toList()
+    ..sort();
+
+  bool get isFilterActive => selectedStatus.value.isNotEmpty;
+
   void onSearch(String val) {
     searchQuery.value = val;
-    _fetchList();
+    _applyFilters();
   }
 
   void selectTab(int index) {
+    if (activeTab.value == index) return;
     activeTab.value = index;
+    selectedStatus.value = ''; // statuses differ per tab
     _fetchList();
   }
 
@@ -167,7 +197,17 @@ class InventoryController extends GetxController {
 
   void viewFullList() {}
 
-  void openFilter() {}
+  Future<void> openFilter(BuildContext context) async {
+    final picked = await showStatusFilterSheet(
+      context,
+      title: 'Filter by Status',
+      options: availableStatuses,
+      selected: selectedStatus.value,
+    );
+    if (picked == null) return;
+    selectedStatus.value = picked;
+    _applyFilters();
+  }
 
   Future<void> refreshList() => _fetchList();
 
@@ -175,6 +215,7 @@ class InventoryController extends GetxController {
     try {
       final token = await PrefsHelper.getString('auth_token');
       await _repo.deleteImplant(token, id);
+      _allItems.removeWhere((e) => e['id'] == id);
       inventoryItems.removeWhere((e) => e['id'] == id);
     } catch (_) {
       ToastMessageHelper.showErrorMessage('Failed to delete implant');

@@ -117,6 +117,7 @@ import '../../../features/manager/managersales/presentation/manager_details_sale
 import '../../../features/manager/managersales/presentation/manager_sales_screen.dart';
 import '../../../features/manager/managershipment/presentation/job_review_screen.dart';
 import '../../../features/manager/managershipment/presentation/shipments_screen.dart';
+import '../../../features/manager/managershipment/presentation/manager_all_shipments_screen.dart';
 import '../../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../../features/role_selection/presentation/role_selection_screen.dart';
 import '../../../features/splash/presentation/splash_screen.dart';
@@ -222,6 +223,7 @@ static const allActivitiesScreen = '/all-activities';
   static const transactionDetailScreen = '/transaction-detail';
 
   static const managerShipmentsScreen = '/managerShipmentsScreen';
+  static const managerAllShipmentsScreen = '/managerAllShipmentsScreen';
   static const jobReviewScreen = '/job-review';
 
   /// -------------------------------------------------- Driver -----------------------------------------------------------------
@@ -414,7 +416,9 @@ static const allActivitiesScreen = '/all-activities';
       GoRoute(
         path: reportSuccessScreen,
         name: reportSuccessScreen,
-        builder: (context, state) => const ReportSuccessScreen(),
+        builder: (context, state) => ReportSuccessScreen(
+          trayId: state.extra as String? ?? '',
+        ),
       ),
       GoRoute(
         path: allActivitiesScreen,
@@ -728,6 +732,11 @@ static const allActivitiesScreen = '/all-activities';
         path: managerShipmentsScreen,
         name: managerShipmentsScreen,
         builder: (context, state) => const ManagerShipmentsScreen(),
+      ),
+      GoRoute(
+        path: managerAllShipmentsScreen,
+        name: managerAllShipmentsScreen,
+        builder: (context, state) => const ManagerAllShipmentsScreen(),
       ),
       GoRoute(
         path: jobReviewScreen,

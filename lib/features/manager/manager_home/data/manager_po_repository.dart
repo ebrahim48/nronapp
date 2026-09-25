@@ -46,11 +46,11 @@ class ManagerPORepository {
     return res.data as Map<String, dynamic>;
   }
 
-  /// POST /purchase-order/send-to-mail/:id
+  /// PATCH /purchase-order/send-to-mail/:id
   Future<Map<String, dynamic>> sendVendorMail(
       String token, String id) async {
     await _connectivity.checkConnectivity();
-    final res = await _api.post(
+    final res = await _api.patch(
       ApiConstants.managerSendVendorMail(id),
       data: {},
       options: _auth(token),

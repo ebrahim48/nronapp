@@ -506,6 +506,40 @@ class _CreateSaleScreenState extends State<CreateSaleScreen> {
 
             SizedBox(height: 24.h),
 
+            // ── API Error Banner ───────────────────────────────────
+            Obx(() {
+              final err = c.submitError.value;
+              if (err == null || err.isEmpty) return const SizedBox.shrink();
+              return Container(
+                margin: EdgeInsets.only(bottom: 16.h),
+                padding: EdgeInsets.all(12.r),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A1A1A),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(
+                      color: const Color(0xFFEC0101).withValues(alpha: 0.5)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.error_outline,
+                        color: const Color(0xFFEC0101), size: 18.r),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: Text(
+                        err,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontFamily: 'Poppins',
+                          color: const Color(0xFFEC0101),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+
             // ── Submit ─────────────────────────────────────────────
             Obx(() => CustomButton(
                   title: isEdit ? 'Update Sale Record' : 'Create Sale Record',

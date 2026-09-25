@@ -40,4 +40,23 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
   end
+
+  # Fix: GoogleMaps xcframework simulator binary is missing after pod install.
+  # Copy it from CocoaPods cache if the binary is absent.
+  google_maps_sim_fw = File.join(
+    __dir__,
+    'Pods/GoogleMaps/Maps/Frameworks/GoogleMaps.xcframework',
+    'ios-arm64_x86_64-simulator/GoogleMaps.framework/GoogleMaps'
+  )
+  unless File.exist?(google_maps_sim_fw)
+    cache_binary = Dir[
+      File.expand_path('~/Library/Caches/CocoaPods/Pods/Release/GoogleMaps/*/Maps/Frameworks/GoogleMaps.xcframework/ios-arm64_x86_64-simulator/GoogleMaps.framework/GoogleMaps')
+    ].sort.last
+    if cache_binary && File.exist?(cache_binary)
+      FileUtils.cp(cache_binary, google_maps_sim_fw)
+      puts "Copied GoogleMaps simulator binary from cache."
+    else
+      puts "WARNING: GoogleMaps simulator binary not found in cache. Simulator builds may fail."
+    end
+  end
 end

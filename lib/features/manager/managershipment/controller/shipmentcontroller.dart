@@ -27,6 +27,12 @@ class ShipmentController extends GetxController {
   // ── All shipments list ────────────────────────────────────────────────────
   final isLoadingList = true.obs;
   final allShipments = <ShipmentModel>[].obs;
+  final isLoadingMore = false.obs;
+  final listFilter = Rxn<ShipmentStatus>(); // null = All
+  final allScrollController = ScrollController();
+  int _page = 1;
+  int _totalPage = 1;
+  int _requestId = 0;
 
   // ── Detail ────────────────────────────────────────────────────────────────
   final isLoadingDetail = false.obs;
@@ -44,12 +50,15 @@ class ShipmentController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    allScrollController.addListener(_onAllScroll);
     _fetchStats();
     fetchAll();
   }
 
   @override
   void onClose() {
+    allScrollController.removeListener(_onAllScroll);
+    allScrollController.dispose();
     trackingTextController.dispose();
     super.onClose();
   }
@@ -87,23 +96,63 @@ class ShipmentController extends GetxController {
   }
 
 
-  Future<void> fetchAll({String? status}) async {
-    try {
+  Future<void> fetchAll({bool reset = true}) async {
+    final requestId = reset ? ++_requestId : _requestId;
+    if (reset) {
+      _page = 1;
       isLoadingList.value = true;
-      final token = await PrefsHelper.getString('auth_token');
-      final res = await _repo.getAll(token, status: status);
-      final results = _asList(res['data']);
-      allShipments.assignAll(
-        results
-            .whereType<Map<String, dynamic>>()
-            .map(ShipmentModel.fromJson)
-            .toList(),
-      );
-    } catch (_) {
-      ToastMessageHelper.showErrorMessage('Failed to load shipments');
-    } finally {
-      isLoadingList.value = false;
+    } else {
+      if (isLoadingMore.value) return;
+      isLoadingMore.value = true;
     }
+    try {
+      final token = await PrefsHelper.getString('auth_token');
+      final res = await _repo.getAll(token, page: _page, limit: 20);
+      if (requestId != _requestId) return;
+      final data = res['data'];
+      final meta = data is Map && data['meta'] is Map
+          ? data['meta'] as Map
+          : const {};
+      _totalPage = (meta['totalPage'] as num?)?.toInt() ?? 1;
+      final results = _asList(data)
+          .whereType<Map<String, dynamic>>()
+          .map(ShipmentModel.fromJson)
+          .toList();
+      if (reset) {
+        allShipments.assignAll(results);
+      } else {
+        allShipments.addAll(results);
+      }
+    } catch (_) {
+      if (requestId == _requestId) {
+        ToastMessageHelper.showErrorMessage('Failed to load shipments');
+      }
+    } finally {
+      if (requestId == _requestId) {
+        isLoadingList.value = false;
+        isLoadingMore.value = false;
+      }
+    }
+  }
+
+  void _onAllScroll() {
+    if (allScrollController.position.pixels >=
+            allScrollController.position.maxScrollExtent - 200 &&
+        _page < _totalPage &&
+        !isLoadingMore.value &&
+        !isLoadingList.value) {
+      _page++;
+      fetchAll(reset: false);
+    }
+  }
+
+  Future<void> refreshAll() => Future.wait([_fetchStats(), fetchAll()]);
+
+  /// All-shipments list filtered by the selected status chip.
+  List<ShipmentModel> get filteredAllShipments {
+    final f = listFilter.value;
+    if (f == null) return allShipments;
+    return allShipments.where((s) => s.statusEnum == f).toList();
   }
 
 

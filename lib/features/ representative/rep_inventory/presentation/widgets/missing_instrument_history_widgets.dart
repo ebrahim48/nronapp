@@ -10,11 +10,13 @@ import '../../model/missing_instrument_model.dart';
 class MissingSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onFilterTap;
+  final bool filterActive;
 
   const MissingSearchBar({
     super.key,
     required this.controller,
     required this.onFilterTap,
+    this.filterActive = false,
   });
 
   @override
@@ -70,12 +72,17 @@ class MissingSearchBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: const Color(0xFF1E2121),
               borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: const Color(0xFF3A3A3A)),
+              border: Border.all(
+                  color: filterActive
+                      ? AppColors.primaryColor
+                      : const Color(0xFF3A3A3A)),
             ),
             child: Icon(
               Icons.tune_rounded,
               size: 20.r,
-              color: AppColors.primaryTextColor,
+              color: filterActive
+                  ? AppColors.primaryColor
+                  : AppColors.primaryTextColor,
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../core/exceptions/app_exceptions.dart';
+import '../../../../core/helpers/pdf_helper.dart';
 import '../../../../core/helpers/prefs_helper.dart';
 import '../../../../core/helpers/toast_mesage_helper.dart';
 import '../../../../core/services/api_service.dart';
@@ -82,5 +83,26 @@ class MissingInstrumentDetailController extends GetxController {
     }
   }
 
-  void downloadPdf(BuildContext context) {}
+  final isGeneratingPdf = false.obs;
+
+  Future<void> downloadPdf(BuildContext context) async {
+    if (isLoading.value || isGeneratingPdf.value) return;
+    isGeneratingPdf.value = true;
+    try {
+      await PdfHelper.shareMissingReportPdf(
+        id: _id,
+        trayTitle: trayTitle.value,
+        instrumentName: instrumentName.value,
+        issueType: issueType.value,
+        vendorName: vendorName.value,
+        date: capturedAt.value?.toIso8601String() ?? '',
+        notes: notes.value,
+        evidenceUrls: evidenceFiles.toList(),
+      );
+    } catch (_) {
+      ToastMessageHelper.showErrorMessage('Failed to generate PDF');
+    } finally {
+      isGeneratingPdf.value = false;
+    }
+  }
 }
