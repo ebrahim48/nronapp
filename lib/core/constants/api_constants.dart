@@ -1,12 +1,12 @@
 class ApiConstants {
 
 
-  static const String baseUrl = 'https://dgpjqg8r-1000.inc1.devtunnels.ms/api/v1';
-  static const String socketUrl = "https://dgpjqg8r-1000.inc1.devtunnels.ms";
+  // static const String baseUrl = 'https://dgpjqg8r-1000.inc1.devtunnels.ms/api/v1';
+  // static const String socketUrl = "https://dgpjqg8r-1000.inc1.devtunnels.ms";
 
 
-  // static const String baseUrl = 'https://api.holepackage.com/api/v1';
-  // static const String socketUrl = "https://api.holepackage.com";
+  static const String baseUrl = 'https://api.holepackage.com/api/v1';
+  static const String socketUrl = "https://api.holepackage.com";
 
   static const String apiVersion = '/api/v1';
 
