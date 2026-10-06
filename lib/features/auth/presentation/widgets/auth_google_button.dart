@@ -54,6 +54,7 @@ class _AuthGoogleButtonState extends State<AuthGoogleButton> {
 
       final fullName = (account.displayName ?? '').trim();
 
+
       // Role is chosen before login (RoleSelectionScreen); default representative.
       final role = AuthTempData.selectedRole;
 
